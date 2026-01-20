@@ -86,6 +86,8 @@ Mengurus grafik.
 -   `pinChart()`: Fitur untuk memperbesar/mem-pin grafik tertentu ke atas.
 
 ---
-**Dibuat oleh Tim Gardenist**
+**Dibuat oleh:**
+
 Rhaichan Rasyid Adi Aqhsan S.Pd.
+
 
