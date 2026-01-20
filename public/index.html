@@ -220,7 +220,7 @@
 
                         <!-- PINNED CHART SECTION -->
                         <div id="pinned-chart-section"
-                            class="hidden mb-8 bg-white p-6 rounded-3xl shadow-lg border border-slate-100 relative">
+                            class="hidden mb-8 bg-white p-4 md:p-6 rounded-3xl shadow-lg border border-slate-100 relative">
                             <div class="flex justify-between items-center mb-4">
                                 <h3 class="font-bold text-slate-800 text-lg flex items-center gap-2">
                                     <i class="fa-solid fa-thumbtack text-emerald-500"></i>
@@ -439,188 +439,101 @@
                             </div>
 
                             <!-- Bottom: CHARTS GRID -->
-                            <div class="space-y-6">
-                                <!-- Main Chart: Soil -->
-                                <div id="card-soil" class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                                    <div class="flex justify-between items-center mb-4">
-                                        <h3 class="font-bold text-slate-800 flex items-center gap-2">
-                                            <span class="w-2 h-6 bg-emerald-500 rounded-full"></span> Kelembaban Tanah
-                                            (Utama)
-                                        </h3>
-                                        <button onclick="app.pinChart('soil')"
-                                            class="text-slate-400 hover:text-emerald-600 transition p-2 hover:bg-emerald-50 rounded-full"
-                                            title="Pin Chart">
+                            <!-- Bottom: CHARTS GRID (Removed Duplicate) -->
+                        </div>
+
+                        <!-- 2. CHARTS SECTION (Grid) -->
+                        <div class="space-y-6">
+                            <!-- Main Chart: Soil -->
+                            <div id="card-soil"
+                                class="bg-white p-4 md:p-6 rounded-2xl shadow-sm border border-slate-100">
+                                <div class="flex justify-between items-center mb-4">
+                                    <h3 class="font-bold text-slate-800 flex items-center gap-2">
+                                        <span class="w-2 h-6 bg-emerald-500 rounded-full"></span> Kelembaban Tanah
+                                        (Utama)
+                                    </h3>
+                                    <button onclick="app.pinChart('soil')"
+                                        class="text-slate-400 hover:text-emerald-600 transition p-2 hover:bg-emerald-50 rounded-full"
+                                        title="Pin Chart">
+                                        <i class="fa-solid fa-thumbtack"></i>
+                                    </button>
+                                </div>
+                                <div class="chart-container-main">
+                                    <canvas id="soilChart"></canvas>
+                                </div>
+                            </div>
+
+                            <!-- Secondary Charts Grid -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+                                <!-- Humidity Chart -->
+                                <div id="card-hum"
+                                    class="bg-white p-4 md:p-5 rounded-2xl shadow-sm border border-slate-100">
+                                    <div class="flex justify-between items-center mb-3">
+                                        <h4 class="text-sm font-bold text-slate-600">Kelembaban Udara</h4>
+                                        <button onclick="app.pinChart('hum')"
+                                            class="text-slate-400 hover:text-emerald-600 transition" title="Pin Chart">
                                             <i class="fa-solid fa-thumbtack"></i>
                                         </button>
                                     </div>
-                                    <div class="chart-container-main">
-                                        <canvas id="soilChart"></canvas>
+                                    <div class="chart-container-small">
+                                        <canvas id="humChart"></canvas>
                                     </div>
                                 </div>
-
-                                <!-- Secondary Charts Grid -->
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <!-- Humidity Chart -->
-                                    <div id="card-hum"
-                                        class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
-                                        <div class="flex justify-between items-center mb-3">
-                                            <h4 class="text-sm font-bold text-slate-600">Kelembaban Udara</h4>
-                                            <button onclick="app.pinChart('hum')"
-                                                class="text-slate-400 hover:text-emerald-600 transition"
-                                                title="Pin Chart">
-                                                <i class="fa-solid fa-thumbtack"></i>
-                                            </button>
-                                        </div>
-                                        <div class="chart-container-small">
-                                            <canvas id="humChart"></canvas>
-                                        </div>
+                                <!-- Temperature Chart -->
+                                <div id="card-temp"
+                                    class="bg-white p-4 md:p-5 rounded-2xl shadow-sm border border-slate-100">
+                                    <div class="flex justify-between items-center mb-3">
+                                        <h4 class="text-sm font-bold text-slate-600">Suhu Lingkungan</h4>
+                                        <button onclick="app.pinChart('temp')"
+                                            class="text-slate-400 hover:text-emerald-600 transition" title="Pin Chart">
+                                            <i class="fa-solid fa-thumbtack"></i>
+                                        </button>
                                     </div>
-                                    <!-- Temperature Chart -->
-                                    <div id="card-temp"
-                                        class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
-                                        <div class="flex justify-between items-center mb-3">
-                                            <h4 class="text-sm font-bold text-slate-600">Suhu Lingkungan</h4>
-                                            <button onclick="app.pinChart('temp')"
-                                                class="text-slate-400 hover:text-emerald-600 transition"
-                                                title="Pin Chart">
-                                                <i class="fa-solid fa-thumbtack"></i>
-                                            </button>
-                                        </div>
-                                        <div class="chart-container-small">
-                                            <canvas id="tempChart"></canvas>
-                                        </div>
-                                    </div>
-                                    <!-- Light Chart -->
-                                    <div id="card-light"
-                                        class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
-                                        <div class="flex justify-between items-center mb-3">
-                                            <h4 class="text-sm font-bold text-slate-600">Intensitas Cahaya</h4>
-                                            <button onclick="app.pinChart('light')"
-                                                class="text-slate-400 hover:text-emerald-600 transition"
-                                                title="Pin Chart">
-                                                <i class="fa-solid fa-thumbtack"></i>
-                                            </button>
-                                        </div>
-                                        <div class="chart-container-small">
-                                            <canvas id="lightChart"></canvas>
-                                        </div>
-                                    </div>
-                                    <!-- MQ135 Chart -->
-                                    <div id="card-mq135"
-                                        class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
-                                        <div class="flex justify-between items-center mb-3">
-                                            <h4 class="text-sm font-bold text-slate-600">Kualitas Udara (MQ135)</h4>
-                                            <button onclick="app.pinChart('mq135')"
-                                                class="text-slate-400 hover:text-emerald-600 transition"
-                                                title="Pin Chart">
-                                                <i class="fa-solid fa-thumbtack"></i>
-                                            </button>
-                                        </div>
-                                        <div class="chart-container-small">
-                                            <canvas id="mq135Chart"></canvas>
-                                        </div>
-                                    </div>
-                                    <!-- Tank Chart -->
-                                    <div id="card-tank"
-                                        class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
-                                        <div class="flex justify-between items-center mb-3">
-                                            <h4 class="text-sm font-bold text-slate-600">Level Air Tangki</h4>
-                                            <button onclick="app.pinChart('tank')"
-                                                class="text-slate-400 hover:text-emerald-600 transition"
-                                                title="Pin Chart">
-                                                <i class="fa-solid fa-thumbtack"></i>
-                                            </button>
-                                        </div>
-                                        <div class="chart-container-small">
-                                            <canvas id="tankChart"></canvas>
-                                        </div>
+                                    <div class="chart-container-small">
+                                        <canvas id="tempChart"></canvas>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
-                        <!-- Main Chart: Soil -->
-                        <div id="card-soil" class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                            <div class="flex justify-between items-center mb-4">
-                                <h3 class="font-bold text-slate-800 flex items-center gap-2">
-                                    <span class="w-2 h-6 bg-emerald-500 rounded-full"></span> Kelembaban Tanah
-                                    (Utama)
-                                </h3>
-                                <button onclick="app.pinChart('soil')"
-                                    class="text-slate-400 hover:text-emerald-600 transition p-2 hover:bg-emerald-50 rounded-full"
-                                    title="Pin Chart">
-                                    <i class="fa-solid fa-thumbtack"></i>
-                                </button>
-                            </div>
-                            <div class="chart-container-main">
-                                <canvas id="soilChart"></canvas>
-                            </div>
-                        </div>
-
-                        <!-- Secondary Charts Grid -->
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <!-- Humidity Chart -->
-                            <div id="card-hum" class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
-                                <div class="flex justify-between items-center mb-3">
-                                    <h4 class="text-sm font-bold text-slate-600">Kelembaban Udara</h4>
-                                    <button onclick="app.pinChart('hum')"
-                                        class="text-slate-400 hover:text-emerald-600 transition" title="Pin Chart">
-                                        <i class="fa-solid fa-thumbtack"></i>
-                                    </button>
+                                <!-- Light Chart -->
+                                <div id="card-light"
+                                    class="bg-white p-4 md:p-5 rounded-2xl shadow-sm border border-slate-100">
+                                    <div class="flex justify-between items-center mb-3">
+                                        <h4 class="text-sm font-bold text-slate-600">Intensitas Cahaya</h4>
+                                        <button onclick="app.pinChart('light')"
+                                            class="text-slate-400 hover:text-emerald-600 transition" title="Pin Chart">
+                                            <i class="fa-solid fa-thumbtack"></i>
+                                        </button>
+                                    </div>
+                                    <div class="chart-container-small">
+                                        <canvas id="lightChart"></canvas>
+                                    </div>
                                 </div>
-                                <div class="chart-container-small">
-                                    <canvas id="humChart"></canvas>
+                                <!-- MQ135 Chart -->
+                                <div id="card-mq135"
+                                    class="bg-white p-4 md:p-5 rounded-2xl shadow-sm border border-slate-100">
+                                    <div class="flex justify-between items-center mb-3">
+                                        <h4 class="text-sm font-bold text-slate-600">Kualitas Udara (MQ135)</h4>
+                                        <button onclick="app.pinChart('mq135')"
+                                            class="text-slate-400 hover:text-emerald-600 transition" title="Pin Chart">
+                                            <i class="fa-solid fa-thumbtack"></i>
+                                        </button>
+                                    </div>
+                                    <div class="chart-container-small">
+                                        <canvas id="mq135Chart"></canvas>
+                                    </div>
                                 </div>
-                            </div>
-                            <!-- Temperature Chart -->
-                            <div id="card-temp" class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
-                                <div class="flex justify-between items-center mb-3">
-                                    <h4 class="text-sm font-bold text-slate-600">Suhu Lingkungan</h4>
-                                    <button onclick="app.pinChart('temp')"
-                                        class="text-slate-400 hover:text-emerald-600 transition" title="Pin Chart">
-                                        <i class="fa-solid fa-thumbtack"></i>
-                                    </button>
-                                </div>
-                                <div class="chart-container-small">
-                                    <canvas id="tempChart"></canvas>
-                                </div>
-                            </div>
-                            <!-- Light Chart -->
-                            <div id="card-light" class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
-                                <div class="flex justify-between items-center mb-3">
-                                    <h4 class="text-sm font-bold text-slate-600">Intensitas Cahaya</h4>
-                                    <button onclick="app.pinChart('light')"
-                                        class="text-slate-400 hover:text-emerald-600 transition" title="Pin Chart">
-                                        <i class="fa-solid fa-thumbtack"></i>
-                                    </button>
-                                </div>
-                                <div class="chart-container-small">
-                                    <canvas id="lightChart"></canvas>
-                                </div>
-                            </div>
-                            <!-- MQ135 Chart -->
-                            <div id="card-mq135" class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
-                                <div class="flex justify-between items-center mb-3">
-                                    <h4 class="text-sm font-bold text-slate-600">Kualitas Udara (MQ135)</h4>
-                                    <button onclick="app.pinChart('mq135')"
-                                        class="text-slate-400 hover:text-emerald-600 transition" title="Pin Chart">
-                                        <i class="fa-solid fa-thumbtack"></i>
-                                    </button>
-                                </div>
-                                <div class="chart-container-small">
-                                    <canvas id="mq135Chart"></canvas>
-                                </div>
-                            </div>
-                            <!-- Tank Chart -->
-                            <div id="card-tank" class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
-                                <div class="flex justify-between items-center mb-3">
-                                    <h4 class="text-sm font-bold text-slate-600">Level Air Tangki</h4>
-                                    <button onclick="app.pinChart('tank')"
-                                        class="text-slate-400 hover:text-emerald-600 transition" title="Pin Chart">
-                                        <i class="fa-solid fa-thumbtack"></i>
-                                    </button>
-                                </div>
-                                <div class="chart-container-small">
-                                    <canvas id="tankChart"></canvas>
+                                <!-- Tank Chart -->
+                                <div id="card-tank"
+                                    class="bg-white p-4 md:p-5 rounded-2xl shadow-sm border border-slate-100">
+                                    <div class="flex justify-between items-center mb-3">
+                                        <h4 class="text-sm font-bold text-slate-600">Level Air Tangki</h4>
+                                        <button onclick="app.pinChart('tank')"
+                                            class="text-slate-400 hover:text-emerald-600 transition" title="Pin Chart">
+                                            <i class="fa-solid fa-thumbtack"></i>
+                                        </button>
+                                    </div>
+                                    <div class="chart-container-small">
+                                        <canvas id="tankChart"></canvas>
+                                    </div>
                                 </div>
                             </div>
                         </div>
