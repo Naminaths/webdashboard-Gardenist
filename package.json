@@ -1,0 +1,27 @@
+{
+  "name": "smartgarden-webdashboard",
+  "version": "1.0.0",
+  "description": "Dashboard monitoring dan kontrol untuk sistem Smart Garden berbasis IoT, terintegrasi dengan Firebase Realtime Database.",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Naminaths/webdashboard-Gardenist.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Naminaths/webdashboard-Gardenist/issues"
+  },
+  "homepage": "https://github.com/Naminaths/webdashboard-Gardenist#readme",
+  "dependencies": {
+    "chart.js": "^4.5.1",
+    "firebase": "^12.8.0",
+    "vite": "^7.3.1"
+  }
+}
