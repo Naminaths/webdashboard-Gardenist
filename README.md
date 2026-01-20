@@ -4,6 +4,7 @@ Dashboard monitoring dan kontrol untuk sistem Smart Garden berbasis IoT, terinte
 
 ## 🚀 Fitur Utama
 
+-   **Kontrol & Monitoring Terpusat**: Layout Dashboard yang dioptimalkan dengan **Kontrol Manual** di bagian atas untuk akses cepat, diikuti oleh **Grafik Monitoring**.
 -   **Realtime Monitoring**: Menampilkan data sensor (Tanah, Udara, Suhu, Cahaya, MQ135, Tangki) secara langsung.
 -   **Interaktif Chart**: Grafik data historis menggunakan Chart.js dengan fitur **Pin Chart** untuk fokus pada satu grafik.
 -   **Otomasi Cerdas**:
@@ -12,48 +13,37 @@ Dashboard monitoring dan kontrol untuk sistem Smart Garden berbasis IoT, terinte
     -   Buzzer berbunyi jika Tangki Kosong atau Polusi Tinggi (>900 PPM / Lonjakan >200).
 -   **Log & Alarm**: Pencatatan riwayat aktivitas dan alarm bahaya, dapat diekspor ke **CSV**.
 -   **Realtime Clock**: Jam digital akurat (Sync UTC/Local).
--   **Responsive Design**: Tampilan optimal di Desktop dan Mobile (Tailwind CSS).
+-   **Responsive Design**: Desktop (Grid 4 Kolom) & Mobile (Single Column).
 
 ## 🛠️ Teknologi yang Digunakan
 
--   **Frontend**: HTML5, Vanilla JavaScript (ES Modules), Tailwind CSS (CDN).
+-   **Frontend**: HTML5, Vanilla JavaScript, Tailwind CSS (CDN).
 -   **Visualization**: Chart.js.
 -   **Backend / Database**: Firebase Realtime Database.
 -   **Hosting**: Firebase Hosting.
 
-## 📂 Struktur File (Modular)
+## 📂 Struktur File
 
-Proyek ini menggunakan arsitektur JavaScript Modular (ESM) agar kode lebih rapi dan mudah dikelola.
+Saat ini proyek menggunakan struktur **Monolithic** pada `index.html` untuk memastikan stabilitas deployment di Firebase Hosting dan menghindari isu *Cross-Origin Resource Sharing (CORS)* pada modul eksternal di beberapa environment.
 
 ```
 smartgarden-webdashboard/
 │
 ├── public/                 # Folder Publik (yang di-deploy)
-│   ├── index.html          # Halaman Utama (Entry Point)
-│   └── js/                 # Logika JavaScript Modular
-│       ├── app.js          # Controller Utama (Menghubungkan semua modul)
-│       ├── config.js       # Konfigurasi API Firebase
-│       ├── firebase-init.js# Inisialisasi Koneksi Database
-│       ├── state.js        # State Management (Data Sensor, Status Device)
-│       ├── ui.js           # Manipulasi DOM & Tampilan
-│       ├── charts.js       # Konfigurasi Grafik & Fitur Pin
-│       └── automation.js   # Logika Otomasi (Pompa, Alarm, Log)
+│   ├── index.html          # FILE UTAMA (HTML, CSS, & JS Logic ada di sini)
+│   └── js/                 # (Arsip) Versi Modular - tidak digunakan di live version
 │
 ├── firebase.json           # Konfigurasi Deployment Firebase
 ├── .firebaserc             # Alias Project Firebase
-└── RUN_DASHBOARD.bat       # Script untuk menjalankan server lokal
+└── RUN_DASHBOARD.bat       # Script utility
 ```
 
-## 💻 Cara Menjalankan (Local Development)
+## 💻 Cara Menjalankan
 
-Karena menggunakan **ES Modules**, aplikasi ini **TIDAK BISA** dijalankan hanya dengan double-click `index.html` (Browser akan memblokir karena kebijakan CORS file://).
+### Versi Live (Deploy)
+Aplikasi yang aktif adalah yang berjalan dari `public/index.html`. File ini memuat semua logika yang diperlukan.
 
-**Solusi:**
-1.  Cari file **`RUN_DASHBOARD.bat`** di folder root.
-2.  **Double Click** file tersebut.
-3.  Browser akan otomatis terbuka di `http://localhost:8000`.
-
-## ☁️ Deployment (Firebase Hosting)
+### Deployment (Firebase Hosting)
 
 Lakukan langkah ini jika ingin meng-online-kan dashboard:
 
@@ -65,29 +55,16 @@ Lakukan langkah ini jika ingin meng-online-kan dashboard:
     ```
 4.  Dashboard akan aktif di URL yang diberikan (misal: `https://webdashboard-gardenist.web.app`).
 
-## 📚 Dokumentasi Kode
+## 📚 Dokumentasi Fitur Code (Dalam index.html)
 
-### `js/app.js`
-File induk yang mengimpor semua modul lain. Berisi fungsi `init`, `enterDashboard`, dan listener utama Firebase.
+Logika pemrograman kini disatukan dalam script module di bagian bawah `index.html`:
 
-### `js/automation.js`
-Otak dari sistem pintar.
--   `runAutomationLogic()`: Mengecek sensor terus menerus untuk memicu Pompa/Mist/Buzzer.
--   `exportLogsToCSV()`: Mengunduh data log ke format Excel.
-
-### `js/ui.js`
-Mengurus tampilan.
--   `updateDashboardUI()`: Memperbarui angka sensor dan warna status text.
--   `startClock()`: Menjalankan jam digital realtime.
-
-### `js/charts.js`
-Mengurus grafik.
--   `updateAllCharts()`: Menambah data baru ke grafik secara realtime.
--   `pinChart()`: Fitur untuk memperbesar/mem-pin grafik tertentu ke atas.
+- **`app.init()`**: Menginisialisasi chart, koneksi firebase, input, dan jam.
+- **`app.runAutomationLogic()`**: "Otak" sistem. Mengecek logika sensor vs threshold setiap kali ada data baru.
+- **`app.pinChart(key)`**: Fungsi untuk menyalin data grafik kecil ke grafik utama (Pinned) dan menyembunyikan grafik asalnya.
+- **`app.syncDeviceToggles()`**: Memastikan tombol UI on/off sesuai dengan status asli di Database (agar tidak bentrok dengan kontrol otomatis).
 
 ---
 **Dibuat oleh:**
 
 Rhaichan Rasyid Adi Aqhsan S.Pd.
-
-
