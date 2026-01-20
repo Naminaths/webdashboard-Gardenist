@@ -197,12 +197,24 @@
                                 <h2 class="text-2xl font-bold text-slate-900">Dashboard</h2>
                                 <p class="text-sm text-slate-500">Data sensor real-time & analisis grafik.</p>
                             </div>
-                            <div class="flex flex-col items-end gap-1">
-                                <span
-                                    class="text-xl font-mono font-bold text-slate-700 bg-white px-3 py-1 rounded-lg border border-slate-200 shadow-sm"
-                                    id="realtime-clock">--:--:--</span>
-                                <span class="text-[10px] font-mono text-slate-400" id="last-updated">Waiting
-                                    data...</span>
+                            <div class="flex flex-col items-end gap-2">
+                                <div
+                                    class="flex items-center gap-3 bg-white pl-3 pr-4 py-2 rounded-xl border border-emerald-100 shadow-sm">
+                                    <div
+                                        class="bg-emerald-50 text-emerald-600 w-8 h-8 flex items-center justify-center rounded-lg">
+                                        <i class="fa-regular fa-clock text-sm"></i>
+                                    </div>
+                                    <div class="text-right">
+                                        <div id="clock-time"
+                                            class="text-xl font-bold text-slate-800 leading-none font-mono tracking-tight">
+                                            --:--</div>
+                                        <div id="clock-date"
+                                            class="text-[10px] font-bold text-slate-400 uppercase tracking-wide mt-0.5">
+                                            -- --- ----</div>
+                                    </div>
+                                </div>
+                                <span class="text-[10px] font-mono text-slate-400 mr-1"
+                                    id="last-updated">Updating...</span>
                             </div>
                         </div>
 
@@ -1276,12 +1288,38 @@
             },
 
             startClock: function () {
-                setInterval(() => {
+                const updateTime = () => {
                     const now = new Date();
-                    const timeString = now.toLocaleTimeString('en-US', { timeZone: 'UTC', hour12: false });
-                    const el = document.getElementById('realtime-clock');
-                    if (el) el.innerText = timeString + " UTC";
-                }, 1000);
+
+                    // Options for Time (WIB)
+                    const optionsTime = {
+                        timeZone: 'Asia/Jakarta',
+                        hour12: false,
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    };
+
+                    // Options for Date (WIB)
+                    const optionsDate = {
+                        timeZone: 'Asia/Jakarta',
+                        weekday: 'short',
+                        day: 'numeric',
+                        month: 'short',
+                        year: 'numeric'
+                    };
+
+                    const timeString = now.toLocaleTimeString('id-ID', optionsTime).replace(/\./g, ':');
+                    const dateString = now.toLocaleDateString('id-ID', optionsDate);
+
+                    const timeEl = document.getElementById('clock-time');
+                    const dateEl = document.getElementById('clock-date');
+
+                    if (timeEl) timeEl.innerText = timeString + " WIB";
+                    if (dateEl) dateEl.innerText = dateString;
+                };
+
+                updateTime(); // Run immediately
+                setInterval(updateTime, 1000); // And every second
             }
         };
     </script>
