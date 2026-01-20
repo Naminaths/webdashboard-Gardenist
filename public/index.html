@@ -86,14 +86,6 @@
 </head>
 
 <body class="text-slate-800 antialiased overflow-x-hidden">
-    <script>
-        window.addEventListener('error', function (e) {
-            alert("JS Error: " + e.message + " at " + e.filename + ":" + e.lineno);
-        });
-        window.addEventListener('unhandledrejection', function (e) {
-            alert("Promise Error: " + e.reason);
-        });
-    </script>
 
     <!-- LANDING PAGE -->
     <div id="landing-page" class="min-h-screen flex flex-col relative bg-gradient-to-br from-emerald-50 to-teal-100">
@@ -205,424 +197,883 @@
                                 <h2 class="text-2xl font-bold text-slate-900">Dashboard</h2>
                                 <p class="text-sm text-slate-500">Data sensor real-time & analisis grafik.</p>
                             </div>
-                        </div>
-                        <div class="flex flex-col items-end gap-1">
-                            <span
-                                class="text-xl font-mono font-bold text-slate-700 bg-white px-3 py-1 rounded-lg border border-slate-200 shadow-sm"
-                                id="realtime-clock">--:--:--</span>
-                            <span class="text-[10px] font-mono text-slate-400" id="last-updated">Waiting data...</span>
-                        </div>
-                    </div>
-
-                    <!-- PINNED CHART SECTION -->
-                    <div id="pinned-chart-section"
-                        class="hidden mb-8 bg-white p-6 rounded-3xl shadow-lg border border-slate-100 relative">
-                        <div class="flex justify-between items-center mb-4">
-                            <h3 class="font-bold text-slate-800 text-lg flex items-center gap-2">
-                                <i class="fa-solid fa-thumbtack text-emerald-500"></i>
-                                <span id="pinned-chart-title">Chart</span>
-                            </h3>
-                            <button onclick="app.pinChart(null)"
-                                class="text-slate-400 hover:text-rose-500 transition bg-slate-50 p-2 rounded-full hover:bg-rose-50">
-                                <i class="fa-solid fa-times"></i>
-                            </button>
-                        </div>
-                        <div class="w-full h-[400px]">
-                            <canvas id="pinnedChart"></canvas>
-                        </div>
-                    </div>
-
-                    <!-- SENSOR CARDS ROW -->
-                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-                        <!-- Soil -->
-                        <div
-                            class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition">
-                            <div class="flex items-center gap-2 mb-2 text-emerald-600">
-                                <i class="fa-solid fa-droplet bg-emerald-50 p-1.5 rounded-lg"></i>
-                                <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Kelembaban
-                                    Tanah</span>
-                            </div>
-                            <span id="val-soil" class="text-2xl font-bold text-slate-800">--%</span>
-                            <span class="text-[10px] text-slate-400 block" id="soil-msg">--</span>
-                        </div>
-                        <!-- Humidity -->
-                        <div
-                            class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition">
-                            <div class="flex items-center gap-2 mb-2 text-cyan-600">
-                                <i class="fa-solid fa-cloud-rain bg-cyan-50 p-1.5 rounded-lg"></i>
-                                <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Kelembapan
-                                    Udara</span>
-                            </div>
-                            <span id="val-hum" class="text-2xl font-bold text-slate-800">--%</span>
-                            <span class="text-[10px] text-slate-400 block" id="hum-msg">--</span>
-                        </div>
-                        <!-- Temp -->
-                        <div
-                            class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition">
-                            <div class="flex items-center gap-2 mb-2 text-orange-500">
-                                <i class="fa-solid fa-temperature-half bg-orange-50 p-1.5 rounded-lg"></i>
-                                <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Suhu</span>
-                            </div>
-                            <span id="val-temp" class="text-2xl font-bold text-slate-800">--°C</span>
-                            <span class="text-[10px] text-slate-400 block" id="temp-msg">--</span>
-                        </div>
-                        <!-- Light -->
-                        <div
-                            class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition">
-                            <div class="flex items-center gap-2 mb-2 text-yellow-500">
-                                <i class="fa-solid fa-sun bg-yellow-50 p-1.5 rounded-lg"></i>
+                            <div class="flex flex-col items-end gap-1">
                                 <span
-                                    class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Cahaya</span>
-                            </div>
-                            <span id="val-light" class="text-2xl font-bold text-slate-800">--</span>
-                            <span class="text-xs text-slate-400">Lx</span>
-                            <span class="text-[10px] text-slate-400 block" id="light-msg">--</span>
-                        </div>
-                        <!-- MQ135 (Air Quality) -->
-                        <div
-                            class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition">
-                            <div class="flex items-center gap-2 mb-2 text-rose-600">
-                                <i class="fa-solid fa-wind bg-rose-50 p-1.5 rounded-lg"></i>
-                                <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                                    Kualitas Udara </span>
-                            </div>
-                            <span id="val-mq135" class="text-2xl font-bold text-slate-800">--</span>
-                            <span class="text-xs text-slate-400">PPM</span>
-                            <span class="text-[10px] text-slate-400 block" id="mq135-msg">--</span>
-                        </div>
-                        <!-- Tank -->
-                        <div
-                            class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition">
-                            <div class="flex items-center gap-2 mb-2 text-indigo-500">
-                                <i class="fa-solid fa-water bg-indigo-50 p-1.5 rounded-lg"></i>
-                                <span
-                                    class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Tangki</span>
-                            </div>
-                            <span id="val-tank" class="text-2xl font-bold text-slate-800">--%</span>
-                            <span class="text-[10px] text-slate-400 block" id="tank-msg">--</span>
-                        </div>
-                    </div>
-
-                    <!-- 2. CHARTS & CONTROLS SECTION -->
-                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-                        <!-- Left Col: CHARTS GRID -->
-                        <div class="lg:col-span-2 space-y-6">
-                            <!-- Main Chart: Soil -->
-                            <div id="card-soil" class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                                <div class="flex justify-between items-center mb-4">
-                                    <h3 class="font-bold text-slate-800 flex items-center gap-2">
-                                        <span class="w-2 h-6 bg-emerald-500 rounded-full"></span> Kelembaban Tanah
-                                        (Utama)
-                                    </h3>
-                                    <button onclick="app.pinChart('soil')"
-                                        class="text-slate-400 hover:text-emerald-600 transition p-2 hover:bg-emerald-50 rounded-full"
-                                        title="Pin Chart">
-                                        <i class="fa-solid fa-thumbtack"></i>
-                                    </button>
-                                </div>
-                                <div class="chart-container-main">
-                                    <canvas id="soilChart"></canvas>
-                                </div>
-                            </div>
-
-                            <!-- Secondary Charts Grid -->
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <!-- Humidity Chart -->
-                                <div id="card-hum" class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
-                                    <div class="flex justify-between items-center mb-3">
-                                        <h4 class="text-sm font-bold text-slate-600">Kelembaban Udara</h4>
-                                        <button onclick="app.pinChart('hum')"
-                                            class="text-slate-400 hover:text-emerald-600 transition" title="Pin Chart">
-                                            <i class="fa-solid fa-thumbtack"></i>
-                                        </button>
-                                    </div>
-                                    <div class="chart-container-small">
-                                        <canvas id="humChart"></canvas>
-                                    </div>
-                                </div>
-                                <!-- Temperature Chart -->
-                                <div id="card-temp" class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
-                                    <div class="flex justify-between items-center mb-3">
-                                        <h4 class="text-sm font-bold text-slate-600">Suhu Lingkungan</h4>
-                                        <button onclick="app.pinChart('temp')"
-                                            class="text-slate-400 hover:text-emerald-600 transition" title="Pin Chart">
-                                            <i class="fa-solid fa-thumbtack"></i>
-                                        </button>
-                                    </div>
-                                    <div class="chart-container-small">
-                                        <canvas id="tempChart"></canvas>
-                                    </div>
-                                </div>
-                                <!-- Light Chart -->
-                                <div id="card-light" class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
-                                    <div class="flex justify-between items-center mb-3">
-                                        <h4 class="text-sm font-bold text-slate-600">Intensitas Cahaya</h4>
-                                        <button onclick="app.pinChart('light')"
-                                            class="text-slate-400 hover:text-emerald-600 transition" title="Pin Chart">
-                                            <i class="fa-solid fa-thumbtack"></i>
-                                        </button>
-                                    </div>
-                                    <div class="chart-container-small">
-                                        <canvas id="lightChart"></canvas>
-                                    </div>
-                                </div>
-                                <!-- MQ135 Chart -->
-                                <div id="card-mq135" class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
-                                    <div class="flex justify-between items-center mb-3">
-                                        <h4 class="text-sm font-bold text-slate-600">Kualitas Udara (MQ135)</h4>
-                                        <button onclick="app.pinChart('mq135')"
-                                            class="text-slate-400 hover:text-emerald-600 transition" title="Pin Chart">
-                                            <i class="fa-solid fa-thumbtack"></i>
-                                        </button>
-                                    </div>
-                                    <div class="chart-container-small">
-                                        <canvas id="mq135Chart"></canvas>
-                                    </div>
-                                </div>
-                                <!-- Tank Chart -->
-                                <div id="card-tank" class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
-                                    <div class="flex justify-between items-center mb-3">
-                                        <h4 class="text-sm font-bold text-slate-600">Level Air Tangki</h4>
-                                        <button onclick="app.pinChart('tank')"
-                                            class="text-slate-400 hover:text-emerald-600 transition" title="Pin Chart">
-                                            <i class="fa-solid fa-thumbtack"></i>
-                                        </button>
-                                    </div>
-                                    <div class="chart-container-small">
-                                        <canvas id="tankChart"></canvas>
-                                    </div>
-                                </div>
+                                    class="text-xl font-mono font-bold text-slate-700 bg-white px-3 py-1 rounded-lg border border-slate-200 shadow-sm"
+                                    id="realtime-clock">--:--:--</span>
+                                <span class="text-[10px] font-mono text-slate-400" id="last-updated">Waiting
+                                    data...</span>
                             </div>
                         </div>
 
-                        <!-- Right Col: CONTROLS (Sticky) -->
-                        <div class="lg:col-span-1">
-                            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 sticky top-6">
-                                <h3 class="font-bold text-slate-800 mb-6 flex items-center gap-2">
-                                    <i class="fa-solid fa-gamepad text-slate-400"></i> Kontrol Manual
+                        <!-- PINNED CHART SECTION -->
+                        <div id="pinned-chart-section"
+                            class="hidden mb-8 bg-white p-6 rounded-3xl shadow-lg border border-slate-100 relative">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="font-bold text-slate-800 text-lg flex items-center gap-2">
+                                    <i class="fa-solid fa-thumbtack text-emerald-500"></i>
+                                    <span id="pinned-chart-title">Chart</span>
                                 </h3>
+                                <button onclick="app.pinChart(null)"
+                                    class="text-slate-400 hover:text-rose-500 transition bg-slate-50 p-2 rounded-full hover:bg-rose-50">
+                                    <i class="fa-solid fa-times"></i>
+                                </button>
+                            </div>
+                            <div class="w-full h-[400px]">
+                                <canvas id="pinnedChart"></canvas>
+                            </div>
+                        </div>
 
-                                <div class="space-y-5">
-                                    <!-- Pump -->
-                                    <div
-                                        class="flex items-center justify-between p-3 rounded-xl hover:bg-slate-50 transition">
-                                        <div class="flex items-center gap-3">
-                                            <div
-                                                class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
-                                                <i class="fa-solid fa-shower"></i>
-                                            </div>
-                                            <div>
-                                                <p class="font-bold text-slate-700 text-sm">Pompa Air</p>
-                                                <p class="text-xs text-slate-400" id="status-pump">...</p>
-                                            </div>
-                                        </div>
-                                        <label class="flex items-center cursor-pointer relative"><input type="checkbox"
-                                                id="toggle-pump" class="sr-only"
-                                                onchange="app.toggleDevice('pump', this.checked)">
-                                            <div
-                                                class="toggle-bg bg-slate-200 border-2 border-slate-200 h-6 w-11 rounded-full transition-colors duration-200">
-                                            </div>
-                                            <div
-                                                class="dot absolute left-0.5 top-0.5 bg-white w-5 h-5 rounded-full shadow transition-transform duration-200">
-                                            </div>
-                                        </label>
+                        <!-- SENSOR CARDS ROW -->
+                        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+                            <!-- Soil -->
+                            <div
+                                class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition">
+                                <div class="flex items-center gap-2 mb-2 text-emerald-600">
+                                    <i class="fa-solid fa-droplet bg-emerald-50 p-1.5 rounded-lg"></i>
+                                    <span
+                                        class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Kelembaban
+                                        Tanah</span>
+                                </div>
+                                <span id="val-soil" class="text-2xl font-bold text-slate-800">--%</span>
+                                <span class="text-[10px] text-slate-400 block" id="soil-msg">--</span>
+                            </div>
+                            <!-- Humidity -->
+                            <div
+                                class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition">
+                                <div class="flex items-center gap-2 mb-2 text-cyan-600">
+                                    <i class="fa-solid fa-cloud-rain bg-cyan-50 p-1.5 rounded-lg"></i>
+                                    <span
+                                        class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Kelembapan
+                                        Udara</span>
+                                </div>
+                                <span id="val-hum" class="text-2xl font-bold text-slate-800">--%</span>
+                                <span class="text-[10px] text-slate-400 block" id="hum-msg">--</span>
+                            </div>
+                            <!-- Temp -->
+                            <div
+                                class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition">
+                                <div class="flex items-center gap-2 mb-2 text-orange-500">
+                                    <i class="fa-solid fa-temperature-half bg-orange-50 p-1.5 rounded-lg"></i>
+                                    <span
+                                        class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Suhu</span>
+                                </div>
+                                <span id="val-temp" class="text-2xl font-bold text-slate-800">--°C</span>
+                                <span class="text-[10px] text-slate-400 block" id="temp-msg">--</span>
+                            </div>
+                            <!-- Light -->
+                            <div
+                                class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition">
+                                <div class="flex items-center gap-2 mb-2 text-yellow-500">
+                                    <i class="fa-solid fa-sun bg-yellow-50 p-1.5 rounded-lg"></i>
+                                    <span
+                                        class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Cahaya</span>
+                                </div>
+                                <span id="val-light" class="text-2xl font-bold text-slate-800">--</span>
+                                <span class="text-xs text-slate-400">Lx</span>
+                                <span class="text-[10px] text-slate-400 block" id="light-msg">--</span>
+                            </div>
+                            <!-- MQ135 (Air Quality) -->
+                            <div
+                                class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition">
+                                <div class="flex items-center gap-2 mb-2 text-rose-600">
+                                    <i class="fa-solid fa-wind bg-rose-50 p-1.5 rounded-lg"></i>
+                                    <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                                        Kualitas Udara </span>
+                                </div>
+                                <span id="val-mq135" class="text-2xl font-bold text-slate-800">--</span>
+                                <span class="text-xs text-slate-400">PPM</span>
+                                <span class="text-[10px] text-slate-400 block" id="mq135-msg">--</span>
+                            </div>
+                            <!-- Tank -->
+                            <div
+                                class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition">
+                                <div class="flex items-center gap-2 mb-2 text-indigo-500">
+                                    <i class="fa-solid fa-water bg-indigo-50 p-1.5 rounded-lg"></i>
+                                    <span
+                                        class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Tangki</span>
+                                </div>
+                                <span id="val-tank" class="text-2xl font-bold text-slate-800">--%</span>
+                                <span class="text-[10px] text-slate-400 block" id="tank-msg">--</span>
+                            </div>
+                        </div>
+
+                        <!-- 2. CHARTS & CONTROLS SECTION -->
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+                            <!-- Left Col: CHARTS GRID -->
+                            <div class="lg:col-span-2 space-y-6">
+                                <!-- Main Chart: Soil -->
+                                <div id="card-soil" class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                                    <div class="flex justify-between items-center mb-4">
+                                        <h3 class="font-bold text-slate-800 flex items-center gap-2">
+                                            <span class="w-2 h-6 bg-emerald-500 rounded-full"></span> Kelembaban Tanah
+                                            (Utama)
+                                        </h3>
+                                        <button onclick="app.pinChart('soil')"
+                                            class="text-slate-400 hover:text-emerald-600 transition p-2 hover:bg-emerald-50 rounded-full"
+                                            title="Pin Chart">
+                                            <i class="fa-solid fa-thumbtack"></i>
+                                        </button>
                                     </div>
-
-                                    <!-- UV -->
-                                    <div
-                                        class="flex items-center justify-between p-3 rounded-xl hover:bg-slate-50 transition">
-                                        <div class="flex items-center gap-3">
-                                            <div
-                                                class="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center text-purple-600">
-                                                <i class="fa-solid fa-lightbulb"></i>
-                                            </div>
-                                            <div>
-                                                <p class="font-bold text-slate-700 text-sm">Lampu UV</p>
-                                                <p class="text-xs text-slate-400" id="status-uv">...</p>
-                                            </div>
-                                        </div>
-                                        <label class="flex items-center cursor-pointer relative"><input type="checkbox"
-                                                id="toggle-uv" class="sr-only"
-                                                onchange="app.toggleDevice('uv', this.checked)">
-                                            <div
-                                                class="toggle-bg bg-slate-200 border-2 border-slate-200 h-6 w-11 rounded-full transition-colors duration-200">
-                                            </div>
-                                            <div
-                                                class="dot absolute left-0.5 top-0.5 bg-white w-5 h-5 rounded-full shadow transition-transform duration-200">
-                                            </div>
-                                        </label>
-                                    </div>
-
-                                    <!-- Mist -->
-                                    <div
-                                        class="flex items-center justify-between p-3 rounded-xl hover:bg-slate-50 transition">
-                                        <div class="flex items-center gap-3">
-                                            <div
-                                                class="w-10 h-10 rounded-full bg-cyan-100 flex items-center justify-center text-cyan-600">
-                                                <i class="fa-solid fa-smog"></i>
-                                            </div>
-                                            <div>
-                                                <p class="font-bold text-slate-700 text-sm">Mist Maker</p>
-                                                <p class="text-xs text-slate-400" id="status-mist">...</p>
-                                            </div>
-                                        </div>
-                                        <label class="flex items-center cursor-pointer relative"><input type="checkbox"
-                                                id="toggle-mist" class="sr-only"
-                                                onchange="app.toggleDevice('mist', this.checked)">
-                                            <div
-                                                class="toggle-bg bg-slate-200 border-2 border-slate-200 h-6 w-11 rounded-full transition-colors duration-200">
-                                            </div>
-                                            <div
-                                                class="dot absolute left-0.5 top-0.5 bg-white w-5 h-5 rounded-full shadow transition-transform duration-200">
-                                            </div>
-                                        </label>
-                                    </div>
-
-                                    <!-- Buzzer -->
-                                    <div
-                                        class="flex items-center justify-between p-3 rounded-xl hover:bg-slate-50 transition">
-                                        <div class="flex items-center gap-3">
-                                            <div
-                                                class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center text-red-600">
-                                                <i class="fa-solid fa-bell"></i>
-                                            </div>
-                                            <div>
-                                                <p class="font-bold text-slate-700 text-sm">Buzzer</p>
-                                                <p class="text-xs text-slate-400" id="status-buzzer">...</p>
-                                            </div>
-                                        </div>
-                                        <label class="flex items-center cursor-pointer relative"><input type="checkbox"
-                                                id="toggle-buzzer" class="sr-only"
-                                                onchange="app.toggleDevice('buzzer', this.checked)">
-                                            <div
-                                                class="toggle-bg bg-slate-200 border-2 border-slate-200 h-6 w-11 rounded-full transition-colors duration-200">
-                                            </div>
-                                            <div
-                                                class="dot absolute left-0.5 top-0.5 bg-white w-5 h-5 rounded-full shadow transition-transform duration-200">
-                                            </div>
-                                        </label>
+                                    <div class="chart-container-main">
+                                        <canvas id="soilChart"></canvas>
                                     </div>
                                 </div>
 
-                                <div class="mt-8 pt-6 border-t border-slate-100">
-                                    <div class="bg-slate-50 p-4 rounded-xl text-xs text-slate-500">
-                                        <p class="font-bold mb-2">Info Otomasi:</p>
-                                        <ul class="space-y-1 list-disc ml-4">
-                                            <li>Pompa aktif jika Tanah <span
-                                                    class="text-blue-600 font-bold">Kering</span></li>
-                                            <li>Mist aktif jika Udara <span
-                                                    class="text-cyan-600 font-bold">Kering</span></li>
-                                            <li>Buzzer aktif jika Tangki <span
-                                                    class="text-red-600 font-bold">Kosong</span></li>
-                                            <li>Buzzer aktif jika Polusi <span
-                                                    class="text-red-600 font-bold">Tinggi</span></li>
-                                        </ul>
+                                <!-- Secondary Charts Grid -->
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <!-- Humidity Chart -->
+                                    <div id="card-hum"
+                                        class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+                                        <div class="flex justify-between items-center mb-3">
+                                            <h4 class="text-sm font-bold text-slate-600">Kelembaban Udara</h4>
+                                            <button onclick="app.pinChart('hum')"
+                                                class="text-slate-400 hover:text-emerald-600 transition"
+                                                title="Pin Chart">
+                                                <i class="fa-solid fa-thumbtack"></i>
+                                            </button>
+                                        </div>
+                                        <div class="chart-container-small">
+                                            <canvas id="humChart"></canvas>
+                                        </div>
+                                    </div>
+                                    <!-- Temperature Chart -->
+                                    <div id="card-temp"
+                                        class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+                                        <div class="flex justify-between items-center mb-3">
+                                            <h4 class="text-sm font-bold text-slate-600">Suhu Lingkungan</h4>
+                                            <button onclick="app.pinChart('temp')"
+                                                class="text-slate-400 hover:text-emerald-600 transition"
+                                                title="Pin Chart">
+                                                <i class="fa-solid fa-thumbtack"></i>
+                                            </button>
+                                        </div>
+                                        <div class="chart-container-small">
+                                            <canvas id="tempChart"></canvas>
+                                        </div>
+                                    </div>
+                                    <!-- Light Chart -->
+                                    <div id="card-light"
+                                        class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+                                        <div class="flex justify-between items-center mb-3">
+                                            <h4 class="text-sm font-bold text-slate-600">Intensitas Cahaya</h4>
+                                            <button onclick="app.pinChart('light')"
+                                                class="text-slate-400 hover:text-emerald-600 transition"
+                                                title="Pin Chart">
+                                                <i class="fa-solid fa-thumbtack"></i>
+                                            </button>
+                                        </div>
+                                        <div class="chart-container-small">
+                                            <canvas id="lightChart"></canvas>
+                                        </div>
+                                    </div>
+                                    <!-- MQ135 Chart -->
+                                    <div id="card-mq135"
+                                        class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+                                        <div class="flex justify-between items-center mb-3">
+                                            <h4 class="text-sm font-bold text-slate-600">Kualitas Udara (MQ135)</h4>
+                                            <button onclick="app.pinChart('mq135')"
+                                                class="text-slate-400 hover:text-emerald-600 transition"
+                                                title="Pin Chart">
+                                                <i class="fa-solid fa-thumbtack"></i>
+                                            </button>
+                                        </div>
+                                        <div class="chart-container-small">
+                                            <canvas id="mq135Chart"></canvas>
+                                        </div>
+                                    </div>
+                                    <!-- Tank Chart -->
+                                    <div id="card-tank"
+                                        class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+                                        <div class="flex justify-between items-center mb-3">
+                                            <h4 class="text-sm font-bold text-slate-600">Level Air Tangki</h4>
+                                            <button onclick="app.pinChart('tank')"
+                                                class="text-slate-400 hover:text-emerald-600 transition"
+                                                title="Pin Chart">
+                                                <i class="fa-solid fa-thumbtack"></i>
+                                            </button>
+                                        </div>
+                                        <div class="chart-container-small">
+                                            <canvas id="tankChart"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Right Col: CONTROLS (Sticky) -->
+                            <div class="lg:col-span-1">
+                                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 sticky top-6">
+                                    <h3 class="font-bold text-slate-800 mb-6 flex items-center gap-2">
+                                        <i class="fa-solid fa-gamepad text-slate-400"></i> Kontrol Manual
+                                    </h3>
+
+                                    <div class="space-y-5">
+                                        <!-- Pump -->
+                                        <div
+                                            class="flex items-center justify-between p-3 rounded-xl hover:bg-slate-50 transition">
+                                            <div class="flex items-center gap-3">
+                                                <div
+                                                    class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+                                                    <i class="fa-solid fa-shower"></i>
+                                                </div>
+                                                <div>
+                                                    <p class="font-bold text-slate-700 text-sm">Pompa Air</p>
+                                                    <p class="text-xs text-slate-400" id="status-pump">...</p>
+                                                </div>
+                                            </div>
+                                            <label class="flex items-center cursor-pointer relative"><input
+                                                    type="checkbox" id="toggle-pump" class="sr-only"
+                                                    onchange="app.toggleDevice('pump', this.checked)">
+                                                <div
+                                                    class="toggle-bg bg-slate-200 border-2 border-slate-200 h-6 w-11 rounded-full transition-colors duration-200">
+                                                </div>
+                                                <div
+                                                    class="dot absolute left-0.5 top-0.5 bg-white w-5 h-5 rounded-full shadow transition-transform duration-200">
+                                                </div>
+                                            </label>
+                                        </div>
+
+                                        <!-- UV -->
+                                        <div
+                                            class="flex items-center justify-between p-3 rounded-xl hover:bg-slate-50 transition">
+                                            <div class="flex items-center gap-3">
+                                                <div
+                                                    class="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center text-purple-600">
+                                                    <i class="fa-solid fa-lightbulb"></i>
+                                                </div>
+                                                <div>
+                                                    <p class="font-bold text-slate-700 text-sm">Lampu UV</p>
+                                                    <p class="text-xs text-slate-400" id="status-uv">...</p>
+                                                </div>
+                                            </div>
+                                            <label class="flex items-center cursor-pointer relative"><input
+                                                    type="checkbox" id="toggle-uv" class="sr-only"
+                                                    onchange="app.toggleDevice('uv', this.checked)">
+                                                <div
+                                                    class="toggle-bg bg-slate-200 border-2 border-slate-200 h-6 w-11 rounded-full transition-colors duration-200">
+                                                </div>
+                                                <div
+                                                    class="dot absolute left-0.5 top-0.5 bg-white w-5 h-5 rounded-full shadow transition-transform duration-200">
+                                                </div>
+                                            </label>
+                                        </div>
+
+                                        <!-- Mist -->
+                                        <div
+                                            class="flex items-center justify-between p-3 rounded-xl hover:bg-slate-50 transition">
+                                            <div class="flex items-center gap-3">
+                                                <div
+                                                    class="w-10 h-10 rounded-full bg-cyan-100 flex items-center justify-center text-cyan-600">
+                                                    <i class="fa-solid fa-smog"></i>
+                                                </div>
+                                                <div>
+                                                    <p class="font-bold text-slate-700 text-sm">Mist Maker</p>
+                                                    <p class="text-xs text-slate-400" id="status-mist">...</p>
+                                                </div>
+                                            </div>
+                                            <label class="flex items-center cursor-pointer relative"><input
+                                                    type="checkbox" id="toggle-mist" class="sr-only"
+                                                    onchange="app.toggleDevice('mist', this.checked)">
+                                                <div
+                                                    class="toggle-bg bg-slate-200 border-2 border-slate-200 h-6 w-11 rounded-full transition-colors duration-200">
+                                                </div>
+                                                <div
+                                                    class="dot absolute left-0.5 top-0.5 bg-white w-5 h-5 rounded-full shadow transition-transform duration-200">
+                                                </div>
+                                            </label>
+                                        </div>
+
+                                        <!-- Buzzer -->
+                                        <div
+                                            class="flex items-center justify-between p-3 rounded-xl hover:bg-slate-50 transition">
+                                            <div class="flex items-center gap-3">
+                                                <div
+                                                    class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center text-red-600">
+                                                    <i class="fa-solid fa-bell"></i>
+                                                </div>
+                                                <div>
+                                                    <p class="font-bold text-slate-700 text-sm">Buzzer</p>
+                                                    <p class="text-xs text-slate-400" id="status-buzzer">...</p>
+                                                </div>
+                                            </div>
+                                            <label class="flex items-center cursor-pointer relative"><input
+                                                    type="checkbox" id="toggle-buzzer" class="sr-only"
+                                                    onchange="app.toggleDevice('buzzer', this.checked)">
+                                                <div
+                                                    class="toggle-bg bg-slate-200 border-2 border-slate-200 h-6 w-11 rounded-full transition-colors duration-200">
+                                                </div>
+                                                <div
+                                                    class="dot absolute left-0.5 top-0.5 bg-white w-5 h-5 rounded-full shadow transition-transform duration-200">
+                                                </div>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div class="mt-8 pt-6 border-t border-slate-100">
+                                        <div class="bg-slate-50 p-4 rounded-xl text-xs text-slate-500">
+                                            <p class="font-bold mb-2">Info Otomasi:</p>
+                                            <ul class="space-y-1 list-disc ml-4">
+                                                <li>Pompa aktif jika Tanah <span
+                                                        class="text-blue-600 font-bold">Kering</span></li>
+                                                <li>Mist aktif jika Udara <span
+                                                        class="text-cyan-600 font-bold">Kering</span></li>
+                                                <li>Buzzer aktif jika Tangki <span
+                                                        class="text-red-600 font-bold">Kosong</span></li>
+                                                <li>Buzzer aktif jika Polusi <span
+                                                        class="text-red-600 font-bold">Tinggi</span></li>
+                                            </ul>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- VIEW: AUTOMATION -->
-                <div id="view-automation" class="hidden space-y-6 fade-in">
-                    <div class="mb-4">
-                        <h2 class="text-2xl font-bold text-slate-800">Pengaturan Otomasi</h2>
-                        <p class="text-sm text-slate-500">Sesuaikan slider untuk mengatur ambang batas otomatis.</p>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <!-- Pump Logic -->
-                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                            <div class="flex justify-between items-center mb-6">
-                                <h3 class="font-bold text-slate-800 flex items-center gap-2"><i
-                                        class="fa-solid fa-droplet text-blue-500"></i> Auto Siram</h3>
-                                <label class="flex items-center cursor-pointer relative"><input type="checkbox"
-                                        id="auto-pump-enable" class="sr-only">
-                                    <div
-                                        class="toggle-bg bg-slate-200 border-2 border-slate-200 h-6 w-11 rounded-full transition-colors duration-200">
-                                    </div>
-                                    <div
-                                        class="dot absolute left-0.5 top-0.5 bg-white w-5 h-5 rounded-full shadow transition-transform duration-200">
-                                    </div>
-                                </label>
-                            </div>
-                            <div class="space-y-4">
-                                <div class="flex justify-between text-sm"><span class="text-slate-600">Batas
-                                        Tanah</span><span id="lbl-soil-thresh"
-                                        class="font-bold text-blue-600">30%</span></div>
-                                <input type="range" id="input-soil-thresh" min="0" max="100" value="30"
-                                    class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-500">
-                            </div>
-                            <button onclick="app.saveAutomation('pump')"
-                                class="mt-6 w-full bg-slate-800 hover:bg-slate-900 text-white py-2 rounded-lg text-sm font-bold transition">Simpan</button>
+                    <!-- VIEW: AUTOMATION -->
+                    <div id="view-automation" class="hidden space-y-6 fade-in">
+                        <div class="mb-4">
+                            <h2 class="text-2xl font-bold text-slate-800">Pengaturan Otomasi</h2>
+                            <p class="text-sm text-slate-500">Sesuaikan slider untuk mengatur ambang batas otomatis.</p>
                         </div>
-                        <!-- Mist Logic -->
-                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                            <div class="flex justify-between items-center mb-6">
-                                <h3 class="font-bold text-slate-800 flex items-center gap-2"><i
-                                        class="fa-solid fa-smog text-cyan-500"></i> Auto Mist</h3>
-                                <label class="flex items-center cursor-pointer relative"><input type="checkbox"
-                                        id="auto-mist-enable" class="sr-only">
-                                    <div
-                                        class="toggle-bg bg-slate-200 border-2 border-slate-200 h-6 w-11 rounded-full transition-colors duration-200">
-                                    </div>
-                                    <div
-                                        class="dot absolute left-0.5 top-0.5 bg-white w-5 h-5 rounded-full shadow transition-transform duration-200">
-                                    </div>
-                                </label>
-                            </div>
-                            <div class="space-y-4">
-                                <div class="flex justify-between text-sm"><span class="text-slate-600">Batas
-                                        Udara</span><span id="lbl-hum-thresh" class="font-bold text-cyan-600">50%</span>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- Pump Logic -->
+                            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                                <div class="flex justify-between items-center mb-6">
+                                    <h3 class="font-bold text-slate-800 flex items-center gap-2"><i
+                                            class="fa-solid fa-droplet text-blue-500"></i> Auto Siram</h3>
+                                    <label class="flex items-center cursor-pointer relative"><input type="checkbox"
+                                            id="auto-pump-enable" class="sr-only">
+                                        <div
+                                            class="toggle-bg bg-slate-200 border-2 border-slate-200 h-6 w-11 rounded-full transition-colors duration-200">
+                                        </div>
+                                        <div
+                                            class="dot absolute left-0.5 top-0.5 bg-white w-5 h-5 rounded-full shadow transition-transform duration-200">
+                                        </div>
+                                    </label>
                                 </div>
-                                <input type="range" id="input-hum-thresh" min="20" max="90" value="50"
-                                    class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-cyan-500">
+                                <div class="space-y-4">
+                                    <div class="flex justify-between text-sm"><span class="text-slate-600">Batas
+                                            Tanah</span><span id="lbl-soil-thresh"
+                                            class="font-bold text-blue-600">30%</span></div>
+                                    <input type="range" id="input-soil-thresh" min="0" max="100" value="30"
+                                        class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-500">
+                                </div>
+                                <button onclick="app.saveAutomation('pump')"
+                                    class="mt-6 w-full bg-slate-800 hover:bg-slate-900 text-white py-2 rounded-lg text-sm font-bold transition">Simpan</button>
                             </div>
-                            <button onclick="app.saveAutomation('mist')"
-                                class="mt-6 w-full bg-slate-800 hover:bg-slate-900 text-white py-2 rounded-lg text-sm font-bold transition">Simpan</button>
+                            <!-- Mist Logic -->
+                            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                                <div class="flex justify-between items-center mb-6">
+                                    <h3 class="font-bold text-slate-800 flex items-center gap-2"><i
+                                            class="fa-solid fa-smog text-cyan-500"></i> Auto Mist</h3>
+                                    <label class="flex items-center cursor-pointer relative"><input type="checkbox"
+                                            id="auto-mist-enable" class="sr-only">
+                                        <div
+                                            class="toggle-bg bg-slate-200 border-2 border-slate-200 h-6 w-11 rounded-full transition-colors duration-200">
+                                        </div>
+                                        <div
+                                            class="dot absolute left-0.5 top-0.5 bg-white w-5 h-5 rounded-full shadow transition-transform duration-200">
+                                        </div>
+                                    </label>
+                                </div>
+                                <div class="space-y-4">
+                                    <div class="flex justify-between text-sm"><span class="text-slate-600">Batas
+                                            Udara</span><span id="lbl-hum-thresh"
+                                            class="font-bold text-cyan-600">50%</span></div>
+                                    <input type="range" id="input-hum-thresh" min="20" max="90" value="50"
+                                        class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-cyan-500">
+                                </div>
+                                <button onclick="app.saveAutomation('mist')"
+                                    class="mt-6 w-full bg-slate-800 hover:bg-slate-900 text-white py-2 rounded-lg text-sm font-bold transition">Simpan</button>
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- VIEW: LOGS -->
-                <div id="view-logs" class="hidden space-y-6 fade-in">
-                    <div class="flex justify-between items-center">
-                        <h2 class="text-2xl font-bold text-slate-800">Riwayat & Alarm</h2>
-                        <div class="flex gap-4">
-                            <button onclick="app.exportLogsToCSV()"
-                                class="text-xs text-emerald-600 hover:underline font-bold"><i
-                                    class="fa-solid fa-file-csv"></i> Export CSV</button>
-                            <button onclick="app.clearLogs()" class="text-xs text-red-500 hover:underline">Hapus
-                                Log</button>
+                    <!-- VIEW: LOGS -->
+                    <div id="view-logs" class="hidden space-y-6 fade-in">
+                        <div class="flex justify-between items-center">
+                            <h2 class="text-2xl font-bold text-slate-800">Riwayat & Alarm</h2>
+                            <div class="flex gap-4">
+                                <button onclick="app.exportLogsToCSV()"
+                                    class="text-xs text-emerald-600 hover:underline font-bold"><i
+                                        class="fa-solid fa-file-csv"></i> Export CSV</button>
+                                <button onclick="app.clearLogs()" class="text-xs text-red-500 hover:underline">Hapus
+                                    Log</button>
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                            <table class="w-full text-left text-sm text-slate-600">
+                                <thead class="bg-slate-50 text-slate-800 border-b border-slate-200">
+                                    <tr>
+                                        <th class="p-4">Waktu</th>
+                                        <th class="p-4">Tipe</th>
+                                        <th class="p-4">Pesan</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="logs-table-body">
+                                    <tr>
+                                        <td colspan="3" class="p-4 text-center">Memuat...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
-                    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-                        <table class="w-full text-left text-sm text-slate-600">
-                            <thead class="bg-slate-50 text-slate-800 border-b border-slate-200">
-                                <tr>
-                                    <th class="p-4">Waktu</th>
-                                    <th class="p-4">Tipe</th>
-                                    <th class="p-4">Pesan</th>
-                                </tr>
-                            </thead>
-                            <tbody id="logs-table-body">
-                                <tr>
-                                    <td colspan="3" class="p-4 text-center">Memuat...</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
                 </div>
+            </main>
         </div>
-        </main>
-    </div>
     </div>
 
-    <!-- App Logic -->
-    <!-- App Logic -->
-    <script type="module" src="./js/app.js"></script>
-</body>
+    <!-- Firebase & Logic -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getDatabase, ref, onValue, set, push, query, limitToLast, get } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
+
+        // ============================================
+        // 1. KONFIGURASI API (WAJIB DIISI)
+        // ============================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyBoPQqYYAf2qjNCNur0IqQMiCj-sLyWvOs",
+            authDomain: "webdashboard-gardenist.firebaseapp.com",
+            databaseURL: "https://webdashboard-gardenist-default-rtdb.firebaseio.com",
+            projectId: "webdashboard-gardenist",
+            storageBucket: "webdashboard-gardenist.firebasestorage.app",
+            messagingSenderId: "608799094403",
+            appId: "1:608799094403:web:0ac4b0e8ff3b72c660cdb6",
+            measurementId: "G-VL7W2Z6ECV"
+        };
+
+        let database;
+        try {
+            const appInstance = initializeApp(firebaseConfig);
+            database = getDatabase(appInstance);
+        } catch (e) {
+            console.error("Firebase Init Error", e);
+            alert("Gagal koneksi Firebase: " + e.message);
+        }
+
+        window.app = {
+            charts: {},
+            state: {
+                automation: { pump: { enabled: false, threshold: 30 }, mist: { enabled: false, threshold: 50 } },
+                sensors: { soil: 0, temp: 0, humidity: 0, tank: 0, light: 0, mq135: 0 },
+                devices: { pump: 0, uv: 0, mist: 0, buzzer: 0 },
+                alarmReason: null,
+                pinnedKey: null
+            },
+
+            init: function () {
+                this.initCharts();
+                this.connectFirebase();
+                this.setupInputs();
+                this.startClock();
+            },
+
+            enterDashboard: function () {
+                document.getElementById('landing-page').classList.add('hidden');
+                document.getElementById('dashboard-app').classList.remove('hidden');
+                setTimeout(() => this.init(), 100);
+            },
+
+            logout: function () {
+                if (confirm("Keluar dari Dashboard?")) {
+                    document.getElementById('dashboard-app').classList.add('hidden');
+                    document.getElementById('landing-page').classList.remove('hidden');
+                }
+            },
+
+            exportLogsToCSV: function () {
+                if (!database) return;
+
+                get(query(ref(database, 'logs'), limitToLast(500))).then((snapshot) => {
+                    const data = snapshot.val();
+                    if (!data) { alert("Tidak ada data log untuk diexport (kosong)."); return; }
+                    let csvContent = "\uFEFFTimestamp,Type,Message\n";
+                    Object.values(data).sort((a, b) => b.timestamp - a.timestamp).forEach(log => {
+                        const d = new Date(log.timestamp);
+                        const dateStr = d.getFullYear() + "-" +
+                            String(d.getMonth() + 1).padStart(2, '0') + "-" +
+                            String(d.getDate()).padStart(2, '0') + " " +
+                            String(d.getHours()).padStart(2, '0') + ":" +
+                            String(d.getMinutes()).padStart(2, '0') + ":" +
+                            String(d.getSeconds()).padStart(2, '0');
+                        const typeStr = (log.type || 'INFO').replace(/"/g, '""');
+                        const msgStr = (log.message || '').replace(/"/g, '""').replace(/\n/g, " ");
+                        csvContent += `"${dateStr}","${typeStr}","${msgStr}"\n`;
+                    });
+                    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement("a");
+                    link.setAttribute("href", url);
+                    link.setAttribute("download", `smartgarden_logs_${new Date().toISOString().split('T')[0]}.csv`);
+                    link.style.display = 'none';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                }).catch(err => {
+                    console.error("Export Error:", err);
+                    alert("Gagal mengambil data untuk export.");
+                });
+            },
+
+            navigate: function (viewId) {
+                ['overview', 'automation', 'logs'].forEach(id => {
+                    document.getElementById(`view-${id}`).classList.add('hidden');
+                    document.getElementById(`nav-${id}`).classList.remove('bg-emerald-50', 'text-emerald-700');
+                    document.getElementById(`nav-${id}`).classList.add('text-slate-600');
+                });
+                document.getElementById(`view-${viewId}`).classList.remove('hidden');
+                document.getElementById(`nav-${viewId}`).classList.add('bg-emerald-50', 'text-emerald-700');
+                document.getElementById(`nav-${viewId}`).classList.remove('text-slate-600');
+            },
+
+            connectFirebase: function () {
+                if (!database) return;
+                const statusEl = document.getElementById('connection-status');
+
+                onValue(ref(database, 'sensors'), (snapshot) => {
+                    statusEl.innerText = "Terhubung";
+                    const data = snapshot.val();
+                    if (data) {
+                        this.state.sensors = { ...this.state.sensors, ...data };
+                        this.updateDashboardUI(this.state.sensors);
+                        this.updateAllCharts(this.state.sensors);
+                        this.runAutomationLogic();
+                    }
+                });
+
+                onValue(ref(database, 'devices'), (snap) => this.syncDeviceToggles(snap.val()));
+                onValue(ref(database, 'config/automation'), (snap) => this.syncAutomationUI(snap.val()));
+                onValue(query(ref(database, 'logs'), limitToLast(20)), (snap) => this.renderLogs(snap.val()));
+            },
+
+            updateDashboardUI: function (data) {
+                if (data.soil !== undefined) {
+                    document.getElementById('val-soil').innerText = data.soil + '%';
+                    const msg = document.getElementById('soil-msg');
+                    msg.innerText = data.soil < 40 ? "TERLALU KERING" : data.soil > 60 ? "TERLALU LEMBAB" : "HUMIDITAS IDEAL";
+                    msg.className = data.soil < 40 ? "text-[10px] text-blue-600 font-bold" : data.soil > 60 ? "text-[10px] text-red-600 font-bold" : "text-[10px] text-emerald-600 font-bold";
+                }
+                if (data.humidity !== undefined) {
+                    document.getElementById('val-hum').innerText = data.humidity + '%';
+                    const msg = document.getElementById('hum-msg');
+                    msg.innerText = data.humidity < 40 ? "TERLALU KERING" : data.humidity > 60 ? "TERLALU LEMBAB" : "HUMIDITAS IDEAL";
+                    msg.className = data.humidity < 40 ? "text-[10px] text-blue-600 font-bold" : data.humidity > 60 ? "text-[10px] text-red-600 font-bold" : "text-[10px] text-emerald-600 font-bold";
+                }
+                if (data.temp !== undefined) {
+                    document.getElementById('val-temp').innerText = data.temp + '°C';
+                    const msg = document.getElementById('temp-msg');
+                    msg.innerText = data.temp < 15 ? "TERLALU DINGIN" : data.temp > 30 ? "TERLALU PANAS" : "SUHU IDEAL";
+                    msg.className = data.temp < 15 ? "text-[10px] text-blue-600 font-bold" : data.temp > 30 ? "text-[10px] text-red-600 font-bold" : "text-[10px] text-emerald-600 font-bold";
+                }
+                if (data.light !== undefined) {
+                    document.getElementById('val-light').innerText = data.light;
+                    const msg = document.getElementById('light-msg');
+                    msg.innerText = data.light < 500 ? "KURANG CAHAYA" : data.light > 2000 ? "TERLALU TERANG" : "CAHAYA IDEAL";
+                    msg.className = data.light < 500 ? "text-[10px] text-blue-600 font-bold" : data.light > 2000 ? "text-[10px] text-red-600 font-bold" : "text-[10px] text-emerald-600 font-bold";
+                }
+                if (data.mq135 !== undefined) {
+                    document.getElementById('val-mq135').innerText = data.mq135;
+                    const msg = document.getElementById('mq135-msg');
+                    msg.innerText = data.mq135 < 450 ? "UDARA SEGAR" : data.mq135 < 900 ? "CUKUP BAIK" : "POLUSI TINGGI";
+                    msg.className = data.mq135 < 450 ? "text-[10px] text-emerald-600 font-bold" : data.mq135 < 900 ? "text-[10px] text-orange-500 font-bold" : "text-[10px] text-rose-600 font-bold";
+                }
+                if (data.tank !== undefined) {
+                    document.getElementById('val-tank').innerText = data.tank + '%';
+                    const msg = document.getElementById('tank-msg');
+                    msg.innerText = data.tank < 10 ? "PERLU ISI AIR" : "Aman";
+                    msg.className = data.tank < 10 ? "text-[10px] text-red-600 font-bold animate-pulse" : "text-[10px] text-slate-400";
+                }
+                document.getElementById('last-updated').innerText = new Date().toLocaleTimeString();
+            },
+
+            syncDeviceToggles: function (dev) {
+                if (!dev) return;
+                ['pump', 'uv', 'mist', 'buzzer'].forEach(d => {
+                    const el = document.getElementById(`toggle-${d}`);
+                    if (el) el.checked = dev[d] == 1;
+                    const st = document.getElementById(`status-${d}`);
+                    if (st) {
+                        let statusText = dev[d] == 1 ? "ON" : "OFF";
+                        let statusClass = dev[d] == 1 ? "text-xs font-bold text-emerald-600" : "text-xs text-slate-400";
+                        if (d === 'buzzer' && dev[d] == 1) {
+                            if (this.state.alarmReason === 'tank' || this.state.sensors?.tank < 10) {
+                                statusText = "ON (Air Tangki Kritis!)";
+                                statusClass = "text-[10px] font-bold text-red-600 animate-pulse";
+                            } else if (this.state.alarmReason === 'pollution' || this.state.sensors?.mq135 > 900) {
+                                statusText = "ON (Polusi Tinggi!)";
+                                statusClass = "text-[10px] font-bold text-red-600 animate-pulse";
+                            } else if (this.state.alarmReason === 'tank_and_pollution' || this.state.sensors?.tank < 10 && this.state.sensors?.mq135 > 900) {
+                                statusText = "ON (Air Tangki Kritis dan Polusi Tinggi!)";
+                                statusClass = "text-[10px] font-bold text-green-600 animate-pulse";
+                            }
+                        }
+                        st.innerText = statusText;
+                        st.className = statusClass;
+                    }
+                });
+            },
+
+            syncAutomationUI: function (cfg) {
+                if (cfg) {
+                    this.state.automation = { ...this.state.automation, ...cfg };
+                    if (cfg.pump) {
+                        document.getElementById('auto-pump-enable').checked = cfg.pump.enabled;
+                        document.getElementById('input-soil-thresh').value = cfg.pump.threshold;
+                        document.getElementById('lbl-soil-thresh').innerText = cfg.pump.threshold + '%';
+                    }
+                    if (cfg.mist) {
+                        document.getElementById('auto-mist-enable').checked = cfg.mist.enabled;
+                        document.getElementById('input-hum-thresh').value = cfg.mist.threshold;
+                        document.getElementById('lbl-hum-thresh').innerText = cfg.mist.threshold + '%';
+                    }
+                    this.runAutomationLogic();
+                }
+            },
+
+            logActivity: function (type, message) {
+                if (!database) return;
+                push(ref(database, 'logs'), {
+                    timestamp: Date.now(),
+                    type: type,
+                    message: message
+                });
+            },
+
+            toggleDevice: function (d, val, source = 'MANUAL') {
+                if (database) {
+                    set(ref(database, `devices/${d}`), val ? 1 : 0)
+                        .then(() => this.logActivity(source, `${d.toUpperCase()} ${val ? 'ON' : 'OFF'}`));
+                }
+            },
+
+            saveAutomation: function (type) {
+                if (!database) return;
+                const enabled = document.getElementById(`auto-${type}-enable`).checked;
+                const threshold = parseInt(document.getElementById(type === 'pump' ? 'input-soil-thresh' : 'input-hum-thresh').value);
+                set(ref(database, `config/automation/${type}`), { enabled, threshold })
+                    .then(() => {
+                        alert("Tersimpan!");
+                        this.logActivity('CONFIG', `Update Aturan ${type.toUpperCase()}`);
+                    });
+            },
+
+            runAutomationLogic: function () {
+                const s = this.state.sensors; const c = this.state.automation; const d = this.state.devices;
+                const now = Date.now();
+                if (c?.pump?.enabled && database) {
+                    const threshold = parseInt(c.pump.threshold);
+                    if (s.soil < threshold && d.pump == 0) this.toggleDevice('pump', true, 'AUTO');
+                    else if (s.soil > threshold + 5 && d.pump == 1) this.toggleDevice('pump', false, 'AUTO');
+                }
+                if (c?.mist?.enabled && database) {
+                    const threshold = parseInt(c.mist.threshold);
+                    if (s.humidity < threshold && d.mist == 0) this.toggleDevice('mist', true, 'AUTO');
+                    else if (s.humidity > threshold + 5 && d.mist == 1) this.toggleDevice('mist', false, 'AUTO');
+                }
+                if (!this.state.mq135_ref || (now - this.state.mq135_ref.ts > 5000)) {
+                    this.state.mq135_ref = { val: s.mq135 || 0, ts: now };
+                }
+                const mqDiff = (s.mq135 || 0) - this.state.mq135_ref.val;
+                const isPollutionSpike = (mqDiff > 200);
+                const isHighPollution = (s.mq135 > 900);
+                const isPollutionCritical = isPollutionSpike || isHighPollution;
+                if (isPollutionCritical) {
+                    const msg = document.getElementById('mq135-msg');
+                    if (msg) {
+                        msg.innerText = isPollutionSpike ? "BAHAYA: LONJAKAN POLUSI" : "BAHAYA: POLUSI TINGGI";
+                        msg.className = "text-[10px] text-red-600 font-bold animate-pulse";
+                    }
+                }
+                const isTankCritical = (s.tank < 10 && s.tank > 0);
+                const shouldBuzz = isTankCritical || isPollutionCritical;
+                if (shouldBuzz && d.buzzer == 0) {
+                    set(ref(database, 'devices/buzzer'), 1);
+                    let reason = "";
+                    let alarmState = "";
+                    if (isPollutionCritical && isTankCritical) {
+                        reason = "Polusi Tinggi & Air Tangki Kritis!";
+                        alarmState = "tank_and_pollution";
+                    } else if (isPollutionCritical) {
+                        reason = "Polusi Tinggi!";
+                        alarmState = "pollution";
+                    } else {
+                        reason = "Air Tangki Kritis!";
+                        alarmState = "tank";
+                    }
+                    this.state.alarmReason = alarmState;
+                    this.logActivity('ALARM', `Buzzer ON (${reason})`);
+                }
+                else if (!shouldBuzz && d.buzzer == 1 && database) {
+                    set(ref(database, 'devices/buzzer'), 0);
+                    this.state.alarmReason = null;
+                }
+            },
+
+            renderLogs: function (data) {
+                const tbody = document.getElementById('logs-table-body');
+                tbody.innerHTML = '';
+                if (!data) {
+                    tbody.innerHTML = '<tr><td colspan="3" class="p-4 text-center text-slate-400">Belum ada data log.</td></tr>';
+                    return;
+                }
+                Object.values(data).sort((a, b) => b.timestamp - a.timestamp).forEach(log => {
+                    let badgeClass = "bg-slate-100 text-slate-600";
+                    if (log.type === 'ALARM') badgeClass = "bg-red-100 text-red-600";
+                    if (log.type === 'AUTO') badgeClass = "bg-blue-100 text-blue-600";
+                    if (log.type === 'MANUAL') badgeClass = "bg-emerald-100 text-emerald-600";
+                    tbody.innerHTML += `
+                        <tr class="border-b border-slate-50 hover:bg-slate-50/50 transition">
+                            <td class="p-4 text-xs text-slate-400 font-mono">${new Date(log.timestamp).toLocaleTimeString()}</td>
+                            <td class="p-4"><span class="${badgeClass} px-2 py-1 rounded text-xs font-bold">${log.type || 'INFO'}</span></td>
+                            <td class="p-4 text-slate-700 font-medium text-sm">${log.message}</td>
+                        </tr>`;
+                });
+            },
+            clearLogs: function () { if (confirm("Hapus?")) set(ref(database, 'logs'), null); },
+
+            createChartConfig: function (ctx, label, colorHex, bgColor) {
+                return new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: Array(15).fill(''),
+                        datasets: [{
+                            label: label,
+                            data: Array(15).fill(0),
+                            borderColor: colorHex,
+                            backgroundColor: bgColor,
+                            borderWidth: 2,
+                            tension: 0.4,
+                            fill: true,
+                            pointRadius: 0,
+                            pointHoverRadius: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: { x: { display: false }, y: { beginAtZero: true } },
+                        plugins: { legend: { display: false } },
+                        interaction: { intersect: false, mode: 'index' }
+                    }
+                });
+            },
+
+            initCharts: function () {
+                this.charts.soil = this.createChartConfig(document.getElementById('soilChart').getContext('2d'), 'Tanah (%)', '#10b981', 'rgba(16, 185, 129, 0.1)');
+                this.charts.hum = this.createChartConfig(document.getElementById('humChart').getContext('2d'), 'Udara (%)', '#06b6d4', 'rgba(6, 182, 212, 0.1)');
+                this.charts.temp = this.createChartConfig(document.getElementById('tempChart').getContext('2d'), 'Suhu (°C)', '#f97316', 'rgba(249, 115, 22, 0.1)');
+                this.charts.light = this.createChartConfig(document.getElementById('lightChart').getContext('2d'), 'Cahaya (Lx)', '#eab308', 'rgba(234, 179, 8, 0.1)');
+                this.charts.mq135 = this.createChartConfig(document.getElementById('mq135Chart').getContext('2d'), 'Kualitas Udara (PPM)', '#e11d48', 'rgba(225, 29, 72, 0.1)');
+                this.charts.tank = this.createChartConfig(document.getElementById('tankChart').getContext('2d'), 'Air (%)', '#6366f1', 'rgba(99, 102, 241, 0.1)');
+            },
+
+            updateAllCharts: function (sensors) {
+                const now = new Date().toLocaleTimeString();
+                const updateSingle = (chart, val) => {
+                    if (!chart) return;
+                    if (chart.data.datasets[0].data.length > 20) {
+                        chart.data.datasets[0].data.shift();
+                        chart.data.labels.shift();
+                    }
+                    chart.data.datasets[0].data.push(val);
+                    chart.data.labels.push(now);
+                    chart.update('none');
+                };
+                if (sensors.soil !== undefined) updateSingle(this.charts.soil, sensors.soil);
+                if (sensors.humidity !== undefined) updateSingle(this.charts.hum, sensors.humidity);
+                if (sensors.temp !== undefined) updateSingle(this.charts.temp, sensors.temp);
+                if (sensors.light !== undefined) updateSingle(this.charts.light, sensors.light);
+                if (sensors.mq135 !== undefined) updateSingle(this.charts.mq135, sensors.mq135);
+                if (sensors.tank !== undefined) updateSingle(this.charts.tank, sensors.tank);
+                if (this.state.pinnedKey && this.charts.pinned && sensors[this.state.pinnedKey] !== undefined) {
+                    updateSingle(this.charts.pinned, sensors[this.state.pinnedKey]);
+                }
+            },
+
+            pinChart: function (key) {
+                const map = {
+                    'soil': { label: 'Kelembaban Tanah (%)', color: '#10b981', bg: 'rgba(16, 185, 129, 0.1)' },
+                    'hum': { label: 'Kelembaban Udara (%)', color: '#06b6d4', bg: 'rgba(6, 182, 212, 0.1)' },
+                    'temp': { label: 'Suhu Lingkungan (°C)', color: '#f97316', bg: 'rgba(249, 115, 22, 0.1)' },
+                    'light': { label: 'Intensitas Cahaya (Lx)', color: '#eab308', bg: 'rgba(234, 179, 8, 0.1)' },
+                    'mq135': { label: 'Kualitas Udara (PPM)', color: '#e11d48', bg: 'rgba(225, 29, 72, 0.1)' },
+                    'tank': { label: 'Level Air Tangki (%)', color: '#6366f1', bg: 'rgba(99, 102, 241, 0.1)' }
+                };
+                const section = document.getElementById('pinned-chart-section');
+                if (!section) return;
+                if (this.state.pinnedKey) {
+                    const oldCard = document.getElementById(`card-${this.state.pinnedKey}`);
+                    if (oldCard) oldCard.classList.remove('hidden');
+                }
+                if (!key || !map[key]) {
+                    section.classList.add('hidden');
+                    this.state.pinnedKey = null;
+                    if (this.charts.pinned) {
+                        this.charts.pinned.destroy();
+                        this.charts.pinned = null;
+                    }
+                    return;
+                }
+                const newCard = document.getElementById(`card-${key}`);
+                if (newCard) newCard.classList.add('hidden');
+                this.state.pinnedKey = key;
+                section.classList.remove('hidden');
+                const titleEl = document.getElementById('pinned-chart-title');
+                if (titleEl) titleEl.innerText = map[key].label;
+                if (this.charts.pinned) {
+                    this.charts.pinned.destroy();
+                    this.charts.pinned = null;
+                }
+                const canvas = document.getElementById('pinnedChart');
+                if (!canvas) return;
+                const ctx = canvas.getContext('2d');
+                const sourceChart = this.charts[key];
+                let initialData = [];
+                let initialLabels = [];
+                if (sourceChart && sourceChart.data) {
+                    initialData = [...(sourceChart.data.datasets[0].data || [])];
+                    initialLabels = [...(sourceChart.data.labels || [])];
+                }
+                this.charts.pinned = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: initialLabels,
+                        datasets: [{
+                            label: map[key].label,
+                            data: initialData,
+                            borderColor: map[key].color,
+                            backgroundColor: map[key].bg,
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: { y: { beginAtZero: true } },
+                        plugins: { legend: { display: true } },
+                        interaction: { intersect: false, mode: 'index' },
+                        animation: false
+                    }
+                });
+            },
+
+            setupInputs: function () {
+                ['soil', 'hum'].forEach(t => document.getElementById(`input-${t}-thresh`).addEventListener('input', (e) => document.getElementById(`lbl-${t}-thresh`).innerText = e.target.value + '%'));
+            },
+
+            startClock: function () {
+                setInterval(() => {
+                    const now = new Date();
+                    const timeString = now.toLocaleTimeString('en-US', { timeZone: 'UTC', hour12: false });
+                    const el = document.getElementById('realtime-clock');
+                    if (el) el.innerText = timeString + " UTC";
+                }, 1000);
+            }
+        };
+    </script>
 </body>
 
 </html>
