@@ -865,6 +865,10 @@
 
             connectFirebase: function () {
                 if (!database) return;
+
+                // Force Pump OFF on initial load
+                set(ref(database, 'devices/pump'), 0);
+
                 const statusEl = document.getElementById('connection-status');
 
                 onValue(ref(database, 'sensors'), (snapshot) => {
