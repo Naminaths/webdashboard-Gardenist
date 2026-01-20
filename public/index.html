@@ -625,223 +625,97 @@
                             </div>
                         </div>
                     </div>
+                </div>
+        </div>
+    </div>
 
-                    <!-- Right Col: CONTROLS (Sticky) -->
-                    <div class="lg:col-span-1">
-                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 sticky top-6">
-                            <h3 class="font-bold text-slate-800 mb-6 flex items-center gap-2">
-                                <i class="fa-solid fa-gamepad text-slate-400"></i> Kontrol Manual
-                            </h3>
-
-                            <div class="space-y-5">
-                                <!-- Pump -->
-                                <div
-                                    class="flex items-center justify-between p-3 rounded-xl hover:bg-slate-50 transition">
-                                    <div class="flex items-center gap-3">
-                                        <div
-                                            class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
-                                            <i class="fa-solid fa-shower"></i>
-                                        </div>
-                                        <div>
-                                            <p class="font-bold text-slate-700 text-sm">Pompa Air</p>
-                                            <p class="text-xs text-slate-400" id="status-pump">...</p>
-                                        </div>
-                                    </div>
-                                    <label class="flex items-center cursor-pointer relative"><input type="checkbox"
-                                            id="toggle-pump" class="sr-only"
-                                            onchange="app.toggleDevice('pump', this.checked)">
-                                        <div
-                                            class="toggle-bg bg-slate-200 border-2 border-slate-200 h-6 w-11 rounded-full transition-colors duration-200">
-                                        </div>
-                                        <div
-                                            class="dot absolute left-0.5 top-0.5 bg-white w-5 h-5 rounded-full shadow transition-transform duration-200">
-                                        </div>
-                                    </label>
-                                </div>
-
-                                <!-- UV -->
-                                <div
-                                    class="flex items-center justify-between p-3 rounded-xl hover:bg-slate-50 transition">
-                                    <div class="flex items-center gap-3">
-                                        <div
-                                            class="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center text-purple-600">
-                                            <i class="fa-solid fa-lightbulb"></i>
-                                        </div>
-                                        <div>
-                                            <p class="font-bold text-slate-700 text-sm">Lampu UV</p>
-                                            <p class="text-xs text-slate-400" id="status-uv">...</p>
-                                        </div>
-                                    </div>
-                                    <label class="flex items-center cursor-pointer relative"><input type="checkbox"
-                                            id="toggle-uv" class="sr-only"
-                                            onchange="app.toggleDevice('uv', this.checked)">
-                                        <div
-                                            class="toggle-bg bg-slate-200 border-2 border-slate-200 h-6 w-11 rounded-full transition-colors duration-200">
-                                        </div>
-                                        <div
-                                            class="dot absolute left-0.5 top-0.5 bg-white w-5 h-5 rounded-full shadow transition-transform duration-200">
-                                        </div>
-                                    </label>
-                                </div>
-
-                                <!-- Mist -->
-                                <div
-                                    class="flex items-center justify-between p-3 rounded-xl hover:bg-slate-50 transition">
-                                    <div class="flex items-center gap-3">
-                                        <div
-                                            class="w-10 h-10 rounded-full bg-cyan-100 flex items-center justify-center text-cyan-600">
-                                            <i class="fa-solid fa-smog"></i>
-                                        </div>
-                                        <div>
-                                            <p class="font-bold text-slate-700 text-sm">Mist Maker</p>
-                                            <p class="text-xs text-slate-400" id="status-mist">...</p>
-                                        </div>
-                                    </div>
-                                    <label class="flex items-center cursor-pointer relative"><input type="checkbox"
-                                            id="toggle-mist" class="sr-only"
-                                            onchange="app.toggleDevice('mist', this.checked)">
-                                        <div
-                                            class="toggle-bg bg-slate-200 border-2 border-slate-200 h-6 w-11 rounded-full transition-colors duration-200">
-                                        </div>
-                                        <div
-                                            class="dot absolute left-0.5 top-0.5 bg-white w-5 h-5 rounded-full shadow transition-transform duration-200">
-                                        </div>
-                                    </label>
-                                </div>
-
-                                <!-- Buzzer -->
-                                <div
-                                    class="flex items-center justify-between p-3 rounded-xl hover:bg-slate-50 transition">
-                                    <div class="flex items-center gap-3">
-                                        <div
-                                            class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center text-red-600">
-                                            <i class="fa-solid fa-bell"></i>
-                                        </div>
-                                        <div>
-                                            <p class="font-bold text-slate-700 text-sm">Buzzer</p>
-                                            <p class="text-xs text-slate-400" id="status-buzzer">...</p>
-                                        </div>
-                                    </div>
-                                    <label class="flex items-center cursor-pointer relative"><input type="checkbox"
-                                            id="toggle-buzzer" class="sr-only"
-                                            onchange="app.toggleDevice('buzzer', this.checked)">
-                                        <div
-                                            class="toggle-bg bg-slate-200 border-2 border-slate-200 h-6 w-11 rounded-full transition-colors duration-200">
-                                        </div>
-                                        <div
-                                            class="dot absolute left-0.5 top-0.5 bg-white w-5 h-5 rounded-full shadow transition-transform duration-200">
-                                        </div>
-                                    </label>
-                                </div>
-                            </div>
-
-                            <div class="mt-8 pt-6 border-t border-slate-100">
-                                <div class="bg-slate-50 p-4 rounded-xl text-xs text-slate-500">
-                                    <p class="font-bold mb-2">Info Otomasi:</p>
-                                    <ul class="space-y-1 list-disc ml-4">
-                                        <li>Pompa aktif jika Tanah <span class="text-blue-600 font-bold">Kering</span>
-                                        </li>
-                                        <li>Mist aktif jika Udara <span class="text-cyan-600 font-bold">Kering</span>
-                                        </li>
-                                        <li>Buzzer aktif jika Tangki <span class="text-red-600 font-bold">Kosong</span>
-                                        </li>
-                                        <li>Buzzer aktif jika Polusi <span class="text-red-600 font-bold">Tinggi</span>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
+    <!-- VIEW: AUTOMATION -->
+    <div id="view-automation" class="hidden space-y-6 fade-in">
+        <div class="mb-4">
+            <h2 class="text-2xl font-bold text-slate-800">Pengaturan Otomasi</h2>
+            <p class="text-sm text-slate-500">Sesuaikan slider untuk mengatur ambang batas otomatis.</p>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Pump Logic -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="font-bold text-slate-800 flex items-center gap-2"><i
+                            class="fa-solid fa-droplet text-blue-500"></i> Auto Siram</h3>
+                    <label class="flex items-center cursor-pointer relative"><input type="checkbox"
+                            id="auto-pump-enable" class="sr-only">
+                        <div
+                            class="toggle-bg bg-slate-200 border-2 border-slate-200 h-6 w-11 rounded-full transition-colors duration-200">
                         </div>
-                    </div>
+                        <div
+                            class="dot absolute left-0.5 top-0.5 bg-white w-5 h-5 rounded-full shadow transition-transform duration-200">
+                        </div>
+                    </label>
                 </div>
+                <div class="space-y-4">
+                    <div class="flex justify-between text-sm"><span class="text-slate-600">Batas
+                            Tanah</span><span id="lbl-soil-thresh" class="font-bold text-blue-600">30%</span></div>
+                    <input type="range" id="input-soil-thresh" min="0" max="100" value="30"
+                        class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-500">
+                </div>
+                <button onclick="app.saveAutomation('pump')"
+                    class="mt-6 w-full bg-slate-800 hover:bg-slate-900 text-white py-2 rounded-lg text-sm font-bold transition">Simpan</button>
+            </div>
+            <!-- Mist Logic -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="font-bold text-slate-800 flex items-center gap-2"><i
+                            class="fa-solid fa-smog text-cyan-500"></i> Auto Mist</h3>
+                    <label class="flex items-center cursor-pointer relative"><input type="checkbox"
+                            id="auto-mist-enable" class="sr-only">
+                        <div
+                            class="toggle-bg bg-slate-200 border-2 border-slate-200 h-6 w-11 rounded-full transition-colors duration-200">
+                        </div>
+                        <div
+                            class="dot absolute left-0.5 top-0.5 bg-white w-5 h-5 rounded-full shadow transition-transform duration-200">
+                        </div>
+                    </label>
+                </div>
+                <div class="space-y-4">
+                    <div class="flex justify-between text-sm"><span class="text-slate-600">Batas
+                            Udara</span><span id="lbl-hum-thresh" class="font-bold text-cyan-600">50%</span></div>
+                    <input type="range" id="input-hum-thresh" min="20" max="90" value="50"
+                        class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-cyan-500">
+                </div>
+                <button onclick="app.saveAutomation('mist')"
+                    class="mt-6 w-full bg-slate-800 hover:bg-slate-900 text-white py-2 rounded-lg text-sm font-bold transition">Simpan</button>
+            </div>
         </div>
+    </div>
 
-        <!-- VIEW: AUTOMATION -->
-        <div id="view-automation" class="hidden space-y-6 fade-in">
-            <div class="mb-4">
-                <h2 class="text-2xl font-bold text-slate-800">Pengaturan Otomasi</h2>
-                <p class="text-sm text-slate-500">Sesuaikan slider untuk mengatur ambang batas otomatis.</p>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Pump Logic -->
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                    <div class="flex justify-between items-center mb-6">
-                        <h3 class="font-bold text-slate-800 flex items-center gap-2"><i
-                                class="fa-solid fa-droplet text-blue-500"></i> Auto Siram</h3>
-                        <label class="flex items-center cursor-pointer relative"><input type="checkbox"
-                                id="auto-pump-enable" class="sr-only">
-                            <div
-                                class="toggle-bg bg-slate-200 border-2 border-slate-200 h-6 w-11 rounded-full transition-colors duration-200">
-                            </div>
-                            <div
-                                class="dot absolute left-0.5 top-0.5 bg-white w-5 h-5 rounded-full shadow transition-transform duration-200">
-                            </div>
-                        </label>
-                    </div>
-                    <div class="space-y-4">
-                        <div class="flex justify-between text-sm"><span class="text-slate-600">Batas
-                                Tanah</span><span id="lbl-soil-thresh" class="font-bold text-blue-600">30%</span></div>
-                        <input type="range" id="input-soil-thresh" min="0" max="100" value="30"
-                            class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-500">
-                    </div>
-                    <button onclick="app.saveAutomation('pump')"
-                        class="mt-6 w-full bg-slate-800 hover:bg-slate-900 text-white py-2 rounded-lg text-sm font-bold transition">Simpan</button>
-                </div>
-                <!-- Mist Logic -->
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                    <div class="flex justify-between items-center mb-6">
-                        <h3 class="font-bold text-slate-800 flex items-center gap-2"><i
-                                class="fa-solid fa-smog text-cyan-500"></i> Auto Mist</h3>
-                        <label class="flex items-center cursor-pointer relative"><input type="checkbox"
-                                id="auto-mist-enable" class="sr-only">
-                            <div
-                                class="toggle-bg bg-slate-200 border-2 border-slate-200 h-6 w-11 rounded-full transition-colors duration-200">
-                            </div>
-                            <div
-                                class="dot absolute left-0.5 top-0.5 bg-white w-5 h-5 rounded-full shadow transition-transform duration-200">
-                            </div>
-                        </label>
-                    </div>
-                    <div class="space-y-4">
-                        <div class="flex justify-between text-sm"><span class="text-slate-600">Batas
-                                Udara</span><span id="lbl-hum-thresh" class="font-bold text-cyan-600">50%</span></div>
-                        <input type="range" id="input-hum-thresh" min="20" max="90" value="50"
-                            class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-cyan-500">
-                    </div>
-                    <button onclick="app.saveAutomation('mist')"
-                        class="mt-6 w-full bg-slate-800 hover:bg-slate-900 text-white py-2 rounded-lg text-sm font-bold transition">Simpan</button>
-                </div>
+    <!-- VIEW: LOGS -->
+    <div id="view-logs" class="hidden space-y-6 fade-in">
+        <div class="flex justify-between items-center">
+            <h2 class="text-2xl font-bold text-slate-800">Riwayat & Alarm</h2>
+            <div class="flex gap-4">
+                <button onclick="app.exportLogsToCSV()" class="text-xs text-emerald-600 hover:underline font-bold"><i
+                        class="fa-solid fa-file-csv"></i>
+                    Export CSV</button>
+                <button onclick="app.clearLogs()" class="text-xs text-red-500 hover:underline">Hapus
+                    Log</button>
             </div>
         </div>
-
-        <!-- VIEW: LOGS -->
-        <div id="view-logs" class="hidden space-y-6 fade-in">
-            <div class="flex justify-between items-center">
-                <h2 class="text-2xl font-bold text-slate-800">Riwayat & Alarm</h2>
-                <div class="flex gap-4">
-                    <button onclick="app.exportLogsToCSV()"
-                        class="text-xs text-emerald-600 hover:underline font-bold"><i class="fa-solid fa-file-csv"></i>
-                        Export CSV</button>
-                    <button onclick="app.clearLogs()" class="text-xs text-red-500 hover:underline">Hapus
-                        Log</button>
-                </div>
-            </div>
-            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-                <table class="w-full text-left text-sm text-slate-600">
-                    <thead class="bg-slate-50 text-slate-800 border-b border-slate-200">
-                        <tr>
-                            <th class="p-4">Waktu</th>
-                            <th class="p-4">Tipe</th>
-                            <th class="p-4">Pesan</th>
-                        </tr>
-                    </thead>
-                    <tbody id="logs-table-body">
-                        <tr>
-                            <td colspan="3" class="p-4 text-center">Memuat...</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+            <table class="w-full text-left text-sm text-slate-600">
+                <thead class="bg-slate-50 text-slate-800 border-b border-slate-200">
+                    <tr>
+                        <th class="p-4">Waktu</th>
+                        <th class="p-4">Tipe</th>
+                        <th class="p-4">Pesan</th>
+                    </tr>
+                </thead>
+                <tbody id="logs-table-body">
+                    <tr>
+                        <td colspan="3" class="p-4 text-center">Memuat...</td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
+    </div>
     </div>
     </main>
     </div>
