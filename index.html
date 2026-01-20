@@ -2,346 +2,130 @@
 <html lang="id">
 
 <head>
-    <meta charset="utf-8" />
-    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <title>Gardenist - Smart Garden Dashboard</title>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap"
-        rel="stylesheet" />
-    <link
-        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
-        rel="stylesheet" />
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet" />
-    <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: "#10B981", // Emerald 500
-                        "primary-hover": "#059669", // Emerald 600
-                        "background-light": "#ecfdf5", // emerald-50 base
-                        "background-dark": "#0f172a", // slate-900
-                        "surface-light": "#ffffff",
-                        "surface-dark": "#1e293b", // slate-800
-                        "subtle-light": "#d1fae5", // emerald-100
-                        "subtle-dark": "#334155", // slate-700
-                    },
-                    fontFamily: {
-                        display: ["'Plus Jakarta Sans'", "sans-serif"],
-                        body: ["'Inter'", "sans-serif"],
-                    },
-                    boxShadow: {
-                        'glow': '0 0 20px rgba(16, 185, 129, 0.3)',
-                        'card': '0 10px 30px -5px rgba(0, 0, 0, 0.1)',
-                    }
-                },
-            },
-        };
-    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> Gardenist - Smart Garden </title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+
     <style>
-        .progress-gradient {
-            background: linear-gradient(90deg, #34d399 0%, #10b981 100%);
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #f1f5f9;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Chart Containers */
+        .chart-container-main {
+            position: relative;
+            width: 100%;
+            height: 300px;
+        }
+
+        .chart-container-small {
+            position: relative;
+            width: 100%;
+            height: 200px;
+        }
+
+        /* Toggle Switch Styling */
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #10B981;
+        }
+
+        .toggle-checkbox:checked+.toggle-label {
+            background-color: #10B981;
+        }
+
+        input:checked~.toggle-bg {
+            background-color: #10B981;
+            border-color: #10B981;
+        }
+
+        input:checked~.dot {
+            transform: translateX(100%);
+        }
+
+        /* Button Gradient */
+        .btn-primary {
+            background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+            transition: transform 0.2s;
+        }
+
+        .btn-primary:hover {
+            transform: scale(1.02);
         }
     </style>
 </head>
 
-<body
-    class="bg-background-light text-slate-800 font-body transition-colors duration-300 min-h-screen flex flex-col selection:bg-primary selection:text-white">
+<body class="text-slate-800 antialiased overflow-x-hidden">
 
     <!-- LANDING PAGE -->
-    <div id="landing-page" class="w-full h-full flex flex-col">
-        <nav class="w-full px-6 py-5 flex justify-between items-center max-w-7xl mx-auto z-50 relative">
-            <div class="flex items-center gap-2 cursor-pointer group">
-                <div
-                    class="bg-primary group-hover:bg-primary-hover transition-colors text-white p-2 rounded-lg shadow-md shadow-primary/20">
-                    <span class="material-icons-round text-2xl">eco</span>
+    <div id="landing-page" class="min-h-screen flex flex-col relative bg-gradient-to-br from-emerald-50 to-teal-100">
+        <nav
+            class="relative z-10 w-full px-6 py-4 flex justify-between items-center bg-white/60 backdrop-blur-md border-b border-white/50">
+            <div class="flex items-center gap-2">
+                <div class="bg-emerald-600 text-white p-1.5 rounded-lg">
+                    <i class="fa-solid fa-leaf text-xl"></i>
                 </div>
-                <span
-                    class="text-xl font-bold font-display text-slate-900 tracking-tight group-hover:text-primary transition-colors">Gardenist</span>
+                <span class="text-xl font-bold text-slate-800">Gardenist</span>
             </div>
-            <div class="flex items-center gap-4">
-                <button
-                    class="bg-primary hover:bg-primary-hover text-white px-5 py-2.5 rounded-full font-semibold text-sm transition shadow-lg shadow-primary/30 flex items-center gap-2"
-                    onclick="app.enterDashboard()">
-                    <span>Dashboard</span>
-                    <span class="material-icons-round text-sm">arrow_forward</span>
-                </button>
-            </div>
+            <button onclick="app.enterDashboard()"
+                class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 rounded-full font-semibold transition shadow-lg text-sm">
+                Dashboard
+            </button>
         </nav>
-        <main class="flex-grow flex flex-col items-center justify-center pt-10 pb-20 px-4 relative overflow-hidden">
-            <div class="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
-                <div
-                    class="absolute top-[-10%] left-[20%] w-96 h-96 bg-emerald-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse">
-                </div>
-                <div
-                    class="absolute top-[10%] right-[20%] w-72 h-72 bg-teal-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30">
-                </div>
-            </div>
-            <div class="z-10 w-full max-w-7xl mx-auto text-center">
-                <div class="mb-12">
-                    <span
-                        class="inline-flex items-center gap-1.5 py-1.5 px-4 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold tracking-wider uppercase mb-8 border border-emerald-200 shadow-sm">
-                        <span class="material-icons-round text-sm">verified</span>
-                        Sistem Log &amp; Monitoring
-                    </span>
-                    <h1
-                        class="text-5xl md:text-6xl lg:text-7xl font-display font-extrabold text-slate-900 leading-[1.1] mb-6 tracking-tight">
-                        Monitoring Kebun <br />
-                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-teal-500">Cerdas
-                            &amp; Tercatat</span>
-                    </h1>
-                    <p class="text-lg md:text-xl text-slate-600 max-w-2xl mx-auto mb-10 leading-relaxed font-light">
-                        Kini dilengkapi dengan sistem pencatatan riwayat (Log) yang akurat. Pantau setiap tetes air dan
-                        perubahan suhu secara real-time.
-                    </p>
-                    <div class="flex justify-center gap-4">
-                        <button
-                            class="group bg-primary hover:bg-primary-hover text-white px-8 py-4 rounded-xl font-bold text-lg transition-all shadow-xl shadow-primary/20 flex items-center gap-2 transform hover:-translate-y-1"
-                            onclick="app.enterDashboard()">
-                            <span class="material-icons-round group-hover:animate-pulse">analytics</span>
-                            Masuk Dashboard
-                        </button>
-                    </div>
-                </div>
-                <div class="relative mt-20 w-full flex justify-center items-center px-4 md:px-0">
-                    <div
-                        class="hidden lg:block absolute left-4 top-1/2 transform -translate-y-1/2 -translate-x-4 z-0 opacity-90">
-                        <div class="relative group">
-                            <div
-                                class="absolute inset-0 bg-primary opacity-0 group-hover:opacity-10 transition-opacity rounded-2xl">
-                            </div>
-                            <img alt="Abstract Plant Pot"
-                                class="w-48 h-64 object-cover rounded-2xl shadow-2xl rotate-[-6deg] group-hover:rotate-[-3deg] transition-all duration-700 border-4 border-white"
-                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuAp3rawOnvVQtRSLi-A2kMJ5TGaAlsMQ_Xpiv2VOLlrGesLpzbv8Ss-ZoRN2s9-eXYi8YhL32BOmcr6mLSOMcDzHyXANDQBd0qUj0QMDIZRF1YHnQY1ssyAPcWI7GTumEKNIK_1WAJsaIPs5QrrBw1aDrALVTbpyOUOck61tC9GdPTLcyQPx6IcH3hQDe6mGGcKVfK5DgMe6qT6b---fxo0mZ2oMnXDvOgTVpD88Mpci8PBdUkTTkLFV96ifu4cKMoIhh9543lRjts" />
-                        </div>
-                    </div>
-                    <div
-                        class="hidden lg:block absolute right-4 top-1/2 transform -translate-y-1/2 translate-x-4 z-0 opacity-90">
-                        <div class="relative group">
-                            <div
-                                class="absolute inset-0 bg-primary opacity-0 group-hover:opacity-10 transition-opacity rounded-2xl">
-                            </div>
-                            <img alt="Succulent Pot"
-                                class="w-48 h-64 object-cover rounded-2xl shadow-2xl rotate-[6deg] group-hover:rotate-[3deg] transition-all duration-700 border-4 border-white"
-                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuAdcKuviKYdKWv7ha1-KnOWBujgVbOfBA_ftL4WaW2PhTU4phcaDTMawe59jhRWkWhZ7h_UAe7i3mtFwGs2izFPsSANlqFIrv-emNlg-MNUp7by5hZPKvZQy2wP2rTbkgygtAz-Xv9yFssCsKnj8FdBEuqjdgax8ghSdRxXuwH5YlyZO3qW1ZQR-9KTbDQe-N3RMzPYvkyAuVDZRN2pVnUexipoChxxd3mMd6KmD7LSD-7AoWqb-E3UHzFv2G2j38QTM68K8kpZffw" />
-                        </div>
-                    </div>
-                    <div
-                        class="relative z-10 bg-white/95 backdrop-blur-xl border border-white/50 w-full max-w-5xl rounded-[2rem] shadow-card p-6 md:p-8 transform transition hover:scale-[1.01] duration-500 text-left">
-                        <div
-                            class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 pb-4 border-b border-slate-100 gap-4">
-                            <div>
-                                <h2 class="text-2xl font-bold font-display text-slate-800">Dashboard
-                                </h2>
-                                <p class="text-slate-500 text-sm">Data sensor real-time &amp;
-                                    analisis
-                                    grafik.</p>
-                            </div>
-                            <div class="text-right hidden md:block">
-                                <div class="text-2xl font-mono font-bold text-slate-800 tracking-widest">
-                                    16:02:10 WIB</div>
-                                <div class="text-xs font-bold text-emerald-500 uppercase tracking-wide">Selasa, 20
-                                    Januari
-                                    2026</div>
-                            </div>
-                        </div>
-                        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
-                            <div
-                                class="bg-white p-4 rounded-xl border border-slate-100 shadow-sm flex flex-col justify-between h-32 hover:shadow-md transition-shadow">
-                                <div class="flex items-start gap-3">
-                                    <div class="bg-emerald-50 p-2 rounded-lg text-emerald-500">
-                                        <span class="material-symbols-outlined text-[20px]">water_drop</span>
-                                    </div>
-                                    <span
-                                        class="text-[10px] font-bold text-slate-500 uppercase leading-tight">Kelembaban<br />Tanah</span>
-                                </div>
-                                <div class="mt-2">
-                                    <span class="text-3xl font-extrabold text-slate-800 font-display">--<span
-                                            class="text-lg text-slate-400">%</span></span>
-                                    <div class="text-[10px] text-slate-400 mt-1">--</div>
-                                </div>
-                            </div>
-                            <div
-                                class="bg-white p-4 rounded-xl border border-slate-100 shadow-sm flex flex-col justify-between h-32 hover:shadow-md transition-shadow">
-                                <div class="flex items-start gap-3">
-                                    <div class="bg-cyan-50 p-2 rounded-lg text-cyan-500">
-                                        <span class="material-symbols-outlined text-[20px]">cloud</span>
-                                    </div>
-                                    <span
-                                        class="text-[10px] font-bold text-slate-500 uppercase leading-tight">Kelembaban<br />Udara</span>
-                                </div>
-                                <div class="mt-2">
-                                    <span class="text-3xl font-extrabold text-slate-800 font-display">--<span
-                                            class="text-lg text-slate-400">%</span></span>
-                                    <div class="text-[10px] text-slate-400 mt-1">--</div>
-                                </div>
-                            </div>
-                            <div
-                                class="bg-white p-4 rounded-xl border border-slate-100 shadow-sm flex flex-col justify-between h-32 hover:shadow-md transition-shadow">
-                                <div class="flex items-start gap-3">
-                                    <div class="bg-orange-50 p-2 rounded-lg text-orange-500">
-                                        <span class="material-symbols-outlined text-[20px]">device_thermostat</span>
-                                    </div>
-                                    <span
-                                        class="text-[10px] font-bold text-slate-500 uppercase leading-tight">Suhu</span>
-                                </div>
-                                <div class="mt-2">
-                                    <span class="text-3xl font-extrabold text-slate-800 font-display">--<span
-                                            class="text-lg text-slate-400">°C</span></span>
-                                    <div class="text-[10px] text-slate-400 mt-1">--</div>
-                                </div>
-                            </div>
-                            <div
-                                class="bg-white p-4 rounded-xl border border-slate-100 shadow-sm flex flex-col justify-between h-32 hover:shadow-md transition-shadow">
-                                <div class="flex items-start gap-3">
-                                    <div class="bg-yellow-50 p-2 rounded-lg text-yellow-500">
-                                        <span class="material-symbols-outlined text-[20px]">wb_sunny</span>
-                                    </div>
-                                    <span
-                                        class="text-[10px] font-bold text-slate-500 uppercase leading-tight">Cahaya</span>
-                                </div>
-                                <div class="mt-2">
-                                    <span class="text-3xl font-extrabold text-slate-800 font-display">--<span
-                                            class="text-lg text-slate-400 font-normal ml-1 text-sm">Lx</span></span>
-                                    <div class="text-[10px] text-slate-400 mt-1">--</div>
-                                </div>
-                            </div>
-                            <div
-                                class="bg-white p-4 rounded-xl border border-slate-100 shadow-sm flex flex-col justify-between h-32 hover:shadow-md transition-shadow">
-                                <div class="flex items-start gap-3">
-                                    <div class="bg-rose-50 p-2 rounded-lg text-rose-500">
-                                        <span class="material-symbols-outlined text-[20px]">air</span>
-                                    </div>
-                                    <span
-                                        class="text-[10px] font-bold text-slate-500 uppercase leading-tight">Kualitas<br />Udara</span>
-                                </div>
-                                <div class="mt-2">
-                                    <span class="text-3xl font-extrabold text-slate-800 font-display">--<span
-                                            class="text-lg text-slate-400 font-normal ml-1 text-sm">PPM</span></span>
-                                    <div class="text-[10px] text-slate-400 mt-1">--</div>
-                                </div>
-                            </div>
-                            <div
-                                class="bg-white p-4 rounded-xl border border-slate-100 shadow-sm flex flex-col justify-between h-32 hover:shadow-md transition-shadow">
-                                <div class="flex items-start gap-3">
-                                    <div class="bg-blue-50 p-2 rounded-lg text-blue-500">
-                                        <span class="material-symbols-outlined text-[20px]">water</span>
-                                    </div>
-                                    <span
-                                        class="text-[10px] font-bold text-slate-500 uppercase leading-tight">Tangki</span>
-                                </div>
-                                <div class="mt-2">
-                                    <span class="text-3xl font-extrabold text-slate-800 font-display">--<span
-                                            class="text-lg text-slate-400">%</span></span>
-                                    <div class="text-[10px] text-slate-400 mt-1">--</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                            <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-100 p-6 shadow-sm">
-                                <div class="flex justify-between items-center mb-6">
-                                    <div class="flex items-center gap-2">
-                                        <div class="w-1.5 h-6 bg-emerald-500 rounded-full"></div>
-                                        <h3 class="text-lg font-bold text-slate-800 font-display">
-                                            Kelembaban
-                                            Tanah (Utama)</h3>
-                                    </div>
-                                    <button class="text-slate-400 hover:text-slate-600">
-                                        <span class="material-symbols-outlined text-sm">push_pin</span>
-                                    </button>
-                                </div>
-                                <div class="relative h-64 w-full flex flex-col justify-between text-xs text-slate-400">
-                                    <div
-                                        class="absolute inset-0 flex flex-col justify-between z-0 pl-8 pointer-events-none">
-                                        <div class="w-full border-t border-slate-100 h-0"></div>
-                                        <div class="w-full border-t border-slate-100 h-0"></div>
-                                        <div class="w-full border-t border-slate-100 h-0"></div>
-                                        <div class="w-full border-t border-slate-100 h-0"></div>
-                                        <div class="w-full border-t border-slate-100 h-0"></div>
-                                        <div class="w-full border-t border-slate-100 h-0"></div>
-                                        <div class="w-full border-t border-slate-100 h-0"></div>
-                                    </div>
-                                    <div class="flex flex-col justify-between h-full pr-4 z-10 w-8 text-right bg-white">
-                                        <span>1,0</span>
-                                        <span>0,9</span>
-                                        <span>0,8</span>
-                                        <span>0,7</span>
-                                        <span>0,6</span>
-                                        <span>0,5</span>
-                                        <span>0,4</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm">
-                                <div class="flex items-center gap-2 mb-6">
-                                    <span class="material-symbols-outlined text-slate-400 text-lg">gamepad</span>
-                                    <h3 class="text-lg font-bold text-slate-800 font-display">Kontrol
-                                        Manual
-                                    </h3>
-                                </div>
-                                <div class="space-y-6">
-                                    <div class="flex items-center justify-between">
-                                        <div class="flex items-center gap-3">
-                                            <div class="bg-blue-100 p-3 rounded-full text-blue-500">
-                                                <span class="material-symbols-outlined">shower</span>
-                                            </div>
-                                            <div>
-                                                <h4 class="font-bold text-slate-800 text-sm">Pompa Air
-                                                </h4>
-                                                <span class="text-xs text-slate-400 font-medium">OFF</span>
-                                            </div>
-                                        </div>
-                                        <div class="w-12 h-6 bg-slate-200 rounded-full relative cursor-pointer">
-                                            <div
-                                                class="w-5 h-5 bg-white rounded-full absolute top-0.5 left-0.5 shadow-sm transition-transform">
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="flex items-center justify-between">
-                                        <div class="flex items-center gap-3">
-                                            <div class="bg-purple-100 p-3 rounded-full text-purple-500">
-                                                <span class="material-symbols-outlined">lightbulb</span>
-                                            </div>
-                                            <div>
-                                                <h4 class="font-bold text-slate-800 text-sm">Lampu UV
-                                                </h4>
-                                                <span class="text-xs text-slate-400 font-medium">OFF</span>
-                                            </div>
-                                        </div>
-                                        <div class="w-12 h-6 bg-slate-200 rounded-full relative cursor-pointer">
-                                            <div
-                                                class="w-5 h-5 bg-white rounded-full absolute top-0.5 left-0.5 shadow-sm transition-transform">
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="flex items-center justify-between">
-                                        <div class="flex items-center gap-3">
-                                            <div class="bg-cyan-100 p-3 rounded-full text-cyan-500">
-                                                <span class="material-symbols-outlined">blur_on</span>
-                                            </div>
-                                            <div>
-                                                <h4 class="font-bold text-slate-800 text-sm">Mist Maker
-                                                </h4>
-                                                <span class="text-xs text-slate-400 font-medium">OFF</span>
-                                            </div>
-                                        </div>
-                                        <div class="w-12 h-6 bg-slate-200 rounded-full relative cursor-pointer">
-                                            <div
-                                                class="w-5 h-5 bg-white rounded-full absolute top-0.5 left-0.5 shadow-sm transition-transform">
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+
+        <main class="flex-grow flex items-center justify-center px-6">
+            <div class="max-w-4xl text-center space-y-8">
+                <span
+                    class="inline-block py-1.5 px-4 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold uppercase tracking-wider border border-emerald-200">
+                    Sistem Log & Monitoring
+                </span>
+                <h1 class="text-5xl md:text-7xl font-bold text-slate-900 leading-tight">
+                    Monitoring Kebun <br> <span
+                        class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-500">Cerdas &
+                        Tercatat</span>
+                </h1>
+                <p class="text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed">
+                    Kini dilengkapi dengan sistem pencatatan riwayat (Log) yang akurat. Pantau setiap tetes air dan
+                    perubahan suhu secara real-time.
+                </p>
+                <div class="flex justify-center gap-4">
+                    <button onclick="app.enterDashboard()"
+                        class="btn-primary text-white px-8 py-4 rounded-2xl font-bold shadow-xl flex items-center gap-3 text-lg">
+                        <i class="fa-solid fa-chart-line"></i> Masuk Dashboard
+                    </button>
                 </div>
             </div>
         </main>
-        <footer class="text-center py-8 text-slate-400 text-sm border-t border-slate-100">
-            <p>© 2026 Gardenist Inc. Built for smart homes.</p>
-        </footer>
     </div>
 
     <!-- DASHBOARD APP -->
@@ -413,15 +197,9 @@
                                 <h2 class="text-2xl font-bold text-slate-900">Dashboard</h2>
                                 <p class="text-sm text-slate-500">Data sensor real-time & analisis grafik.</p>
                             </div>
-                            <div class="flex flex-col items-end">
-                                <div id="clock-time"
-                                    class="text-3xl font-bold text-slate-800 tracking-tight leading-none font-mono">
-                                    --:--:--</div>
-                                <div id="clock-date"
-                                    class="text-xs font-bold text-emerald-600 uppercase tracking-widest mt-1">--</div>
-                                <div class="text-[10px] text-slate-400 mt-1 font-mono">Updated: <span
-                                        id="last-updated">--:--:--</span></div>
-                            </div>
+                            <span
+                                class="text-xs font-mono text-slate-400 bg-white px-2 py-1 rounded border border-slate-200"
+                                id="last-updated">Waiting data...</span>
                         </div>
 
                         <!-- PINNED CHART SECTION -->
@@ -488,7 +266,7 @@
                                         class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Cahaya</span>
                                 </div>
                                 <span id="val-light" class="text-2xl font-bold text-slate-800">--</span>
-                                <span class="text-xs font-bold text-slate-400">Lx</span>
+                                <span class="text-xs text-slate-400">Lx</span>
                                 <span class="text-[10px] text-slate-400 block" id="light-msg">--</span>
                             </div>
                             <!-- MQ135 (Air Quality) -->
@@ -500,7 +278,7 @@
                                         Kualitas Udara </span>
                                 </div>
                                 <span id="val-mq135" class="text-2xl font-bold text-slate-800">--</span>
-                                <span class="text-xs font-bold text-slate-400">PPM</span>
+                                <span class="text-xs text-slate-400">PPM</span>
                                 <span class="text-[10px] text-slate-400 block" id="mq135-msg">--</span>
                             </div>
                             <!-- Tank -->
@@ -652,7 +430,7 @@
                                             </label>
                                         </div>
 
-                                        <!-- UV Light -->
+                                        <!-- UV -->
                                         <div
                                             class="flex items-center justify-between p-3 rounded-xl hover:bg-slate-50 transition">
                                             <div class="flex items-center gap-3">
@@ -677,7 +455,7 @@
                                             </label>
                                         </div>
 
-                                        <!-- Mist Maker -->
+                                        <!-- Mist -->
                                         <div
                                             class="flex items-center justify-between p-3 rounded-xl hover:bg-slate-50 transition">
                                             <div class="flex items-center gap-3">
@@ -701,103 +479,143 @@
                                                 </div>
                                             </label>
                                         </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
 
-                        <!-- VIEW: AUTOMATION -->
-                        <div id="view-automation" class="hidden space-y-6 fade-in">
-                            <div class="mb-4">
-                                <h2 class="text-2xl font-bold text-slate-800">Pengaturan Otomasi</h2>
-                                <p class="text-sm text-slate-500">Sesuaikan slider untuk mengatur ambang batas otomatis.
-                                </p>
-                            </div>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <!-- Pump Logic -->
-                                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                                    <div class="flex justify-between items-center mb-6">
-                                        <h3 class="font-bold text-slate-800 flex items-center gap-2"><i
-                                                class="fa-solid fa-droplet text-blue-500"></i> Auto Siram</h3>
-                                        <label class="flex items-center cursor-pointer relative"><input type="checkbox"
-                                                id="auto-pump-enable" class="sr-only">
-                                            <div
-                                                class="toggle-bg bg-slate-200 border-2 border-slate-200 h-6 w-11 rounded-full transition-colors duration-200">
+                                        <!-- Buzzer -->
+                                        <div
+                                            class="flex items-center justify-between p-3 rounded-xl hover:bg-slate-50 transition">
+                                            <div class="flex items-center gap-3">
+                                                <div
+                                                    class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center text-red-600">
+                                                    <i class="fa-solid fa-bell"></i>
+                                                </div>
+                                                <div>
+                                                    <p class="font-bold text-slate-700 text-sm">Buzzer</p>
+                                                    <p class="text-xs text-slate-400" id="status-buzzer">...</p>
+                                                </div>
                                             </div>
-                                            <div
-                                                class="dot absolute left-0.5 top-0.5 bg-white w-5 h-5 rounded-full shadow transition-transform duration-200">
-                                            </div>
-                                        </label>
+                                            <label class="flex items-center cursor-pointer relative"><input
+                                                    type="checkbox" id="toggle-buzzer" class="sr-only"
+                                                    onchange="app.toggleDevice('buzzer', this.checked)">
+                                                <div
+                                                    class="toggle-bg bg-slate-200 border-2 border-slate-200 h-6 w-11 rounded-full transition-colors duration-200">
+                                                </div>
+                                                <div
+                                                    class="dot absolute left-0.5 top-0.5 bg-white w-5 h-5 rounded-full shadow transition-transform duration-200">
+                                                </div>
+                                            </label>
+                                        </div>
                                     </div>
-                                    <div class="space-y-4">
-                                        <div class="flex justify-between text-sm"><span class="text-slate-600">Batas
-                                                Tanah</span><span id="lbl-soil-thresh"
-                                                class="font-bold text-blue-600">30%</span></div>
-                                        <input type="range" id="input-soil-thresh" min="0" max="100" value="30"
-                                            class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-500">
-                                    </div>
-                                    <button onclick="app.saveAutomation('pump')"
-                                        class="mt-6 w-full bg-slate-800 hover:bg-slate-900 text-white py-2 rounded-lg text-sm font-bold transition">Simpan</button>
-                                </div>
-                                <!-- Mist Logic -->
-                                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                                    <div class="flex justify-between items-center mb-6">
-                                        <h3 class="font-bold text-slate-800 flex items-center gap-2"><i
-                                                class="fa-solid fa-smog text-cyan-500"></i> Auto Mist</h3>
-                                        <label class="flex items-center cursor-pointer relative"><input type="checkbox"
-                                                id="auto-mist-enable" class="sr-only">
-                                            <div
-                                                class="toggle-bg bg-slate-200 border-2 border-slate-200 h-6 w-11 rounded-full transition-colors duration-200">
-                                            </div>
-                                            <div
-                                                class="dot absolute left-0.5 top-0.5 bg-white w-5 h-5 rounded-full shadow transition-transform duration-200">
-                                            </div>
-                                        </label>
-                                    </div>
-                                    <div class="space-y-4">
-                                        <div class="flex justify-between text-sm"><span class="text-slate-600">Batas
-                                                Udara</span><span id="lbl-hum-thresh"
-                                                class="font-bold text-cyan-600">50%</span></div>
-                                        <input type="range" id="input-hum-thresh" min="20" max="90" value="50"
-                                            class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-cyan-500">
-                                    </div>
-                                    <button onclick="app.saveAutomation('mist')"
-                                        class="mt-6 w-full bg-slate-800 hover:bg-slate-900 text-white py-2 rounded-lg text-sm font-bold transition">Simpan</button>
-                                </div>
-                            </div>
-                        </div>
 
-                        <!-- VIEW: LOGS -->
-                        <div id="view-logs" class="hidden space-y-6 fade-in">
-                            <div class="flex justify-between items-center">
-                                <h2 class="text-2xl font-bold text-slate-800">Riwayat & Alarm</h2>
-                                <div class="flex gap-4">
-                                    <button onclick="app.exportLogsToCSV()"
-                                        class="text-xs text-emerald-600 hover:underline font-bold"><i
-                                            class="fa-solid fa-file-csv"></i>
-                                        Export CSV</button>
-                                    <button onclick="app.clearLogs()" class="text-xs text-red-500 hover:underline">Hapus
-                                        Log</button>
+                                    <div class="mt-8 pt-6 border-t border-slate-100">
+                                        <div class="bg-slate-50 p-4 rounded-xl text-xs text-slate-500">
+                                            <p class="font-bold mb-2">Info Otomasi:</p>
+                                            <ul class="space-y-1 list-disc ml-4">
+                                                <li>Pompa aktif jika Tanah <span
+                                                        class="text-blue-600 font-bold">Kering</span></li>
+                                                <li>Mist aktif jika Udara <span
+                                                        class="text-cyan-600 font-bold">Kering</span></li>
+                                                <li>Buzzer aktif jika Tangki <span
+                                                        class="text-red-600 font-bold">Kosong</span></li>
+                                                <li>Buzzer aktif jika Polusi <span
+                                                        class="text-red-600 font-bold">Tinggi</span></li>
+                                            </ul>
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-                                <table class="w-full text-left text-sm text-slate-600">
-                                    <thead class="bg-slate-50 text-slate-800 border-b border-slate-200">
-                                        <tr>
-                                            <th class="p-4">Waktu</th>
-                                            <th class="p-4">Tipe</th>
-                                            <th class="p-4">Pesan</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="logs-table-body">
-                                        <tr>
-                                            <td colspan="3" class="p-4 text-center">Memuat...</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
                             </div>
                         </div>
                     </div>
+
+                    <!-- VIEW: AUTOMATION -->
+                    <div id="view-automation" class="hidden space-y-6 fade-in">
+                        <div class="mb-4">
+                            <h2 class="text-2xl font-bold text-slate-800">Pengaturan Otomasi</h2>
+                            <p class="text-sm text-slate-500">Sesuaikan slider untuk mengatur ambang batas otomatis.</p>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- Pump Logic -->
+                            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                                <div class="flex justify-between items-center mb-6">
+                                    <h3 class="font-bold text-slate-800 flex items-center gap-2"><i
+                                            class="fa-solid fa-droplet text-blue-500"></i> Auto Siram</h3>
+                                    <label class="flex items-center cursor-pointer relative"><input type="checkbox"
+                                            id="auto-pump-enable" class="sr-only">
+                                        <div
+                                            class="toggle-bg bg-slate-200 border-2 border-slate-200 h-6 w-11 rounded-full transition-colors duration-200">
+                                        </div>
+                                        <div
+                                            class="dot absolute left-0.5 top-0.5 bg-white w-5 h-5 rounded-full shadow transition-transform duration-200">
+                                        </div>
+                                    </label>
+                                </div>
+                                <div class="space-y-4">
+                                    <div class="flex justify-between text-sm"><span class="text-slate-600">Batas
+                                            Tanah</span><span id="lbl-soil-thresh"
+                                            class="font-bold text-blue-600">30%</span></div>
+                                    <input type="range" id="input-soil-thresh" min="0" max="100" value="30"
+                                        class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-500">
+                                </div>
+                                <button onclick="app.saveAutomation('pump')"
+                                    class="mt-6 w-full bg-slate-800 hover:bg-slate-900 text-white py-2 rounded-lg text-sm font-bold transition">Simpan</button>
+                            </div>
+                            <!-- Mist Logic -->
+                            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                                <div class="flex justify-between items-center mb-6">
+                                    <h3 class="font-bold text-slate-800 flex items-center gap-2"><i
+                                            class="fa-solid fa-smog text-cyan-500"></i> Auto Mist</h3>
+                                    <label class="flex items-center cursor-pointer relative"><input type="checkbox"
+                                            id="auto-mist-enable" class="sr-only">
+                                        <div
+                                            class="toggle-bg bg-slate-200 border-2 border-slate-200 h-6 w-11 rounded-full transition-colors duration-200">
+                                        </div>
+                                        <div
+                                            class="dot absolute left-0.5 top-0.5 bg-white w-5 h-5 rounded-full shadow transition-transform duration-200">
+                                        </div>
+                                    </label>
+                                </div>
+                                <div class="space-y-4">
+                                    <div class="flex justify-between text-sm"><span class="text-slate-600">Batas
+                                            Udara</span><span id="lbl-hum-thresh"
+                                            class="font-bold text-cyan-600">50%</span></div>
+                                    <input type="range" id="input-hum-thresh" min="20" max="90" value="50"
+                                        class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-cyan-500">
+                                </div>
+                                <button onclick="app.saveAutomation('mist')"
+                                    class="mt-6 w-full bg-slate-800 hover:bg-slate-900 text-white py-2 rounded-lg text-sm font-bold transition">Simpan</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- VIEW: LOGS -->
+                    <div id="view-logs" class="hidden space-y-6 fade-in">
+                        <div class="flex justify-between items-center">
+                            <h2 class="text-2xl font-bold text-slate-800">Riwayat & Alarm</h2>
+                            <div class="flex gap-4">
+                                <button onclick="app.exportLogsToCSV()"
+                                    class="text-xs text-emerald-600 hover:underline font-bold"><i
+                                        class="fa-solid fa-file-csv"></i> Export CSV</button>
+                                <button onclick="app.clearLogs()" class="text-xs text-red-500 hover:underline">Hapus
+                                    Log</button>
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                            <table class="w-full text-left text-sm text-slate-600">
+                                <thead class="bg-slate-50 text-slate-800 border-b border-slate-200">
+                                    <tr>
+                                        <th class="p-4">Waktu</th>
+                                        <th class="p-4">Tipe</th>
+                                        <th class="p-4">Pesan</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="logs-table-body">
+                                    <tr>
+                                        <td colspan="3" class="p-4 text-center">Memuat...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
             </main>
         </div>
     </div>

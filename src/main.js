@@ -17,7 +17,6 @@ window.app = {
         this.initCharts();
         this.connectFirebase();
         this.setupInputs();
-        this.startClock();
     },
 
     enterDashboard: function () {
@@ -39,8 +38,13 @@ window.app = {
         get(query(ref(database, 'logs'), limitToLast(500))).then((snapshot) => {
             const data = snapshot.val();
             if (!data) { alert("Tidak ada data log untuk diexport (kosong)."); return; }
+
+            // Add BOM (\uFEFF) so Excel opens it correctly with UTF-8
+            // Header with 3 columns
             let csvContent = "\uFEFFTimestamp,Type,Message\n";
+
             Object.values(data).sort((a, b) => b.timestamp - a.timestamp).forEach(log => {
+                // 1. Timestamp "YYYY-MM-DD HH:mm:ss"
                 const d = new Date(log.timestamp);
                 const dateStr = d.getFullYear() + "-" +
                     String(d.getMonth() + 1).padStart(2, '0') + "-" +
@@ -48,10 +52,18 @@ window.app = {
                     String(d.getHours()).padStart(2, '0') + ":" +
                     String(d.getMinutes()).padStart(2, '0') + ":" +
                     String(d.getSeconds()).padStart(2, '0');
+
+                // 2. Type (Escape quotes just in case)
                 const typeStr = (log.type || 'INFO').replace(/"/g, '""');
+
+                // 3. Message (Escape quotes, replace newlines)
                 const msgStr = (log.message || '').replace(/"/g, '""').replace(/\n/g, " ");
+
+                // Wrap all fields in double quotes to guarantee column integrity
                 csvContent += `"${dateStr}","${typeStr}","${msgStr}"\n`;
             });
+
+            // Blob Export
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const url = URL.createObjectURL(blob);
             const link = document.createElement("a");
@@ -126,6 +138,7 @@ window.app = {
         if (data.mq135 !== undefined) {
             document.getElementById('val-mq135').innerText = data.mq135;
             const msg = document.getElementById('mq135-msg');
+            // Example Logic: <450 Good, 450-900 Moderate, >900 Poor
             msg.innerText = data.mq135 < 450 ? "UDARA SEGAR" : data.mq135 < 900 ? "CUKUP BAIK" : "POLUSI TINGGI";
             msg.className = data.mq135 < 450 ? "text-[10px] text-emerald-600 font-bold" : data.mq135 < 900 ? "text-[10px] text-orange-500 font-bold" : "text-[10px] text-rose-600 font-bold";
         }
@@ -135,7 +148,7 @@ window.app = {
             msg.innerText = data.tank < 10 ? "PERLU ISI AIR" : "Aman";
             msg.className = data.tank < 10 ? "text-[10px] text-red-600 font-bold animate-pulse" : "text-[10px] text-slate-400";
         }
-        document.getElementById('last-updated').innerText = new Date().toLocaleTimeString('id-ID', { timeZone: 'Asia/Jakarta' }) + " WIB";
+        document.getElementById('last-updated').innerText = new Date().toLocaleTimeString();
     },
 
     syncDeviceToggles: function (dev) {
@@ -147,6 +160,8 @@ window.app = {
             if (st) {
                 let statusText = dev[d] == 1 ? "ON" : "OFF";
                 let statusClass = dev[d] == 1 ? "text-xs font-bold text-emerald-600" : "text-xs text-slate-400";
+
+                // Custom Alarm Logic for Buzzer
                 if (d === 'buzzer' && dev[d] == 1) {
                     if (this.state.alarmReason === 'tank' || this.state.sensors?.tank < 10) {
                         statusText = "ON (Air Tangki Kritis!)";
@@ -159,6 +174,7 @@ window.app = {
                         statusClass = "text-[10px] font-bold text-green-600 animate-pulse";
                     }
                 }
+
                 st.innerText = statusText;
                 st.className = statusClass;
             }
@@ -166,8 +182,10 @@ window.app = {
     },
 
     syncAutomationUI: function (cfg) {
+        console.log("Syncing Automation Config:", cfg);
         if (cfg) {
             this.state.automation = { ...this.state.automation, ...cfg };
+
             if (cfg.pump) {
                 document.getElementById('auto-pump-enable').checked = cfg.pump.enabled;
                 document.getElementById('input-soil-thresh').value = cfg.pump.threshold;
@@ -178,10 +196,13 @@ window.app = {
                 document.getElementById('input-hum-thresh').value = cfg.mist.threshold;
                 document.getElementById('lbl-hum-thresh').innerText = cfg.mist.threshold + '%';
             }
+
+            // Re-run logic immediately with new settings
             this.runAutomationLogic();
         }
     },
 
+    // --- FUNGSI LOGGING ---
     logActivity: function (type, message) {
         if (!database) return;
         push(ref(database, 'logs'), {
@@ -212,52 +233,85 @@ window.app = {
     runAutomationLogic: function () {
         const s = this.state.sensors; const c = this.state.automation; const d = this.state.devices;
         const now = Date.now();
+
+        // Debug Log
+        // console.log("Run Auto Logic:", { sensors: s, config: c, devices: d });
+
+        // Pump Logic (Soil)
         if (c?.pump?.enabled && database) {
-            const threshold = parseInt(c.pump.threshold);
-            if (s.soil < threshold && d.pump == 0) this.toggleDevice('pump', true, 'AUTO');
-            else if (s.soil > threshold + 5 && d.pump == 1) this.toggleDevice('pump', false, 'AUTO');
+            const threshold = parseInt(c.pump.threshold); // Ensure Number
+            if (s.soil < threshold && d.pump == 0) {
+                console.log("Auto: Pump ON Triggered");
+                this.toggleDevice('pump', true, 'AUTO');
+            }
+            else if (s.soil > threshold + 5 && d.pump == 1) {
+                console.log("Auto: Pump OFF Triggered");
+                this.toggleDevice('pump', false, 'AUTO');
+            }
         }
+
+        // Mist Logic (Humidity)
         if (c?.mist?.enabled && database) {
-            const threshold = parseInt(c.mist.threshold);
-            if (s.humidity < threshold && d.mist == 0) this.toggleDevice('mist', true, 'AUTO');
-            else if (s.humidity > threshold + 5 && d.mist == 1) this.toggleDevice('mist', false, 'AUTO');
+            const threshold = parseInt(c.mist.threshold); // Ensure Number
+            if (s.humidity < threshold && d.mist == 0) {
+                console.log("Auto: Mist ON Triggered");
+                this.toggleDevice('mist', true, 'AUTO');
+            }
+            else if (s.humidity > threshold + 5 && d.mist == 1) {
+                console.log("Auto: Mist OFF Triggered");
+                this.toggleDevice('mist', false, 'AUTO');
+            }
         }
+
+        // MQ135 Spike Logic (Rate of Rise > 200 in 5s)
         if (!this.state.mq135_ref || (now - this.state.mq135_ref.ts > 5000)) {
+            // Reset window every 5 seconds or if undefined
             this.state.mq135_ref = { val: s.mq135 || 0, ts: now };
         }
+
         const mqDiff = (s.mq135 || 0) - this.state.mq135_ref.val;
         const isPollutionSpike = (mqDiff > 200);
-        const isHighPollution = (s.mq135 > 900);
+        const isHighPollution = (s.mq135 > 900); // New Static Threshold
         const isPollutionCritical = isPollutionSpike || isHighPollution;
+
         if (isPollutionCritical) {
+            // Force Status Update for Spike/High
             const msg = document.getElementById('mq135-msg');
             if (msg) {
                 msg.innerText = isPollutionSpike ? "BAHAYA: LONJAKAN POLUSI" : "BAHAYA: POLUSI TINGGI";
                 msg.className = "text-[10px] text-red-600 font-bold animate-pulse";
             }
         }
+
+        // Buzzer Logic (Tank Critical OR Pollution Critical)
         const isTankCritical = (s.tank < 10 && s.tank > 0);
         const shouldBuzz = isTankCritical || isPollutionCritical;
+
         if (shouldBuzz && d.buzzer == 0) {
             set(ref(database, 'devices/buzzer'), 1);
+
+            // Determine Reason and Priority
             let reason = "";
-            let alarmState = "";
+            let alarmState = ""; // pollution, tank, tank_and_pollution
+
             if (isPollutionCritical && isTankCritical) {
                 reason = "Polusi Tinggi & Air Tangki Kritis!";
                 alarmState = "tank_and_pollution";
             } else if (isPollutionCritical) {
-                reason = "Polusi Tinggi!";
+                reason = "Polusi Tinggi!"; // Applies to both Spike and >900
                 alarmState = "pollution";
             } else {
                 reason = "Air Tangki Kritis!";
                 alarmState = "tank";
             }
+
+            // Set local alarm reason for UI
             this.state.alarmReason = alarmState;
             this.logActivity('ALARM', `Buzzer ON (${reason})`);
         }
         else if (!shouldBuzz && d.buzzer == 1 && database) {
             set(ref(database, 'devices/buzzer'), 0);
-            this.state.alarmReason = null;
+            this.state.alarmReason = null; // Reset reason
         }
     },
 
@@ -273,6 +327,7 @@ window.app = {
             if (log.type === 'ALARM') badgeClass = "bg-red-100 text-red-600";
             if (log.type === 'AUTO') badgeClass = "bg-blue-100 text-blue-600";
             if (log.type === 'MANUAL') badgeClass = "bg-emerald-100 text-emerald-600";
+
             tbody.innerHTML += `
                 <tr class="border-b border-slate-50 hover:bg-slate-50/50 transition">
                     <td class="p-4 text-xs text-slate-400 font-mono">${new Date(log.timestamp).toLocaleTimeString()}</td>
@@ -283,6 +338,7 @@ window.app = {
     },
     clearLogs: function () { if (confirm("Hapus?")) set(ref(database, 'logs'), null); },
 
+    // --- MULTI CHARTS LOGIC ---
     createChartConfig: function (ctx, label, colorHex, bgColor) {
         return new Chart(ctx, {
             type: 'line',
@@ -323,6 +379,7 @@ window.app = {
         const now = new Date().toLocaleTimeString();
         const updateSingle = (chart, val) => {
             if (!chart) return;
+            // Keep history same length (20)
             if (chart.data.datasets[0].data.length > 20) {
                 chart.data.datasets[0].data.shift();
                 chart.data.labels.shift();
@@ -331,18 +388,22 @@ window.app = {
             chart.data.labels.push(now);
             chart.update('none');
         };
+
         if (sensors.soil !== undefined) updateSingle(this.charts.soil, sensors.soil);
         if (sensors.humidity !== undefined) updateSingle(this.charts.hum, sensors.humidity);
         if (sensors.temp !== undefined) updateSingle(this.charts.temp, sensors.temp);
         if (sensors.light !== undefined) updateSingle(this.charts.light, sensors.light);
         if (sensors.mq135 !== undefined) updateSingle(this.charts.mq135, sensors.mq135);
         if (sensors.tank !== undefined) updateSingle(this.charts.tank, sensors.tank);
+
+        // Update Pinned Chart if active
         if (this.state.pinnedKey && this.charts.pinned && sensors[this.state.pinnedKey] !== undefined) {
             updateSingle(this.charts.pinned, sensors[this.state.pinnedKey]);
         }
     },
 
     pinChart: function (key) {
+        console.log("Pin Chart Triggered:", key);
         const map = {
             'soil': { label: 'Kelembaban Tanah (%)', color: '#10b981', bg: 'rgba(16, 185, 129, 0.1)' },
             'hum': { label: 'Kelembaban Udara (%)', color: '#06b6d4', bg: 'rgba(6, 182, 212, 0.1)' },
@@ -351,13 +412,18 @@ window.app = {
             'mq135': { label: 'Kualitas Udara (PPM)', color: '#e11d48', bg: 'rgba(225, 29, 72, 0.1)' },
             'tank': { label: 'Level Air Tangki (%)', color: '#6366f1', bg: 'rgba(99, 102, 241, 0.1)' }
         };
+
         const section = document.getElementById('pinned-chart-section');
-        if (!section) return;
+        if (!section) { console.error("Pinned Section Not Found"); return; }
+
+        // Restore previously pinned card visibility
         if (this.state.pinnedKey) {
             const oldCard = document.getElementById(`card-${this.state.pinnedKey}`);
             if (oldCard) oldCard.classList.remove('hidden');
         }
+
         if (!key || !map[key]) {
+            // Close/Unpin
             section.classList.add('hidden');
             this.state.pinnedKey = null;
             if (this.charts.pinned) {
@@ -366,26 +432,40 @@ window.app = {
             }
             return;
         }
+
+        // Hide new card
         const newCard = document.getElementById(`card-${key}`);
         if (newCard) newCard.classList.add('hidden');
+
+        // Open/Pin
         this.state.pinnedKey = key;
         section.classList.remove('hidden');
+
         const titleEl = document.getElementById('pinned-chart-title');
         if (titleEl) titleEl.innerText = map[key].label;
+
+        // Destroy old instance
         if (this.charts.pinned) {
             this.charts.pinned.destroy();
             this.charts.pinned = null;
         }
+
         const canvas = document.getElementById('pinnedChart');
-        if (!canvas) return;
+        if (!canvas) { console.error("Pinned Canvas Not Found"); return; }
         const ctx = canvas.getContext('2d');
+
+        // Safer Data Copying
         const sourceChart = this.charts[key];
         let initialData = [];
         let initialLabels = [];
+
         if (sourceChart && sourceChart.data) {
             initialData = [...(sourceChart.data.datasets[0].data || [])];
             initialLabels = [...(sourceChart.data.labels || [])];
+        } else {
+            console.warn(`Source chart for ${key} not ready. Starting empty.`);
         }
+
         this.charts.pinned = new Chart(ctx, {
             type: 'line',
             data: {
@@ -413,22 +493,5 @@ window.app = {
 
     setupInputs: function () {
         ['soil', 'hum'].forEach(t => document.getElementById(`input-${t}-thresh`).addEventListener('input', (e) => document.getElementById(`lbl-${t}-thresh`).innerText = e.target.value + '%'));
-    },
-
-    startClock: function () {
-        setInterval(() => {
-            const now = new Date();
-            const optionsTime = { timeZone: 'Asia/Jakarta', hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' };
-            const optionsDate = { timeZone: 'Asia/Jakarta', weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-
-            const timeString = now.toLocaleTimeString('id-ID', optionsTime).replace(/\./g, ':');
-            const dateString = now.toLocaleDateString('id-ID', optionsDate);
-
-            const elTime = document.getElementById('clock-time');
-            const elDate = document.getElementById('clock-date');
-
-            if (elTime) elTime.innerText = timeString + " WIB";
-            if (elDate) elDate.innerText = dateString;
-        }, 1000);
     }
 };
