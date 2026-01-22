@@ -1,6 +1,7 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { getDatabase } from "firebase/database";
 
+
 const firebaseConfig = {
     apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
     authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
@@ -11,6 +12,9 @@ const firebaseConfig = {
     appId: import.meta.env.VITE_FIREBASE_APP_ID,
     measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
+
+// Debug: Check which config is being used
+console.log("Using Firebase Config:", firebaseConfig);
 
 let app;
 let database;
@@ -29,5 +33,6 @@ try {
         alert("Gagal koneksi Firebase: " + e.message);
     }
 }
+
 
 export { database };
