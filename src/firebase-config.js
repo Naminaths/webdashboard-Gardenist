@@ -13,9 +13,6 @@ const firebaseConfig = {
     measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
 
-// Debug: Check which config is being used
-console.log("Using Firebase Config:", firebaseConfig);
-
 let app;
 let database;
 
