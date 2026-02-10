@@ -1,6 +1,7 @@
 import { database } from './firebase-config.js';
 import { ref, onValue, set, push, query, limitToLast, get } from "firebase/database";
 import Chart from 'chart.js/auto';
+import Swal from 'sweetalert2';
 
 // Attach app to window for global access (required for current HTML onclick handlers)
 window.app = {
@@ -26,10 +27,21 @@ window.app = {
     },
 
     logout: function () {
-        if (confirm("Keluar dari Dashboard?")) {
-            document.getElementById('dashboard-app').classList.add('hidden');
-            document.getElementById('landing-page').classList.remove('hidden');
-        }
+        Swal.fire({
+            title: 'Keluar dari Dashboard?',
+            text: "Anda akan kembali ke halaman utama.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#10b981',
+            cancelButtonColor: '#ef4444',
+            confirmButtonText: 'Ya, Keluar',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('dashboard-app').classList.add('hidden');
+                document.getElementById('landing-page').classList.remove('hidden');
+            }
+        });
     },
 
     exportLogsToCSV: function () {
@@ -37,7 +49,14 @@ window.app = {
 
         get(query(ref(database, 'logs'), limitToLast(500))).then((snapshot) => {
             const data = snapshot.val();
-            if (!data) { alert("Tidak ada data log untuk diexport (kosong)."); return; }
+            if (!data) {
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Info',
+                    text: 'Tidak ada data log untuk diexport (kosong).'
+                });
+                return;
+            }
 
             // Add BOM (\uFEFF) so Excel opens it correctly with UTF-8
             // Header with 3 columns
@@ -75,7 +94,11 @@ window.app = {
             document.body.removeChild(link);
         }).catch(err => {
             console.error("Export Error:", err);
-            alert("Gagal mengambil data untuk export.");
+            Swal.fire({
+                icon: 'error',
+                title: 'Gagal',
+                text: 'Gagal mengambil data untuk export.'
+            });
         });
     },
 
@@ -225,7 +248,13 @@ window.app = {
         const threshold = parseInt(document.getElementById(type === 'pump' ? 'input-soil-thresh' : 'input-hum-thresh').value);
         set(ref(database, `config/automation/${type}`), { enabled, threshold })
             .then(() => {
-                alert("Tersimpan!");
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: 'Pengaturan tersimpan!',
+                    timer: 1500,
+                    showConfirmButton: false
+                });
                 this.logActivity('CONFIG', `Update Aturan ${type.toUpperCase()}`);
             });
     },
@@ -336,7 +365,28 @@ window.app = {
                 </tr>`;
         });
     },
-    clearLogs: function () { if (confirm("Hapus?")) set(ref(database, 'logs'), null); },
+    clearLogs: function () {
+        Swal.fire({
+            title: 'Hapus Log?',
+            text: "Data log akan dihapus permanen!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ef4444',
+            cancelButtonColor: '#64748b',
+            confirmButtonText: 'Ya, Hapus!',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                set(ref(database, 'logs'), null).then(() => {
+                    Swal.fire(
+                        'Terhapus!',
+                        'Data log berhasil dihapus.',
+                        'success'
+                    );
+                });
+            }
+        });
+    },
 
     // --- MULTI CHARTS LOGIC ---
     createChartConfig: function (ctx, label, colorHex, bgColor) {
