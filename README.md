@@ -12,36 +12,41 @@ Dashboard monitoring dan kontrol untuk sistem Smart Garden berbasis IoT, terinte
     -   Mist Maker otomatis menyala jika udara kering.
     -   Buzzer berbunyi jika Tangki Kosong atau Polusi Tinggi (>900 PPM / Lonjakan >200).
 -   **Log & Alarm**: Pencatatan riwayat aktivitas dan alarm bahaya, dapat diekspor ke **CSV**.
--   **Realtime Clock**: Jam digital akurat (Sync UTC/Local).
+-   **Realtime Clock**: Jam digital akurat (Sync UTC/Local) yang diperbarui setiap detik.
+-   **Tampilan Modern**: Dukungan **Dark Mode** & Light Mode dengan transisi halus.
 -   **Responsive Design**: Desktop (Grid 4 Kolom) & Mobile (Single Column).
 
 ## 🛠️ Teknologi yang Digunakan
 
--   **Frontend**: HTML5, Vanilla JavaScript, Tailwind CSS (CDN).
+-   **Frontend**: HTML5, Vanilla JavaScript (ES Modules), Tailwind CSS (CDN).
 -   **Visualization**: Chart.js.
 -   **Backend / Database**: Firebase Realtime Database.
 -   **Hosting**: Firebase Hosting.
 
 ## 📂 Struktur File
 
-Saat ini proyek menggunakan struktur **Monolithic** pada `index.html` untuk memastikan stabilitas deployment di Firebase Hosting dan menghindari isu *Cross-Origin Resource Sharing (CORS)* pada modul eksternal di beberapa environment.
+Proyek ini telah direfaktor untuk menggunakan struktur yang lebih bersih dengan pemisahan *concern* antara logika dan tampilan.
 
 ```
 smartgarden-webdashboard/
 │
-├── public/                 # Folder Publik (yang di-deploy)
-│   ├── index.html          # FILE UTAMA (HTML, CSS, & JS Logic ada di sini)
-│   └── js/                 # (Arsip) Versi Modular - tidak digunakan di live version
+├── assets/                 # Aset statis (Favicon, Gambar)
+├── src/                    # Source Code JavaScript
+│   ├── firebase-config.js  # Konfigurasi & Inisialisasi Firebase
+│   └── main.js             # Logika Utama Aplikasi (Chart, Sensor, Otomasi)
 │
+├── index.html              # File Utama (Entry Point)
 ├── firebase.json           # Konfigurasi Deployment Firebase
 ├── .firebaserc             # Alias Project Firebase
-└── RUN_DASHBOARD.bat       # Script utility
+└── README.md               # Dokumentasi Proyek
 ```
 
 ## 💻 Cara Menjalankan
 
-### Versi Live (Deploy)
-Aplikasi yang aktif adalah yang berjalan dari `public/index.html`. File ini memuat semua logika yang diperlukan.
+### Versi Lokal (Development)
+1.  Buka folder project di VS Code.
+2.  Gunakan ekstensi "Live Server" untuk menjalankan `index.html`.
+3.  Pastikan koneksi internet aktif untuk memuat CDN (Tailwind, Chart.js, Firebase) dan aset eksternal.
 
 ### Deployment (Firebase Hosting)
 
@@ -55,14 +60,15 @@ Lakukan langkah ini jika ingin meng-online-kan dashboard:
     ```
 4.  Dashboard akan aktif di URL yang diberikan (misal: `https://webdashboard-gardenist.web.app`).
 
-## 📚 Dokumentasi Fitur Code (Dalam index.html)
+## 📚 Dokumentasi Fitur Code
 
-Logika pemrograman kini disatukan dalam script module di bagian bawah `index.html`:
+Logika pemrograman utama terdapat di `src/main.js`:
 
-- **`app.init()`**: Menginisialisasi chart, koneksi firebase, input, dan jam.
-- **`app.runAutomationLogic()`**: "Otak" sistem. Mengecek logika sensor vs threshold setiap kali ada data baru.
-- **`app.pinChart(key)`**: Fungsi untuk menyalin data grafik kecil ke grafik utama (Pinned) dan menyembunyikan grafik asalnya.
-- **`app.syncDeviceToggles()`**: Memastikan tombol UI on/off sesuai dengan status asli di Database (agar tidak bentrok dengan kontrol otomatis).
+-   **`app.init()`**: Menginisialisasi chart, koneksi firebase, input, dan memulai jam digital.
+-   **`app.startClock()`**: Memperbarui jam setiap detik agar selalu sinkron.
+-   **`app.runAutomationLogic()`**: "Otak" sistem. Mengecek logika sensor vs threshold setiap kali ada data baru.
+-   **`app.pinChart(key)`**: Fungsi untuk menyalin data grafik kecil ke grafik utama (Pinned).
+-   **`app.syncDeviceToggles()`**: Sinkronisasi tombol UI on/off dengan status asli di Database.
 
 ---
 **Dibuat oleh:**
