@@ -18,6 +18,7 @@ window.app = {
         this.initCharts();
         this.connectFirebase();
         this.setupInputs();
+        this.startClock();
     },
 
     enterDashboard: function () {
@@ -171,7 +172,7 @@ window.app = {
             msg.innerText = data.tank < 10 ? "PERLU ISI AIR" : "Aman";
             msg.className = data.tank < 10 ? "text-[10px] text-red-600 font-bold animate-pulse" : "text-[10px] text-slate-400";
         }
-        document.getElementById('last-updated').innerText = new Date().toLocaleTimeString();
+
     },
 
     syncDeviceToggles: function (dev) {
@@ -543,5 +544,14 @@ window.app = {
 
     setupInputs: function () {
         ['soil', 'hum'].forEach(t => document.getElementById(`input-${t}-thresh`).addEventListener('input', (e) => document.getElementById(`lbl-${t}-thresh`).innerText = e.target.value + '%'));
+    },
+
+    startClock: function () {
+        setInterval(() => {
+            const el = document.getElementById('last-updated');
+            if (el) {
+                el.innerText = new Date().toLocaleTimeString('id-ID', { hour12: false });
+            }
+        }, 1000);
     }
 };
