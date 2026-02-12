@@ -371,8 +371,11 @@
                     <div id="view-overview" class="space-y-6 fade-in">
                         <div class="flex justify-between items-end">
                             <div>
-                                <h2 class="text-2xl font-bold text-slate-900 dark:text-white">Dashboard</h2>
-                                <p class="text-sm text-slate-500 dark:text-slate-400">Data sensor real-time & analisis
+                                <h2
+                                    class="text-2xl font-bold text-slate-900 dark:text-white transition-colors duration-300">
+                                    Dashboard</h2>
+                                <p class="text-sm text-slate-500 dark:text-slate-400 transition-colors duration-300">
+                                    Data sensor real-time & analisis
                                     grafik.</p>
                             </div>
                             <span
@@ -618,13 +621,13 @@
                                                 </div>
                                             </div>
                                             <label class="flex items-center cursor-pointer relative"><input
-                                                    type="checkbox" id="toggle-pump" class="sr-only"
+                                                    type="checkbox" id="toggle-pump" class="sr-only peer"
                                                     onchange="app.toggleDevice('pump', this.checked)">
                                                 <div
-                                                    class="toggle-bg bg-slate-200 border-2 border-slate-200 h-6 w-11 rounded-full transition-colors duration-200">
+                                                    class="toggle-bg bg-slate-200 border-2 border-slate-200 h-6 w-11 rounded-full transition-colors duration-200 peer-checked:bg-emerald-500 peer-checked:border-emerald-500">
                                                 </div>
                                                 <div
-                                                    class="dot absolute left-0.5 top-0.5 bg-white w-5 h-5 rounded-full shadow transition-transform duration-200">
+                                                    class="dot absolute left-0.5 top-0.5 bg-white w-5 h-5 rounded-full shadow transition-transform duration-200 peer-checked:translate-x-full peer-checked:border-white">
                                                 </div>
                                             </label>
                                         </div>
@@ -645,13 +648,13 @@
                                                 </div>
                                             </div>
                                             <label class="flex items-center cursor-pointer relative"><input
-                                                    type="checkbox" id="toggle-uv" class="sr-only"
+                                                    type="checkbox" id="toggle-uv" class="sr-only peer"
                                                     onchange="app.toggleDevice('uv', this.checked)">
                                                 <div
-                                                    class="toggle-bg bg-slate-200 border-2 border-slate-200 h-6 w-11 rounded-full transition-colors duration-200">
+                                                    class="toggle-bg bg-slate-200 border-2 border-slate-200 h-6 w-11 rounded-full transition-colors duration-200 peer-checked:bg-purple-500 peer-checked:border-purple-500">
                                                 </div>
                                                 <div
-                                                    class="dot absolute left-0.5 top-0.5 bg-white w-5 h-5 rounded-full shadow transition-transform duration-200">
+                                                    class="dot absolute left-0.5 top-0.5 bg-white w-5 h-5 rounded-full shadow transition-transform duration-200 peer-checked:translate-x-full peer-checked:border-white">
                                                 </div>
                                             </label>
                                         </div>
@@ -672,13 +675,13 @@
                                                 </div>
                                             </div>
                                             <label class="flex items-center cursor-pointer relative"><input
-                                                    type="checkbox" id="toggle-mist" class="sr-only"
+                                                    type="checkbox" id="toggle-mist" class="sr-only peer"
                                                     onchange="app.toggleDevice('mist', this.checked)">
                                                 <div
-                                                    class="toggle-bg bg-slate-200 border-2 border-slate-200 h-6 w-11 rounded-full transition-colors duration-200">
+                                                    class="toggle-bg bg-slate-200 border-2 border-slate-200 h-6 w-11 rounded-full transition-colors duration-200 peer-checked:bg-cyan-500 peer-checked:border-cyan-500">
                                                 </div>
                                                 <div
-                                                    class="dot absolute left-0.5 top-0.5 bg-white w-5 h-5 rounded-full shadow transition-transform duration-200">
+                                                    class="dot absolute left-0.5 top-0.5 bg-white w-5 h-5 rounded-full shadow transition-transform duration-200 peer-checked:translate-x-full peer-checked:border-white">
                                                 </div>
                                             </label>
                                         </div>
@@ -699,13 +702,13 @@
                                                 </div>
                                             </div>
                                             <label class="flex items-center cursor-pointer relative"><input
-                                                    type="checkbox" id="toggle-buzzer" class="sr-only"
+                                                    type="checkbox" id="toggle-buzzer" class="sr-only peer"
                                                     onchange="app.toggleDevice('buzzer', this.checked)">
                                                 <div
-                                                    class="toggle-bg bg-slate-200 border-2 border-slate-200 h-6 w-11 rounded-full transition-colors duration-200">
+                                                    class="toggle-bg bg-slate-200 border-2 border-slate-200 h-6 w-11 rounded-full transition-colors duration-200 peer-checked:bg-red-500 peer-checked:border-red-500">
                                                 </div>
                                                 <div
-                                                    class="dot absolute left-0.5 top-0.5 bg-white w-5 h-5 rounded-full shadow transition-transform duration-200">
+                                                    class="dot absolute left-0.5 top-0.5 bg-white w-5 h-5 rounded-full shadow transition-transform duration-200 peer-checked:translate-x-full peer-checked:border-white">
                                                 </div>
                                             </label>
                                         </div>
@@ -751,12 +754,12 @@
                                     <h3 class="font-bold text-slate-800 dark:text-white flex items-center gap-2"><i
                                             class="fa-solid fa-droplet text-blue-500"></i> Auto Siram</h3>
                                     <label class="flex items-center cursor-pointer relative"><input type="checkbox"
-                                            id="auto-pump-enable" class="sr-only">
+                                            id="auto-pump-enable" class="sr-only peer">
                                         <div
-                                            class="toggle-bg bg-slate-200 border-2 border-slate-200 h-6 w-11 rounded-full transition-colors duration-200">
+                                            class="toggle-bg bg-slate-200 border-2 border-slate-200 h-6 w-11 rounded-full transition-colors duration-200 peer-checked:bg-emerald-500 peer-checked:border-emerald-500">
                                         </div>
                                         <div
-                                            class="dot absolute left-0.5 top-0.5 bg-white w-5 h-5 rounded-full shadow transition-transform duration-200">
+                                            class="dot absolute left-0.5 top-0.5 bg-white w-5 h-5 rounded-full shadow transition-transform duration-200 peer-checked:translate-x-full peer-checked:border-white">
                                         </div>
                                     </label>
                                 </div>
@@ -778,12 +781,12 @@
                                     <h3 class="font-bold text-slate-800 dark:text-white flex items-center gap-2"><i
                                             class="fa-solid fa-smog text-cyan-500"></i> Auto Mist</h3>
                                     <label class="flex items-center cursor-pointer relative"><input type="checkbox"
-                                            id="auto-mist-enable" class="sr-only">
+                                            id="auto-mist-enable" class="sr-only peer">
                                         <div
-                                            class="toggle-bg bg-slate-200 border-2 border-slate-200 h-6 w-11 rounded-full transition-colors duration-200">
+                                            class="toggle-bg bg-slate-200 border-2 border-slate-200 h-6 w-11 rounded-full transition-colors duration-200 peer-checked:bg-cyan-500 peer-checked:border-cyan-500">
                                         </div>
                                         <div
-                                            class="dot absolute left-0.5 top-0.5 bg-white w-5 h-5 rounded-full shadow transition-transform duration-200">
+                                            class="dot absolute left-0.5 top-0.5 bg-white w-5 h-5 rounded-full shadow transition-transform duration-200 peer-checked:translate-x-full peer-checked:border-white">
                                         </div>
                                     </label>
                                 </div>
