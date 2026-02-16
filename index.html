@@ -4,53 +4,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Dashboard monitoring dan kontrol untuk sistem Smart Garden berbasis IoT. Pantau kelembaban tanah, suhu, dan kualitas udara secara real-time.">
     <title> Gardenist - Smart Garden </title>
 
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="assets/favicon-uny.png">
 
-    <!-- Tailwind Config -->
-    <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
-    <script>
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    colors: {
-                        primary: "#10B981", // Emerald 500
-                        "primary-hover": "#059669", // Emerald 600
-                        "background-light": "#ecfdf5", // emerald-50 base
-                        "background-dark": "#0f172a", // slate-900
-                        "surface-light": "#ffffff",
-                        "surface-dark": "#1e293b", // slate-800
-                        "subtle-light": "#d1fae5", // emerald-100
-                        "subtle-dark": "#334155", // slate-700
-                    },
-                    fontFamily: {
-                        display: ["'Plus Jakarta Sans'", "sans-serif"],
-                        body: ["'Inter'", "sans-serif"],
-                    },
-                    boxShadow: {
-                        'glow': '0 0 20px rgba(16, 185, 129, 0.3)',
-                        'card': '0 10px 30px -5px rgba(0, 0, 0, 0.1)',
-                    }
-                },
-            },
-        };
-    </script>
-    <style>
-        .progress-gradient {
-            background: linear-gradient(90deg, #34d399 0%, #10b981 100%);
-        }
-    </style>
-
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <!-- Google Fonts & Material Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
         href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap"
         rel="stylesheet" />
@@ -73,13 +38,13 @@
             </div>
             <div class="flex items-center gap-4">
                 <button class="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
-                    onclick="document.documentElement.classList.toggle('dark')" title="Toggle Dark Mode">
+                    onclick="document.documentElement.classList.toggle('dark')" title="Toggle Dark Mode" aria-label="Toggle Dark Mode">
                     <span
                         class="material-icons-round text-slate-600 dark:text-slate-300 text-xl">brightness_medium</span>
                 </button>
                 <button
                     class="bg-primary hover:bg-primary-hover text-white px-5 py-2.5 rounded-full font-semibold text-sm transition shadow-lg shadow-primary/30 flex items-center gap-2"
-                    onclick="app.enterDashboard()">
+                    onclick="app.enterDashboard()" aria-label="Enter Dashboard">
                     <span>Dashboard</span>
                     <span class="material-icons-round text-sm">arrow_forward</span>
                 </button>
@@ -115,7 +80,7 @@
                     <div class="flex justify-center gap-4">
                         <button
                             class="group bg-primary hover:bg-primary-hover text-white px-8 py-4 rounded-xl font-bold text-lg transition-all shadow-xl shadow-primary/20 flex items-center gap-2 transform hover:-translate-y-1"
-                            onclick="app.enterDashboard()">
+                            onclick="app.enterDashboard()" aria-label="Enter Dashboard">
                             <span class="material-icons-round group-hover:animate-pulse">analytics</span>
                             Masuk Dashboard
                         </button>
@@ -128,7 +93,7 @@
                             <div
                                 class="absolute inset-0 bg-primary opacity-0 group-hover:opacity-10 transition-opacity rounded-2xl">
                             </div>
-                            <img alt="Abstract Plant Pot"
+                            <img alt="Abstract Plant Pot" loading="lazy" width="192" height="256"
                                 class="w-48 h-64 object-cover rounded-2xl shadow-2xl rotate-[-6deg] group-hover:rotate-[-3deg] transition-all duration-700 border-4 border-white dark:border-slate-700"
                                 src="https://lh3.googleusercontent.com/aida-public/AB6AXuAp3rawOnvVQtRSLi-A2kMJ5TGaAlsMQ_Xpiv2VOLlrGesLpzbv8Ss-ZoRN2s9-eXYi8YhL32BOmcr6mLSOMcDzHyXANDQBd0qUj0QMDIZRF1YHnQY1ssyAPcWI7GTumEKNIK_1WAJsaIPs5QrrBw1aDrALVTbpyOUOck61tC9GdPTLcyQPx6IcH3hQDe6mGGcKVfK5DgMe6qT6b---fxo0mZ2oMnXDvOgTVpD88Mpci8PBdUkTTkLFV96ifu4cKMoIhh9543lRjts" />
                         </div>
@@ -139,7 +104,7 @@
                             <div
                                 class="absolute inset-0 bg-primary opacity-0 group-hover:opacity-10 transition-opacity rounded-2xl">
                             </div>
-                            <img alt="Succulent Pot"
+                            <img alt="Succulent Pot" loading="lazy" width="192" height="256"
                                 class="w-48 h-64 object-cover rounded-2xl shadow-2xl rotate-[6deg] group-hover:rotate-[3deg] transition-all duration-700 border-4 border-white dark:border-slate-700"
                                 src="https://lh3.googleusercontent.com/aida-public/AB6AXuAdcKuviKYdKWv7ha1-KnOWBujgVbOfBA_ftL4WaW2PhTU4phcaDTMawe59jhRWkWhZ7h_UAe7i3mtFwGs2izFPsSANlqFIrv-emNlg-MNUp7by5hZPKvZQy2wP2rTbkgygtAz-Xv9yFssCsKnj8FdBEuqjdgax8ghSdRxXuwH5YlyZO3qW1ZQR-9KTbDQe-N3RMzPYvkyAuVDZRN2pVnUexipoChxxd3mMd6KmD7LSD-7AoWqb-E3UHzFv2G2j38QTM68K8kpZffw" />
                         </div>
@@ -246,7 +211,8 @@
                                         Moisture Trend (24h)</h4>
                                 </div>
                                 <button
-                                    class="text-primary text-xs font-bold hover:text-primary-hover transition-colors flex items-center gap-1">
+                                    class="text-primary text-xs font-bold hover:text-primary-hover transition-colors flex items-center gap-1"
+                                    aria-label="View Full Log">
                                     Full Log <span class="material-icons-round text-[10px]">chevron_right</span>
                                 </button>
                             </div>
@@ -313,25 +279,25 @@
             </div>
             <nav class="flex-1 p-4 space-y-2">
                 <button onclick="app.navigate('overview')" id="nav-overview"
-                    class="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400 font-medium transition-colors">
+                    class="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400 font-medium transition-colors" aria-label="Overview">
                     <i class="fa-solid fa-grid-2"></i> Overview
                 </button>
                 <button onclick="app.navigate('automation')" id="nav-automation"
-                    class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 font-medium transition-colors">
+                    class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 font-medium transition-colors" aria-label="Automation">
                     <i class="fa-solid fa-gears"></i> Otomasi
                 </button>
                 <button onclick="app.navigate('logs')" id="nav-logs"
-                    class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 font-medium transition-colors">
+                    class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 font-medium transition-colors" aria-label="Logs">
                     <i class="fa-solid fa-clock-rotate-left"></i> Log & Alarm
                 </button>
             </nav>
             <div class="p-4 border-t border-slate-100 dark:border-slate-700 space-y-3">
                 <button onclick="document.documentElement.classList.toggle('dark')"
-                    class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition text-sm font-medium">
+                    class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition text-sm font-medium" aria-label="Change Theme">
                     <i class="fa-solid fa-moon"></i> Ganti Tema
                 </button>
                 <button onclick="app.logout()"
-                    class="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 font-bold transition text-sm">
+                    class="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 font-bold transition text-sm" aria-label="Logout">
                     <i class="fa-solid fa-sign-out-alt"></i> Keluar
                 </button>
                 <div
@@ -352,14 +318,14 @@
                         class="fa-solid fa-leaf text-emerald-600"></i> Gardenist</span>
                 <div class="flex gap-4 text-lg items-center">
                     <button onclick="document.documentElement.classList.toggle('dark')"
-                        class="text-slate-600 dark:text-slate-400"><i class="fa-solid fa-moon"></i></button>
-                    <button onclick="app.navigate('overview')" class="text-slate-600 dark:text-slate-400"><i
+                        class="text-slate-600 dark:text-slate-400" aria-label="Toggle Dark Mode"><i class="fa-solid fa-moon"></i></button>
+                    <button onclick="app.navigate('overview')" class="text-slate-600 dark:text-slate-400" aria-label="Overview"><i
                             class="fa-solid fa-home"></i></button>
-                    <button onclick="app.navigate('automation')" class="text-slate-600 dark:text-slate-400"><i
+                    <button onclick="app.navigate('automation')" class="text-slate-600 dark:text-slate-400" aria-label="Automation"><i
                             class="fa-solid fa-gears"></i></button>
-                    <button onclick="app.navigate('logs')" class="text-slate-600 dark:text-slate-400"><i
+                    <button onclick="app.navigate('logs')" class="text-slate-600 dark:text-slate-400" aria-label="Logs"><i
                             class="fa-solid fa-list"></i></button>
-                    <button onclick="app.logout()" class="text-red-500 ml-2"><i
+                    <button onclick="app.logout()" class="text-red-500 ml-2" aria-label="Logout"><i
                             class="fa-solid fa-sign-out-alt"></i></button>
                 </div>
             </header>
@@ -392,7 +358,7 @@
                                     <span id="pinned-chart-title">Chart</span>
                                 </h3>
                                 <button onclick="app.pinChart(null)"
-                                    class="text-slate-400 hover:text-rose-500 transition bg-slate-50 dark:bg-slate-800 p-2 rounded-full hover:bg-rose-50 dark:hover:bg-rose-900/30">
+                                    class="text-slate-400 hover:text-rose-500 transition bg-slate-50 dark:bg-slate-800 p-2 rounded-full hover:bg-rose-50 dark:hover:bg-rose-900/30" aria-label="Close Chart">
                                     <i class="fa-solid fa-times"></i>
                                 </button>
                             </div>
@@ -502,7 +468,7 @@
                                         </h3>
                                         <button onclick="app.pinChart('soil')"
                                             class="text-slate-400 hover:text-emerald-600 transition p-2 hover:bg-emerald-50 rounded-full"
-                                            title="Pin Chart">
+                                            title="Pin Chart" aria-label="Pin Soil Chart">
                                             <i class="fa-solid fa-thumbtack"></i>
                                         </button>
                                     </div>
@@ -521,7 +487,7 @@
                                                 Udara</h4>
                                             <button onclick="app.pinChart('hum')"
                                                 class="text-slate-400 hover:text-emerald-600 transition"
-                                                title="Pin Chart">
+                                                title="Pin Chart" aria-label="Pin Humidity Chart">
                                                 <i class="fa-solid fa-thumbtack"></i>
                                             </button>
                                         </div>
@@ -537,7 +503,7 @@
                                                 Lingkungan</h4>
                                             <button onclick="app.pinChart('temp')"
                                                 class="text-slate-400 hover:text-emerald-600 transition"
-                                                title="Pin Chart">
+                                                title="Pin Chart" aria-label="Pin Temperature Chart">
                                                 <i class="fa-solid fa-thumbtack"></i>
                                             </button>
                                         </div>
@@ -553,7 +519,7 @@
                                                 Cahaya</h4>
                                             <button onclick="app.pinChart('light')"
                                                 class="text-slate-400 hover:text-emerald-600 transition"
-                                                title="Pin Chart">
+                                                title="Pin Chart" aria-label="Pin Light Chart">
                                                 <i class="fa-solid fa-thumbtack"></i>
                                             </button>
                                         </div>
@@ -569,7 +535,7 @@
                                                 Udara (MQ135)</h4>
                                             <button onclick="app.pinChart('mq135')"
                                                 class="text-slate-400 hover:text-emerald-600 transition"
-                                                title="Pin Chart">
+                                                title="Pin Chart" aria-label="Pin MQ135 Chart">
                                                 <i class="fa-solid fa-thumbtack"></i>
                                             </button>
                                         </div>
@@ -585,7 +551,7 @@
                                                 Tangki</h4>
                                             <button onclick="app.pinChart('tank')"
                                                 class="text-slate-400 hover:text-emerald-600 transition"
-                                                title="Pin Chart">
+                                                title="Pin Chart" aria-label="Pin Tank Chart">
                                                 <i class="fa-solid fa-thumbtack"></i>
                                             </button>
                                         </div>
@@ -620,7 +586,7 @@
                                                         id="status-pump">...</p>
                                                 </div>
                                             </div>
-                                            <label class="flex items-center cursor-pointer relative"><input
+                                            <label class="flex items-center cursor-pointer relative" aria-label="Toggle Pump"><input
                                                     type="checkbox" id="toggle-pump" class="sr-only peer"
                                                     onchange="app.toggleDevice('pump', this.checked)">
                                                 <div
@@ -647,7 +613,7 @@
                                                         id="status-uv">...</p>
                                                 </div>
                                             </div>
-                                            <label class="flex items-center cursor-pointer relative"><input
+                                            <label class="flex items-center cursor-pointer relative" aria-label="Toggle UV"><input
                                                     type="checkbox" id="toggle-uv" class="sr-only peer"
                                                     onchange="app.toggleDevice('uv', this.checked)">
                                                 <div
@@ -674,7 +640,7 @@
                                                         id="status-mist">...</p>
                                                 </div>
                                             </div>
-                                            <label class="flex items-center cursor-pointer relative"><input
+                                            <label class="flex items-center cursor-pointer relative" aria-label="Toggle Mist"><input
                                                     type="checkbox" id="toggle-mist" class="sr-only peer"
                                                     onchange="app.toggleDevice('mist', this.checked)">
                                                 <div
@@ -701,7 +667,7 @@
                                                         id="status-buzzer">...</p>
                                                 </div>
                                             </div>
-                                            <label class="flex items-center cursor-pointer relative"><input
+                                            <label class="flex items-center cursor-pointer relative" aria-label="Toggle Buzzer"><input
                                                     type="checkbox" id="toggle-buzzer" class="sr-only peer"
                                                     onchange="app.toggleDevice('buzzer', this.checked)">
                                                 <div
@@ -753,7 +719,7 @@
                                 <div class="flex justify-between items-center mb-6">
                                     <h3 class="font-bold text-slate-800 dark:text-white flex items-center gap-2"><i
                                             class="fa-solid fa-droplet text-blue-500"></i> Auto Siram</h3>
-                                    <label class="flex items-center cursor-pointer relative"><input type="checkbox"
+                                    <label class="flex items-center cursor-pointer relative" aria-label="Toggle Auto Siram"><input type="checkbox"
                                             id="auto-pump-enable" class="sr-only peer">
                                         <div
                                             class="toggle-bg bg-slate-200 border-2 border-slate-200 h-6 w-11 rounded-full transition-colors duration-200 peer-checked:bg-emerald-500 peer-checked:border-emerald-500">
@@ -768,7 +734,7 @@
                                             class="text-slate-600 dark:text-slate-400">Batas
                                             Tanah</span><span id="lbl-soil-thresh"
                                             class="font-bold text-blue-600 dark:text-blue-400">30%</span></div>
-                                    <input type="range" id="input-soil-thresh" min="0" max="100" value="30"
+                                    <input type="range" id="input-soil-thresh" min="0" max="100" value="30" aria-label="Adjust Soil Threshold"
                                         class="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-500">
                                 </div>
                                 <button onclick="app.saveAutomation('pump')"
@@ -780,7 +746,7 @@
                                 <div class="flex justify-between items-center mb-6">
                                     <h3 class="font-bold text-slate-800 dark:text-white flex items-center gap-2"><i
                                             class="fa-solid fa-smog text-cyan-500"></i> Auto Mist</h3>
-                                    <label class="flex items-center cursor-pointer relative"><input type="checkbox"
+                                    <label class="flex items-center cursor-pointer relative" aria-label="Toggle Auto Mist"><input type="checkbox"
                                             id="auto-mist-enable" class="sr-only peer">
                                         <div
                                             class="toggle-bg bg-slate-200 border-2 border-slate-200 h-6 w-11 rounded-full transition-colors duration-200 peer-checked:bg-cyan-500 peer-checked:border-cyan-500">
@@ -795,7 +761,7 @@
                                             class="text-slate-600 dark:text-slate-400">Batas
                                             Udara</span><span id="lbl-hum-thresh"
                                             class="font-bold text-cyan-600 dark:text-cyan-400">50%</span></div>
-                                    <input type="range" id="input-hum-thresh" min="20" max="90" value="50"
+                                    <input type="range" id="input-hum-thresh" min="20" max="90" value="50" aria-label="Adjust Humidity Threshold"
                                         class="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-cyan-500">
                                 </div>
                                 <button onclick="app.saveAutomation('mist')"

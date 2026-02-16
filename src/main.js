@@ -1,3 +1,4 @@
+import './style.css';
 import { database } from './firebase-config.js';
 import { ref, onValue, set, push, query, limitToLast, get } from "firebase/database";
 import Chart from 'chart.js/auto';
