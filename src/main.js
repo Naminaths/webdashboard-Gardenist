@@ -1,10 +1,11 @@
 import './style.css';
-import { database } from './firebase-config.js';
-import { ref, onValue, set, push, query, limitToLast, get } from "firebase/database";
-import Chart from 'chart.js/auto';
-import Swal from 'sweetalert2';
 
-// Attach app to window for global access (required for current HTML onclick handlers)
+// Module-scope variables for lazy-loaded dependencies
+let database, ref, onValue, set, push, query, limitToLast, get;
+let Chart;
+let Swal;
+
+// Attach app to window for global access
 window.app = {
     charts: {},
     state: {
@@ -15,7 +16,31 @@ window.app = {
         pinnedKey: null
     },
 
-    init: function () {
+    // --- LAZY LOADER HELPERS ---
+    loadFirebase: async function () {
+        if (database) return; // Already loaded
+        const fbConfig = await import('./firebase-config.js');
+        database = fbConfig.database;
+        const fbDb = await import("firebase/database");
+        ref = fbDb.ref;
+        onValue = fbDb.onValue;
+        set = fbDb.set;
+        push = fbDb.push;
+        query = fbDb.query;
+        limitToLast = fbDb.limitToLast;
+        get = fbDb.get;
+    },
+
+    loadSwal: async function () {
+        if (Swal) return Swal;
+        const module = await import('sweetalert2');
+        Swal = module.default;
+        return Swal;
+    },
+
+    init: async function () {
+        await this.loadFirebase();
+        // Chart.js is loaded inside initCharts
         this.initCharts();
         this.connectFirebase();
         this.setupInputs();
@@ -25,11 +50,13 @@ window.app = {
     enterDashboard: function () {
         document.getElementById('landing-page').classList.add('hidden');
         document.getElementById('dashboard-app').classList.remove('hidden');
+        // Small delay to ensure UI transition starts before heavy JS loads
         setTimeout(() => this.init(), 100);
     },
 
-    logout: function () {
-        Swal.fire({
+    logout: async function () {
+        const swal = await this.loadSwal();
+        swal.fire({
             title: 'Keluar dari Dashboard?',
             text: "Anda akan kembali ke halaman utama.",
             icon: 'warning',
@@ -46,13 +73,16 @@ window.app = {
         });
     },
 
-    exportLogsToCSV: function () {
+    exportLogsToCSV: async function () {
+        await this.loadFirebase();
         if (!database) return;
 
-        get(query(ref(database, 'logs'), limitToLast(500))).then((snapshot) => {
+        get(query(ref(database, 'logs'), limitToLast(500))).then(async (snapshot) => {
             const data = snapshot.val();
+            const swal = await this.loadSwal();
+
             if (!data) {
-                Swal.fire({
+                swal.fire({
                     icon: 'info',
                     title: 'Info',
                     text: 'Tidak ada data log untuk diexport (kosong).'
@@ -94,9 +124,10 @@ window.app = {
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
-        }).catch(err => {
+        }).catch(async err => {
             console.error("Export Error:", err);
-            Swal.fire({
+            const swal = await this.loadSwal();
+            swal.fire({
                 icon: 'error',
                 title: 'Gagal',
                 text: 'Gagal mengambil data untuk export.'
@@ -244,13 +275,15 @@ window.app = {
         }
     },
 
-    saveAutomation: function (type) {
+    saveAutomation: async function (type) {
+        await this.loadFirebase();
         if (!database) return;
         const enabled = document.getElementById(`auto-${type}-enable`).checked;
         const threshold = parseInt(document.getElementById(type === 'pump' ? 'input-soil-thresh' : 'input-hum-thresh').value);
         set(ref(database, `config/automation/${type}`), { enabled, threshold })
-            .then(() => {
-                Swal.fire({
+            .then(async () => {
+                const swal = await this.loadSwal();
+                swal.fire({
                     icon: 'success',
                     title: 'Berhasil!',
                     text: 'Pengaturan tersimpan!',
@@ -367,8 +400,9 @@ window.app = {
                 </tr>`;
         });
     },
-    clearLogs: function () {
-        Swal.fire({
+    clearLogs: async function () {
+        const swal = await this.loadSwal();
+        swal.fire({
             title: 'Hapus Log?',
             text: "Data log akan dihapus permanen!",
             icon: 'warning',
@@ -379,19 +413,22 @@ window.app = {
             cancelButtonText: 'Batal'
         }).then((result) => {
             if (result.isConfirmed) {
-                set(ref(database, 'logs'), null).then(() => {
-                    Swal.fire(
-                        'Terhapus!',
-                        'Data log berhasil dihapus.',
-                        'success'
-                    );
-                });
+                if (database) {
+                    set(ref(database, 'logs'), null).then(() => {
+                        swal.fire(
+                            'Terhapus!',
+                            'Data log berhasil dihapus.',
+                            'success'
+                        );
+                    });
+                }
             }
         });
     },
 
     // --- MULTI CHARTS LOGIC ---
     createChartConfig: function (ctx, label, colorHex, bgColor) {
+        // Chart lazy loaded by initCharts
         return new Chart(ctx, {
             type: 'line',
             data: {
@@ -418,7 +455,12 @@ window.app = {
         });
     },
 
-    initCharts: function () {
+    initCharts: async function () {
+        if (!Chart) {
+            const module = await import('chart.js/auto');
+            Chart = module.default;
+        }
+
         this.charts.soil = this.createChartConfig(document.getElementById('soilChart').getContext('2d'), 'Tanah (%)', '#10b981', 'rgba(16, 185, 129, 0.1)');
         this.charts.hum = this.createChartConfig(document.getElementById('humChart').getContext('2d'), 'Udara (%)', '#06b6d4', 'rgba(6, 182, 212, 0.1)');
         this.charts.temp = this.createChartConfig(document.getElementById('tempChart').getContext('2d'), 'Suhu (°C)', '#f97316', 'rgba(249, 115, 22, 0.1)');
@@ -428,6 +470,8 @@ window.app = {
     },
 
     updateAllCharts: function (sensors) {
+        if (!this.charts.soil) return; // Charts not initialized yet
+
         const now = new Date().toLocaleTimeString();
         const updateSingle = (chart, val) => {
             if (!chart) return;
@@ -455,6 +499,7 @@ window.app = {
     },
 
     pinChart: function (key) {
+        if (!Chart) return; // Safety check
         console.log("Pin Chart Triggered:", key);
         const map = {
             'soil': { label: 'Kelembaban Tanah (%)', color: '#10b981', bg: 'rgba(16, 185, 129, 0.1)' },
@@ -556,3 +601,4 @@ window.app = {
         }, 1000);
     }
 };
+
