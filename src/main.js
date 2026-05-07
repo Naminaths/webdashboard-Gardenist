@@ -1,27 +1,55 @@
 import './style.css';
 
-// Module-scope variables for lazy-loaded dependencies
 let database, ref, onValue, set, push, query, limitToLast, get;
 let Chart;
 let Swal;
 
-// Attach app to window for global access
+const SENSOR_DEFAULTS = { soil: 0, temp: 0, humidity: 0, tank: 0, light: 0, mq135: 0 };
+const DEVICE_KEYS = ['pump', 'uv', 'mist', 'buzzer'];
+const VIEW_KEYS = ['overview', 'automation', 'logs'];
+
+const chartMeta = {
+    soil: { label: 'Kelembaban Tanah (%)', color: '#10b981', bg: 'rgba(16, 185, 129, 0.12)' },
+    hum: { label: 'Kelembaban Udara (%)', color: '#0891b2', bg: 'rgba(8, 145, 178, 0.12)' },
+    temp: { label: 'Suhu Lingkungan (°C)', color: '#f97316', bg: 'rgba(249, 115, 22, 0.12)' },
+    light: { label: 'Intensitas Cahaya (Lx)', color: '#ca8a04', bg: 'rgba(202, 138, 4, 0.12)' },
+    mq135: { label: 'Kualitas Udara (PPM)', color: '#e11d48', bg: 'rgba(225, 29, 72, 0.12)' },
+    tank: { label: 'Level Air Tangki (%)', color: '#4f46e5', bg: 'rgba(79, 70, 229, 0.12)' }
+};
+
+const text = (id, value) => {
+    const el = document.getElementById(id);
+    if (el) el.innerText = value;
+};
+
 window.app = {
     charts: {},
+    initialized: false,
+    clockTimer: null,
     state: {
         automation: { pump: { enabled: false, threshold: 30 }, mist: { enabled: false, threshold: 50 } },
-        sensors: { soil: 0, temp: 0, humidity: 0, tank: 0, light: 0, mq135: 0 },
+        sensors: { ...SENSOR_DEFAULTS },
         devices: { pump: 0, uv: 0, mist: 0, buzzer: 0 },
         alarmReason: null,
-        pinnedKey: null
+        mq135_ref: null,
+        pinnedKey: null,
+        sensorReady: false,
+        logs: {
+            items: [],
+            filtered: [],
+            page: 0,
+            pageSize: 10,
+            sortField: 'timestamp',
+            sortDir: 'desc'
+        }
     },
 
-    // --- LAZY LOADER HELPERS ---
     loadFirebase: async function () {
-        if (database) return; // Already loaded
+        if (database) return;
         const fbConfig = await import('./firebase-config.js');
+        const fbDb = await import('firebase/database');
+
         database = fbConfig.database;
-        const fbDb = await import("firebase/database");
         ref = fbDb.ref;
         onValue = fbDb.onValue;
         set = fbDb.set;
@@ -39,26 +67,49 @@ window.app = {
     },
 
     init: async function () {
+        if (this.initialized) return;
+        this.initialized = true;
+
         await this.loadFirebase();
-        // Chart.js is loaded inside initCharts
-        this.initCharts();
+        await this.initCharts();
         this.connectFirebase();
         this.setupInputs();
         this.startClock();
     },
 
     enterDashboard: function () {
-        document.getElementById('landing-page').classList.add('hidden');
-        document.getElementById('dashboard-app').classList.remove('hidden');
-        // Small delay to ensure UI transition starts before heavy JS loads
+        document.getElementById('landing-page')?.classList.add('hidden');
+        document.getElementById('dashboard-app')?.classList.remove('hidden');
+        this.initSidebar();
         setTimeout(() => this.init(), 100);
+    },
+
+    initSidebar: function () {
+        const collapsed = localStorage.getItem('gardenist-sidebar-collapsed') === 'true';
+        this.setSidebarCollapsed(collapsed);
+    },
+
+    setSidebarCollapsed: function (collapsed) {
+        const appEl = document.getElementById('dashboard-app');
+        const reveal = document.getElementById('sidebar-reveal');
+
+        appEl?.classList.toggle('sidebar-collapsed', collapsed);
+        if (reveal) reveal.setAttribute('aria-expanded', String(!collapsed));
+        localStorage.setItem('gardenist-sidebar-collapsed', String(collapsed));
+    },
+
+    toggleSidebar: function (collapsed) {
+        this.setSidebarCollapsed(collapsed);
+        setTimeout(() => {
+            Object.values(this.charts).forEach((chart) => chart?.resize?.());
+        }, 260);
     },
 
     logout: async function () {
         const swal = await this.loadSwal();
         swal.fire({
             title: 'Keluar dari Dashboard?',
-            text: "Anda akan kembali ke halaman utama.",
+            text: 'Anda akan kembali ke halaman utama.',
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#10b981',
@@ -67,8 +118,365 @@ window.app = {
             cancelButtonText: 'Batal'
         }).then((result) => {
             if (result.isConfirmed) {
-                document.getElementById('dashboard-app').classList.add('hidden');
-                document.getElementById('landing-page').classList.remove('hidden');
+                document.getElementById('dashboard-app')?.classList.add('hidden');
+                document.getElementById('landing-page')?.classList.remove('hidden');
+            }
+        });
+    },
+
+    navigate: function (viewId) {
+        VIEW_KEYS.forEach((id) => {
+            document.getElementById(`view-${id}`)?.classList.toggle('hidden', id !== viewId);
+            document.getElementById(`nav-${id}`)?.classList.toggle('is-active', id === viewId);
+            document.getElementById(`mobile-nav-${id}`)?.classList.toggle('is-active', id === viewId);
+        });
+    },
+
+    connectFirebase: function () {
+        if (!database) return;
+
+        const handleDbError = (error) => {
+            console.error('Firebase listener error:', error);
+            text('connection-status', 'Koneksi gagal');
+        };
+
+        onValue(ref(database, 'sensors'), (snapshot) => {
+            text('connection-status', 'Terhubung');
+            const data = snapshot.val();
+            if (!data) return;
+
+            this.state.sensors = { ...this.state.sensors, ...data };
+            this.state.sensorReady = true;
+            this.updateDashboardUI(this.state.sensors);
+            this.updateSystemSummary();
+            this.updateAllCharts(this.state.sensors);
+            this.runAutomationLogic();
+        }, handleDbError);
+
+        onValue(ref(database, 'devices'), (snapshot) => this.syncDeviceToggles(snapshot.val()), handleDbError);
+        onValue(ref(database, 'config/automation'), (snapshot) => this.syncAutomationUI(snapshot.val()), handleDbError);
+        onValue(query(ref(database, 'logs'), limitToLast(100)), (snapshot) => this.renderLogs(snapshot.val()), handleDbError);
+    },
+
+    metricStatus: function (id, label, tone) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.innerText = label;
+        el.className = `metric-status ${tone}`;
+    },
+
+    updateDashboardUI: function (data) {
+        if (data.soil !== undefined) {
+            text('val-soil', `${data.soil}%`);
+            this.metricStatus('soil-msg', data.soil < 40 ? 'Terlalu kering' : data.soil > 60 ? 'Terlalu lembab' : 'Ideal', data.soil < 40 ? 'tone-info' : data.soil > 60 ? 'tone-danger' : 'tone-good');
+        }
+        if (data.humidity !== undefined) {
+            text('val-hum', `${data.humidity}%`);
+            this.metricStatus('hum-msg', data.humidity < 40 ? 'Terlalu kering' : data.humidity > 60 ? 'Terlalu lembab' : 'Ideal', data.humidity < 40 ? 'tone-info' : data.humidity > 60 ? 'tone-danger' : 'tone-good');
+        }
+        if (data.temp !== undefined) {
+            text('val-temp', `${data.temp}°C`);
+            this.metricStatus('temp-msg', data.temp < 15 ? 'Terlalu dingin' : data.temp > 30 ? 'Terlalu panas' : 'Ideal', data.temp < 15 ? 'tone-info' : data.temp > 30 ? 'tone-danger' : 'tone-good');
+        }
+        if (data.light !== undefined) {
+            text('val-light', data.light);
+            this.metricStatus('light-msg', data.light < 500 ? 'Kurang cahaya' : data.light > 2000 ? 'Terlalu terang' : 'Ideal', data.light < 500 ? 'tone-info' : data.light > 2000 ? 'tone-danger' : 'tone-good');
+        }
+        if (data.mq135 !== undefined) {
+            text('val-mq135', data.mq135);
+            this.metricStatus('mq135-msg', data.mq135 < 450 ? 'Udara segar' : data.mq135 < 900 ? 'Cukup baik' : 'Polusi tinggi', data.mq135 < 450 ? 'tone-good' : data.mq135 < 900 ? 'tone-warning' : 'tone-danger');
+        }
+        if (data.tank !== undefined) {
+            text('val-tank', `${data.tank}%`);
+            this.metricStatus('tank-msg', data.tank < 10 ? 'Perlu isi air' : 'Aman', data.tank < 10 ? 'tone-danger animate-pulse' : 'tone-muted');
+        }
+    },
+
+    getSensorIssues: function () {
+        if (!this.state.sensorReady) return [];
+
+        const s = this.state.sensors;
+        const issues = [];
+
+        if (s.soil < 40) issues.push('Tanah kering');
+        if (s.soil > 60) issues.push('Tanah lembab');
+        if (s.humidity < 40) issues.push('Udara kering');
+        if (s.humidity > 60) issues.push('Udara lembab');
+        if (s.temp < 15) issues.push('Suhu rendah');
+        if (s.temp > 30) issues.push('Suhu tinggi');
+        if (s.light < 500) issues.push('Cahaya rendah');
+        if (s.light > 2000) issues.push('Cahaya berlebih');
+        if (s.mq135 >= 900) issues.push('Polusi tinggi');
+        if (s.tank < 10 && s.tank > 0) issues.push('Tangki kritis');
+
+        return issues;
+    },
+
+    updateSystemSummary: function () {
+        const issues = this.getSensorIssues();
+        const activeDevices = DEVICE_KEYS.filter((key) => this.state.devices[key] == 1);
+        const activeAutomation = ['pump', 'mist'].filter((key) => this.state.automation?.[key]?.enabled);
+        const healthScore = Math.max(0, Math.round(((10 - issues.length) / 10) * 100));
+
+        text('summary-health', this.state.sensorReady ? `${healthScore}%` : '--');
+        text('summary-health-note', !this.state.sensorReady ? 'Menunggu data sensor' : issues.length ? `${issues.slice(0, 2).join(', ')}${issues.length > 2 ? ` +${issues.length - 2}` : ''}` : 'Semua parameter dalam batas aman');
+        text('summary-devices', `${activeDevices.length}/${DEVICE_KEYS.length}`);
+        text('summary-devices-note', activeDevices.length ? activeDevices.map((key) => key.toUpperCase()).join(', ') : 'Belum ada perangkat aktif');
+        text('summary-alerts', `${issues.length} isu`);
+        text('summary-alerts-note', issues.length ? issues.slice(0, 3).join(', ') : 'Tidak ada alarm kritis');
+        text('summary-automation', `${activeAutomation.length}/2`);
+        text('summary-automation-note', activeAutomation.length ? activeAutomation.map((key) => key === 'pump' ? 'Auto Siram' : 'Auto Mist').join(', ') : 'Aturan otomatis nonaktif');
+    },
+
+    syncDeviceToggles: function (devices) {
+        if (!devices) return;
+        this.state.devices = { ...this.state.devices, ...devices };
+
+        DEVICE_KEYS.forEach((key) => {
+            const enabled = this.state.devices[key] == 1;
+            const toggle = document.getElementById(`toggle-${key}`);
+            const status = document.getElementById(`status-${key}`);
+
+            if (toggle) toggle.checked = enabled;
+            if (!status) return;
+
+            let label = enabled ? 'ON' : 'OFF';
+            let className = enabled ? 'device-status is-on' : 'device-status';
+
+            if (key === 'buzzer' && enabled) {
+                const tankCritical = this.state.alarmReason === 'tank' || this.state.sensors.tank < 10;
+                const pollutionCritical = this.state.alarmReason === 'pollution' || this.state.sensors.mq135 > 900;
+
+                if (tankCritical && pollutionCritical) label = 'ON (Tangki & polusi kritis)';
+                else if (tankCritical) label = 'ON (Tangki kritis)';
+                else if (pollutionCritical) label = 'ON (Polusi tinggi)';
+
+                className = 'device-status is-alert';
+            }
+
+            status.innerText = label;
+            status.className = className;
+        });
+
+        this.updateSystemSummary();
+    },
+
+    syncAutomationUI: function (cfg) {
+        if (!cfg) return;
+        this.state.automation = { ...this.state.automation, ...cfg };
+
+        if (cfg.pump) {
+            const enable = document.getElementById('auto-pump-enable');
+            const input = document.getElementById('input-soil-thresh');
+            if (enable) enable.checked = cfg.pump.enabled;
+            if (input) input.value = cfg.pump.threshold;
+            text('lbl-soil-thresh', `${cfg.pump.threshold}%`);
+        }
+
+        if (cfg.mist) {
+            const enable = document.getElementById('auto-mist-enable');
+            const input = document.getElementById('input-hum-thresh');
+            if (enable) enable.checked = cfg.mist.enabled;
+            if (input) input.value = cfg.mist.threshold;
+            text('lbl-hum-thresh', `${cfg.mist.threshold}%`);
+        }
+
+        this.runAutomationLogic();
+        this.updateSystemSummary();
+    },
+
+    logActivity: function (type, message) {
+        if (!database) return;
+        push(ref(database, 'logs'), { timestamp: Date.now(), type, message });
+    },
+
+    toggleDevice: function (key, enabled, source = 'MANUAL') {
+        if (!database) return;
+        set(ref(database, `devices/${key}`), enabled ? 1 : 0)
+            .then(() => this.logActivity(source, `${key.toUpperCase()} ${enabled ? 'ON' : 'OFF'}`));
+    },
+
+    saveAutomation: async function (type) {
+        await this.loadFirebase();
+        if (!database) return;
+
+        const thresholdId = type === 'pump' ? 'input-soil-thresh' : 'input-hum-thresh';
+        const enabled = document.getElementById(`auto-${type}-enable`)?.checked || false;
+        const threshold = Number.parseInt(document.getElementById(thresholdId)?.value || '0', 10);
+
+        set(ref(database, `config/automation/${type}`), { enabled, threshold })
+            .then(async () => {
+                const swal = await this.loadSwal();
+                swal.fire({ icon: 'success', title: 'Berhasil', text: 'Pengaturan tersimpan.', timer: 1500, showConfirmButton: false });
+                this.logActivity('CONFIG', `Update aturan ${type.toUpperCase()}`);
+            });
+    },
+
+    runAutomationLogic: function () {
+        if (!database) return;
+
+        const s = this.state.sensors;
+        const c = this.state.automation;
+        const d = this.state.devices;
+        const now = Date.now();
+
+        if (c?.pump?.enabled) {
+            const threshold = Number.parseInt(c.pump.threshold, 10);
+            if (s.soil < threshold && d.pump == 0) this.toggleDevice('pump', true, 'AUTO');
+            if (s.soil > threshold + 5 && d.pump == 1) this.toggleDevice('pump', false, 'AUTO');
+        }
+
+        if (c?.mist?.enabled) {
+            const threshold = Number.parseInt(c.mist.threshold, 10);
+            if (s.humidity < threshold && d.mist == 0) this.toggleDevice('mist', true, 'AUTO');
+            if (s.humidity > threshold + 5 && d.mist == 1) this.toggleDevice('mist', false, 'AUTO');
+        }
+
+        if (!this.state.mq135_ref || now - this.state.mq135_ref.ts > 5000) {
+            this.state.mq135_ref = { val: s.mq135 || 0, ts: now };
+        }
+
+        const pollutionSpike = (s.mq135 || 0) - this.state.mq135_ref.val > 200;
+        const pollutionCritical = pollutionSpike || s.mq135 > 900;
+        const tankCritical = s.tank < 10 && s.tank > 0;
+        const shouldBuzz = pollutionCritical || tankCritical;
+
+        if (pollutionCritical) {
+            this.metricStatus('mq135-msg', pollutionSpike ? 'Bahaya: lonjakan polusi' : 'Bahaya: polusi tinggi', 'tone-danger animate-pulse');
+        }
+
+        if (shouldBuzz && d.buzzer == 0) {
+            const alarmState = pollutionCritical && tankCritical ? 'tank_and_pollution' : pollutionCritical ? 'pollution' : 'tank';
+            const reason = pollutionCritical && tankCritical ? 'Polusi Tinggi & Air Tangki Kritis!' : pollutionCritical ? 'Polusi Tinggi!' : 'Air Tangki Kritis!';
+
+            this.state.alarmReason = alarmState;
+            set(ref(database, 'devices/buzzer'), 1);
+            this.logActivity('ALARM', `Buzzer ON (${reason})`);
+        } else if (!shouldBuzz && d.buzzer == 1) {
+            this.state.alarmReason = null;
+            set(ref(database, 'devices/buzzer'), 0);
+        }
+    },
+
+    renderLogs: function (data) {
+        this.state.logs.items = data ? Object.values(data).map((log) => ({
+            timestamp: Number(log.timestamp || 0),
+            type: String(log.type || 'INFO').toUpperCase(),
+            message: String(log.message || '-')
+        })) : [];
+        this.state.logs.page = 0;
+        this.renderFilteredLogs();
+    },
+
+    getFilteredLogs: function () {
+        const selectedType = document.getElementById('log-type-filter')?.value || 'all';
+        const queryText = (document.getElementById('log-search')?.value || '').trim().toLowerCase();
+        const { sortField, sortDir } = this.state.logs;
+
+        return this.state.logs.items
+            .filter((log) => selectedType === 'all' || log.type === selectedType)
+            .filter((log) => !queryText || `${log.type} ${log.message}`.toLowerCase().includes(queryText))
+            .sort((a, b) => {
+                const aVal = a[sortField];
+                const bVal = b[sortField];
+                const comparison = aVal < bVal ? -1 : aVal > bVal ? 1 : 0;
+                return sortDir === 'asc' ? comparison : -comparison;
+            });
+    },
+
+    renderFilteredLogs: function () {
+        const tbody = document.getElementById('logs-table-body');
+        if (!tbody) return;
+
+        const logs = this.getFilteredLogs();
+        this.state.logs.filtered = logs;
+        const totalPages = Math.max(1, Math.ceil(logs.length / this.state.logs.pageSize));
+        this.state.logs.page = Math.min(this.state.logs.page, totalPages - 1);
+        const start = this.state.logs.page * this.state.logs.pageSize;
+        const visibleLogs = logs.slice(start, start + this.state.logs.pageSize);
+
+        tbody.innerHTML = '';
+
+        if (!visibleLogs.length) {
+            tbody.innerHTML = '<tr><td colspan="3" class="p-5 text-center text-slate-400">Tidak ada log yang cocok.</td></tr>';
+        }
+
+        visibleLogs.forEach((log) => {
+            const row = document.createElement('tr');
+            row.className = 'border-b border-slate-100 transition hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-800/60';
+
+            const timeCell = document.createElement('td');
+            timeCell.className = 'whitespace-nowrap p-4 text-xs font-mono text-slate-400';
+            timeCell.textContent = log.timestamp ? new Date(log.timestamp).toLocaleString('id-ID', { hour12: false }) : '-';
+
+            const typeCell = document.createElement('td');
+            typeCell.className = 'p-4';
+            const badge = document.createElement('span');
+            badge.className = `log-badge ${String(log.type || 'INFO').toLowerCase()}`;
+            badge.textContent = log.type || 'INFO';
+            typeCell.appendChild(badge);
+
+            const messageCell = document.createElement('td');
+            messageCell.className = 'min-w-64 p-4 text-sm font-medium text-slate-700 dark:text-slate-200';
+            messageCell.textContent = log.message || '-';
+
+            row.append(timeCell, typeCell, messageCell);
+            tbody.appendChild(row);
+        });
+
+        text('logs-count', `${logs.length} log`);
+        text('logs-page-info', logs.length ? `Menampilkan ${start + 1}-${Math.min(start + this.state.logs.pageSize, logs.length)} dari ${logs.length}` : 'Tidak ada data');
+
+        const prev = document.getElementById('logs-prev');
+        const next = document.getElementById('logs-next');
+        if (prev) prev.disabled = this.state.logs.page <= 0;
+        if (next) next.disabled = this.state.logs.page >= totalPages - 1;
+
+        ['timestamp', 'type', 'message'].forEach((field) => {
+            text(`sort-${field}`, this.state.logs.sortField === field ? (this.state.logs.sortDir === 'asc' ? '↑' : '↓') : '');
+        });
+    },
+
+    changeLogPage: function (direction) {
+        const totalPages = Math.max(1, Math.ceil(this.state.logs.filtered.length / this.state.logs.pageSize));
+        this.state.logs.page = Math.min(Math.max(this.state.logs.page + direction, 0), totalPages - 1);
+        this.renderFilteredLogs();
+    },
+
+    sortLogs: function (field) {
+        if (this.state.logs.sortField === field) {
+            this.state.logs.sortDir = this.state.logs.sortDir === 'asc' ? 'desc' : 'asc';
+        } else {
+            this.state.logs.sortField = field;
+            this.state.logs.sortDir = field === 'timestamp' ? 'desc' : 'asc';
+        }
+        this.state.logs.page = 0;
+        this.renderFilteredLogs();
+    },
+
+    resetLogFilters: function () {
+        const typeFilter = document.getElementById('log-type-filter');
+        const search = document.getElementById('log-search');
+        if (typeFilter) typeFilter.value = 'all';
+        if (search) search.value = '';
+        this.state.logs.page = 0;
+        this.renderFilteredLogs();
+    },
+
+    clearLogs: async function () {
+        const swal = await this.loadSwal();
+        swal.fire({
+            title: 'Hapus Log?',
+            text: 'Data log akan dihapus permanen.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ef4444',
+            cancelButtonColor: '#64748b',
+            confirmButtonText: 'Ya, hapus',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed && database) {
+                set(ref(database, 'logs'), null).then(() => swal.fire('Terhapus', 'Data log berhasil dihapus.', 'success'));
             }
         });
     },
@@ -82,362 +490,44 @@ window.app = {
             const swal = await this.loadSwal();
 
             if (!data) {
-                swal.fire({
-                    icon: 'info',
-                    title: 'Info',
-                    text: 'Tidak ada data log untuk diexport (kosong).'
-                });
+                swal.fire({ icon: 'info', title: 'Info', text: 'Tidak ada data log untuk diexport.' });
                 return;
             }
 
-            // Add BOM (\uFEFF) so Excel opens it correctly with UTF-8
-            // Header with 3 columns
-            let csvContent = "\uFEFFTimestamp,Type,Message\n";
-
-            Object.values(data).sort((a, b) => b.timestamp - a.timestamp).forEach(log => {
-                // 1. Timestamp "YYYY-MM-DD HH:mm:ss"
-                const d = new Date(log.timestamp);
-                const dateStr = d.getFullYear() + "-" +
-                    String(d.getMonth() + 1).padStart(2, '0') + "-" +
-                    String(d.getDate()).padStart(2, '0') + " " +
-                    String(d.getHours()).padStart(2, '0') + ":" +
-                    String(d.getMinutes()).padStart(2, '0') + ":" +
-                    String(d.getSeconds()).padStart(2, '0');
-
-                // 2. Type (Escape quotes just in case)
-                const typeStr = (log.type || 'INFO').replace(/"/g, '""');
-
-                // 3. Message (Escape quotes, replace newlines)
-                const msgStr = (log.message || '').replace(/"/g, '""').replace(/\n/g, " ");
-
-                // Wrap all fields in double quotes to guarantee column integrity
-                csvContent += `"${dateStr}","${typeStr}","${msgStr}"\n`;
-            });
-
-            // Blob Export
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement("a");
-            link.setAttribute("href", url);
-            link.setAttribute("download", `smartgarden_logs_${new Date().toISOString().split('T')[0]}.csv`);
-            link.style.display = 'none';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }).catch(async err => {
-            console.error("Export Error:", err);
-            const swal = await this.loadSwal();
-            swal.fire({
-                icon: 'error',
-                title: 'Gagal',
-                text: 'Gagal mengambil data untuk export.'
-            });
-        });
-    },
-
-    navigate: function (viewId) {
-        ['overview', 'automation', 'logs'].forEach(id => {
-            document.getElementById(`view-${id}`).classList.add('hidden');
-            document.getElementById(`nav-${id}`).classList.remove('bg-emerald-50', 'text-emerald-700');
-            document.getElementById(`nav-${id}`).classList.add('text-slate-600');
-        });
-        document.getElementById(`view-${viewId}`).classList.remove('hidden');
-        document.getElementById(`nav-${viewId}`).classList.add('bg-emerald-50', 'text-emerald-700');
-        document.getElementById(`nav-${viewId}`).classList.remove('text-slate-600');
-    },
-
-    connectFirebase: function () {
-        if (!database) return;
-        const statusEl = document.getElementById('connection-status');
-
-        onValue(ref(database, 'sensors'), (snapshot) => {
-            statusEl.innerText = "Terhubung";
-            const data = snapshot.val();
-            if (data) {
-                this.state.sensors = { ...this.state.sensors, ...data };
-                this.updateDashboardUI(this.state.sensors);
-                this.updateAllCharts(this.state.sensors);
-                this.runAutomationLogic();
-            }
-        });
-
-        onValue(ref(database, 'devices'), (snap) => this.syncDeviceToggles(snap.val()));
-        onValue(ref(database, 'config/automation'), (snap) => this.syncAutomationUI(snap.val()));
-        onValue(query(ref(database, 'logs'), limitToLast(20)), (snap) => this.renderLogs(snap.val()));
-    },
-
-    updateDashboardUI: function (data) {
-        if (data.soil !== undefined) {
-            document.getElementById('val-soil').innerText = data.soil + '%';
-            const msg = document.getElementById('soil-msg');
-            msg.innerText = data.soil < 40 ? "TERLALU KERING" : data.soil > 60 ? "TERLALU LEMBAB" : "HUMIDITAS IDEAL";
-            msg.className = data.soil < 40 ? "text-[10px] text-blue-600 font-bold" : data.soil > 60 ? "text-[10px] text-red-600 font-bold" : "text-[10px] text-emerald-600 font-bold";
-        }
-        if (data.humidity !== undefined) {
-            document.getElementById('val-hum').innerText = data.humidity + '%';
-            const msg = document.getElementById('hum-msg');
-            msg.innerText = data.humidity < 40 ? "TERLALU KERING" : data.humidity > 60 ? "TERLALU LEMBAB" : "HUMIDITAS IDEAL";
-            msg.className = data.humidity < 40 ? "text-[10px] text-blue-600 font-bold" : data.humidity > 60 ? "text-[10px] text-red-600 font-bold" : "text-[10px] text-emerald-600 font-bold";
-        }
-        if (data.temp !== undefined) {
-            document.getElementById('val-temp').innerText = data.temp + '°C';
-            const msg = document.getElementById('temp-msg');
-            msg.innerText = data.temp < 15 ? "TERLALU DINGIN" : data.temp > 30 ? "TERLALU PANAS" : "SUHU IDEAL";
-            msg.className = data.temp < 15 ? "text-[10px] text-blue-600 font-bold" : data.temp > 30 ? "text-[10px] text-red-600 font-bold" : "text-[10px] text-emerald-600 font-bold";
-        }
-        if (data.light !== undefined) {
-            document.getElementById('val-light').innerText = data.light;
-            const msg = document.getElementById('light-msg');
-            msg.innerText = data.light < 500 ? "KURANG CAHAYA" : data.light > 2000 ? "TERLALU TERANG" : "CAHAYA IDEAL";
-            msg.className = data.light < 500 ? "text-[10px] text-blue-600 font-bold" : data.light > 2000 ? "text-[10px] text-red-600 font-bold" : "text-[10px] text-emerald-600 font-bold";
-        }
-        if (data.mq135 !== undefined) {
-            document.getElementById('val-mq135').innerText = data.mq135;
-            const msg = document.getElementById('mq135-msg');
-            // Example Logic: <450 Good, 450-900 Moderate, >900 Poor
-            msg.innerText = data.mq135 < 450 ? "UDARA SEGAR" : data.mq135 < 900 ? "CUKUP BAIK" : "POLUSI TINGGI";
-            msg.className = data.mq135 < 450 ? "text-[10px] text-emerald-600 font-bold" : data.mq135 < 900 ? "text-[10px] text-orange-500 font-bold" : "text-[10px] text-rose-600 font-bold";
-        }
-        if (data.tank !== undefined) {
-            document.getElementById('val-tank').innerText = data.tank + '%';
-            const msg = document.getElementById('tank-msg');
-            msg.innerText = data.tank < 10 ? "PERLU ISI AIR" : "Aman";
-            msg.className = data.tank < 10 ? "text-[10px] text-red-600 font-bold animate-pulse" : "text-[10px] text-slate-400";
-        }
-
-    },
-
-    syncDeviceToggles: function (dev) {
-        if (!dev) return;
-        ['pump', 'uv', 'mist', 'buzzer'].forEach(d => {
-            const el = document.getElementById(`toggle-${d}`);
-            if (el) el.checked = dev[d] == 1;
-            const st = document.getElementById(`status-${d}`);
-            if (st) {
-                let statusText = dev[d] == 1 ? "ON" : "OFF";
-                let statusClass = dev[d] == 1 ? "text-xs font-bold text-emerald-600" : "text-xs text-slate-400";
-
-                // Custom Alarm Logic for Buzzer
-                if (d === 'buzzer' && dev[d] == 1) {
-                    if (this.state.alarmReason === 'tank' || this.state.sensors?.tank < 10) {
-                        statusText = "ON (Air Tangki Kritis!)";
-                        statusClass = "text-[10px] font-bold text-red-600 animate-pulse";
-                    } else if (this.state.alarmReason === 'pollution' || this.state.sensors?.mq135 > 900) {
-                        statusText = "ON (Polusi Tinggi!)";
-                        statusClass = "text-[10px] font-bold text-red-600 animate-pulse";
-                    } else if (this.state.alarmReason === 'tank_and_pollution' || this.state.sensors?.tank < 10 && this.state.sensors?.mq135 > 900) {
-                        statusText = "ON (Air Tangki Kritis dan Polusi Tinggi!)";
-                        statusClass = "text-[10px] font-bold text-green-600 animate-pulse";
-                    }
-                }
-
-                st.innerText = statusText;
-                st.className = statusClass;
-            }
-        });
-    },
-
-    syncAutomationUI: function (cfg) {
-        console.log("Syncing Automation Config:", cfg);
-        if (cfg) {
-            this.state.automation = { ...this.state.automation, ...cfg };
-
-            if (cfg.pump) {
-                document.getElementById('auto-pump-enable').checked = cfg.pump.enabled;
-                document.getElementById('input-soil-thresh').value = cfg.pump.threshold;
-                document.getElementById('lbl-soil-thresh').innerText = cfg.pump.threshold + '%';
-            }
-            if (cfg.mist) {
-                document.getElementById('auto-mist-enable').checked = cfg.mist.enabled;
-                document.getElementById('input-hum-thresh').value = cfg.mist.threshold;
-                document.getElementById('lbl-hum-thresh').innerText = cfg.mist.threshold + '%';
-            }
-
-            // Re-run logic immediately with new settings
-            this.runAutomationLogic();
-        }
-    },
-
-    // --- FUNGSI LOGGING ---
-    logActivity: function (type, message) {
-        if (!database) return;
-        push(ref(database, 'logs'), {
-            timestamp: Date.now(),
-            type: type,
-            message: message
-        });
-    },
-
-    toggleDevice: function (d, val, source = 'MANUAL') {
-        if (database) {
-            set(ref(database, `devices/${d}`), val ? 1 : 0)
-                .then(() => this.logActivity(source, `${d.toUpperCase()} ${val ? 'ON' : 'OFF'}`));
-        }
-    },
-
-    saveAutomation: async function (type) {
-        await this.loadFirebase();
-        if (!database) return;
-        const enabled = document.getElementById(`auto-${type}-enable`).checked;
-        const threshold = parseInt(document.getElementById(type === 'pump' ? 'input-soil-thresh' : 'input-hum-thresh').value);
-        set(ref(database, `config/automation/${type}`), { enabled, threshold })
-            .then(async () => {
-                const swal = await this.loadSwal();
-                swal.fire({
-                    icon: 'success',
-                    title: 'Berhasil!',
-                    text: 'Pengaturan tersimpan!',
-                    timer: 1500,
-                    showConfirmButton: false
+            const rows = Object.values(data)
+                .sort((a, b) => b.timestamp - a.timestamp)
+                .map((log) => {
+                    const d = new Date(log.timestamp);
+                    const date = d.toLocaleString('sv-SE').replace('T', ' ');
+                    const type = String(log.type || 'INFO').replace(/"/g, '""');
+                    const message = String(log.message || '').replace(/"/g, '""').replace(/\n/g, ' ');
+                    return `"${date}","${type}","${message}"`;
                 });
-                this.logActivity('CONFIG', `Update Aturan ${type.toUpperCase()}`);
-            });
-    },
 
-    runAutomationLogic: function () {
-        const s = this.state.sensors; const c = this.state.automation; const d = this.state.devices;
-        const now = Date.now();
-
-        // Debug Log
-        // console.log("Run Auto Logic:", { sensors: s, config: c, devices: d });
-
-        // Pump Logic (Soil)
-        if (c?.pump?.enabled && database) {
-            const threshold = parseInt(c.pump.threshold); // Ensure Number
-            if (s.soil < threshold && d.pump == 0) {
-                console.log("Auto: Pump ON Triggered");
-                this.toggleDevice('pump', true, 'AUTO');
-            }
-            else if (s.soil > threshold + 5 && d.pump == 1) {
-                console.log("Auto: Pump OFF Triggered");
-                this.toggleDevice('pump', false, 'AUTO');
-            }
-        }
-
-        // Mist Logic (Humidity)
-        if (c?.mist?.enabled && database) {
-            const threshold = parseInt(c.mist.threshold); // Ensure Number
-            if (s.humidity < threshold && d.mist == 0) {
-                console.log("Auto: Mist ON Triggered");
-                this.toggleDevice('mist', true, 'AUTO');
-            }
-            else if (s.humidity > threshold + 5 && d.mist == 1) {
-                console.log("Auto: Mist OFF Triggered");
-                this.toggleDevice('mist', false, 'AUTO');
-            }
-        }
-
-        // MQ135 Spike Logic (Rate of Rise > 200 in 5s)
-        if (!this.state.mq135_ref || (now - this.state.mq135_ref.ts > 5000)) {
-            // Reset window every 5 seconds or if undefined
-            this.state.mq135_ref = { val: s.mq135 || 0, ts: now };
-        }
-
-        const mqDiff = (s.mq135 || 0) - this.state.mq135_ref.val;
-        const isPollutionSpike = (mqDiff > 200);
-        const isHighPollution = (s.mq135 > 900); // New Static Threshold
-        const isPollutionCritical = isPollutionSpike || isHighPollution;
-
-        if (isPollutionCritical) {
-            // Force Status Update for Spike/High
-            const msg = document.getElementById('mq135-msg');
-            if (msg) {
-                msg.innerText = isPollutionSpike ? "BAHAYA: LONJAKAN POLUSI" : "BAHAYA: POLUSI TINGGI";
-                msg.className = "text-[10px] text-red-600 font-bold animate-pulse";
-            }
-        }
-
-        // Buzzer Logic (Tank Critical OR Pollution Critical)
-        const isTankCritical = (s.tank < 10 && s.tank > 0);
-        const shouldBuzz = isTankCritical || isPollutionCritical;
-
-        if (shouldBuzz && d.buzzer == 0) {
-            set(ref(database, 'devices/buzzer'), 1);
-
-            // Determine Reason and Priority
-            let reason = "";
-            let alarmState = ""; // pollution, tank, tank_and_pollution
-
-            if (isPollutionCritical && isTankCritical) {
-                reason = "Polusi Tinggi & Air Tangki Kritis!";
-                alarmState = "tank_and_pollution";
-            } else if (isPollutionCritical) {
-                reason = "Polusi Tinggi!"; // Applies to both Spike and >900
-                alarmState = "pollution";
-            } else {
-                reason = "Air Tangki Kritis!";
-                alarmState = "tank";
-            }
-
-            // Set local alarm reason for UI
-            this.state.alarmReason = alarmState;
-            this.logActivity('ALARM', `Buzzer ON (${reason})`);
-        }
-        else if (!shouldBuzz && d.buzzer == 1 && database) {
-            set(ref(database, 'devices/buzzer'), 0);
-            this.state.alarmReason = null; // Reset reason
-        }
-    },
-
-    renderLogs: function (data) {
-        const tbody = document.getElementById('logs-table-body');
-        tbody.innerHTML = '';
-        if (!data) {
-            tbody.innerHTML = '<tr><td colspan="3" class="p-4 text-center text-slate-400">Belum ada data log.</td></tr>';
-            return;
-        }
-        Object.values(data).sort((a, b) => b.timestamp - a.timestamp).forEach(log => {
-            let badgeClass = "bg-slate-100 text-slate-600";
-            if (log.type === 'ALARM') badgeClass = "bg-red-100 text-red-600";
-            if (log.type === 'AUTO') badgeClass = "bg-blue-100 text-blue-600";
-            if (log.type === 'MANUAL') badgeClass = "bg-emerald-100 text-emerald-600";
-
-            tbody.innerHTML += `
-                <tr class="border-b border-slate-50 hover:bg-slate-50/50 transition">
-                    <td class="p-4 text-xs text-slate-400 font-mono">${new Date(log.timestamp).toLocaleTimeString()}</td>
-                    <td class="p-4"><span class="${badgeClass} px-2 py-1 rounded text-xs font-bold">${log.type || 'INFO'}</span></td>
-                    <td class="p-4 text-slate-700 font-medium text-sm">${log.message}</td>
-                </tr>`;
-        });
-    },
-    clearLogs: async function () {
-        const swal = await this.loadSwal();
-        swal.fire({
-            title: 'Hapus Log?',
-            text: "Data log akan dihapus permanen!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#ef4444',
-            cancelButtonColor: '#64748b',
-            confirmButtonText: 'Ya, Hapus!',
-            cancelButtonText: 'Batal'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                if (database) {
-                    set(ref(database, 'logs'), null).then(() => {
-                        swal.fire(
-                            'Terhapus!',
-                            'Data log berhasil dihapus.',
-                            'success'
-                        );
-                    });
-                }
-            }
+            const blob = new Blob([`\uFEFFTimestamp,Type,Message\n${rows.join('\n')}`], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `smartgarden_logs_${new Date().toISOString().split('T')[0]}.csv`;
+            link.click();
+            URL.revokeObjectURL(url);
+        }).catch(async (err) => {
+            console.error('Export Error:', err);
+            const swal = await this.loadSwal();
+            swal.fire({ icon: 'error', title: 'Gagal', text: 'Gagal mengambil data untuk export.' });
         });
     },
 
-    // --- MULTI CHARTS LOGIC ---
-    createChartConfig: function (ctx, label, colorHex, bgColor) {
-        // Chart lazy loaded by initCharts
+    createChartConfig: function (ctx, meta) {
         return new Chart(ctx, {
             type: 'line',
             data: {
                 labels: Array(15).fill(''),
                 datasets: [{
-                    label: label,
+                    label: meta.label,
                     data: Array(15).fill(0),
-                    borderColor: colorHex,
-                    backgroundColor: bgColor,
+                    borderColor: meta.color,
+                    backgroundColor: meta.bg,
                     borderWidth: 2,
                     tension: 0.4,
                     fill: true,
@@ -461,117 +551,80 @@ window.app = {
             Chart = module.default;
         }
 
-        this.charts.soil = this.createChartConfig(document.getElementById('soilChart').getContext('2d'), 'Tanah (%)', '#10b981', 'rgba(16, 185, 129, 0.1)');
-        this.charts.hum = this.createChartConfig(document.getElementById('humChart').getContext('2d'), 'Udara (%)', '#06b6d4', 'rgba(6, 182, 212, 0.1)');
-        this.charts.temp = this.createChartConfig(document.getElementById('tempChart').getContext('2d'), 'Suhu (°C)', '#f97316', 'rgba(249, 115, 22, 0.1)');
-        this.charts.light = this.createChartConfig(document.getElementById('lightChart').getContext('2d'), 'Cahaya (Lx)', '#eab308', 'rgba(234, 179, 8, 0.1)');
-        this.charts.mq135 = this.createChartConfig(document.getElementById('mq135Chart').getContext('2d'), 'Kualitas Udara (PPM)', '#e11d48', 'rgba(225, 29, 72, 0.1)');
-        this.charts.tank = this.createChartConfig(document.getElementById('tankChart').getContext('2d'), 'Air (%)', '#6366f1', 'rgba(99, 102, 241, 0.1)');
+        Object.entries(chartMeta).forEach(([key, meta]) => {
+            const canvasId = `${key}Chart`;
+            const canvas = document.getElementById(canvasId);
+            if (canvas) this.charts[key] = this.createChartConfig(canvas.getContext('2d'), meta);
+        });
     },
 
     updateAllCharts: function (sensors) {
-        if (!this.charts.soil) return; // Charts not initialized yet
+        if (!this.charts.soil) return;
 
-        const now = new Date().toLocaleTimeString();
-        const updateSingle = (chart, val) => {
+        const now = new Date().toLocaleTimeString('id-ID', { hour12: false });
+        const updateSingle = (chart, value) => {
             if (!chart) return;
-            // Keep history same length (20)
             if (chart.data.datasets[0].data.length > 20) {
                 chart.data.datasets[0].data.shift();
                 chart.data.labels.shift();
             }
-            chart.data.datasets[0].data.push(val);
+            chart.data.datasets[0].data.push(value);
             chart.data.labels.push(now);
             chart.update('none');
         };
+        const updateSensor = (chart, value) => {
+            const parsed = Number(value);
+            if (Number.isFinite(parsed)) updateSingle(chart, parsed);
+        };
 
-        if (sensors.soil !== undefined) updateSingle(this.charts.soil, sensors.soil);
-        if (sensors.humidity !== undefined) updateSingle(this.charts.hum, sensors.humidity);
-        if (sensors.temp !== undefined) updateSingle(this.charts.temp, sensors.temp);
-        if (sensors.light !== undefined) updateSingle(this.charts.light, sensors.light);
-        if (sensors.mq135 !== undefined) updateSingle(this.charts.mq135, sensors.mq135);
-        if (sensors.tank !== undefined) updateSingle(this.charts.tank, sensors.tank);
+        updateSensor(this.charts.soil, sensors.soil);
+        updateSensor(this.charts.hum, sensors.humidity);
+        updateSensor(this.charts.temp, sensors.temp);
+        updateSensor(this.charts.light, sensors.light);
+        updateSensor(this.charts.mq135, sensors.mq135);
+        updateSensor(this.charts.tank, sensors.tank);
 
-        // Update Pinned Chart if active
-        if (this.state.pinnedKey && this.charts.pinned && sensors[this.state.pinnedKey] !== undefined) {
-            updateSingle(this.charts.pinned, sensors[this.state.pinnedKey]);
+        const pinnedSource = this.state.pinnedKey === 'hum' ? 'humidity' : this.state.pinnedKey;
+        if (this.state.pinnedKey && sensors[pinnedSource] !== undefined) {
+            updateSensor(this.charts.pinned, sensors[pinnedSource]);
         }
     },
 
     pinChart: function (key) {
-        if (!Chart) return; // Safety check
-        console.log("Pin Chart Triggered:", key);
-        const map = {
-            'soil': { label: 'Kelembaban Tanah (%)', color: '#10b981', bg: 'rgba(16, 185, 129, 0.1)' },
-            'hum': { label: 'Kelembaban Udara (%)', color: '#06b6d4', bg: 'rgba(6, 182, 212, 0.1)' },
-            'temp': { label: 'Suhu Lingkungan (°C)', color: '#f97316', bg: 'rgba(249, 115, 22, 0.1)' },
-            'light': { label: 'Intensitas Cahaya (Lx)', color: '#eab308', bg: 'rgba(234, 179, 8, 0.1)' },
-            'mq135': { label: 'Kualitas Udara (PPM)', color: '#e11d48', bg: 'rgba(225, 29, 72, 0.1)' },
-            'tank': { label: 'Level Air Tangki (%)', color: '#6366f1', bg: 'rgba(99, 102, 241, 0.1)' }
-        };
-
         const section = document.getElementById('pinned-chart-section');
-        if (!section) { console.error("Pinned Section Not Found"); return; }
+        if (!Chart || !section) return;
 
-        // Restore previously pinned card visibility
         if (this.state.pinnedKey) {
-            const oldCard = document.getElementById(`card-${this.state.pinnedKey}`);
-            if (oldCard) oldCard.classList.remove('hidden');
+            document.getElementById(`card-${this.state.pinnedKey}`)?.classList.remove('hidden');
         }
 
-        if (!key || !map[key]) {
-            // Close/Unpin
+        if (!key || !chartMeta[key]) {
             section.classList.add('hidden');
             this.state.pinnedKey = null;
-            if (this.charts.pinned) {
-                this.charts.pinned.destroy();
-                this.charts.pinned = null;
-            }
+            this.charts.pinned?.destroy();
+            this.charts.pinned = null;
             return;
         }
 
-        // Hide new card
-        const newCard = document.getElementById(`card-${key}`);
-        if (newCard) newCard.classList.add('hidden');
-
-        // Open/Pin
         this.state.pinnedKey = key;
         section.classList.remove('hidden');
+        document.getElementById(`card-${key}`)?.classList.add('hidden');
+        text('pinned-chart-title', chartMeta[key].label);
 
-        const titleEl = document.getElementById('pinned-chart-title');
-        if (titleEl) titleEl.innerText = map[key].label;
-
-        // Destroy old instance
-        if (this.charts.pinned) {
-            this.charts.pinned.destroy();
-            this.charts.pinned = null;
-        }
-
+        this.charts.pinned?.destroy();
+        const source = this.charts[key];
         const canvas = document.getElementById('pinnedChart');
-        if (!canvas) { console.error("Pinned Canvas Not Found"); return; }
-        const ctx = canvas.getContext('2d');
+        if (!canvas) return;
 
-        // Safer Data Copying
-        const sourceChart = this.charts[key];
-        let initialData = [];
-        let initialLabels = [];
-
-        if (sourceChart && sourceChart.data) {
-            initialData = [...(sourceChart.data.datasets[0].data || [])];
-            initialLabels = [...(sourceChart.data.labels || [])];
-        } else {
-            console.warn(`Source chart for ${key} not ready. Starting empty.`);
-        }
-
-        this.charts.pinned = new Chart(ctx, {
+        this.charts.pinned = new Chart(canvas.getContext('2d'), {
             type: 'line',
             data: {
-                labels: initialLabels,
+                labels: [...(source?.data.labels || [])],
                 datasets: [{
-                    label: map[key].label,
-                    data: initialData,
-                    borderColor: map[key].color,
-                    backgroundColor: map[key].bg,
+                    label: chartMeta[key].label,
+                    data: [...(source?.data.datasets[0].data || [])],
+                    borderColor: chartMeta[key].color,
+                    backgroundColor: chartMeta[key].bg,
                     borderWidth: 3,
                     fill: true,
                     tension: 0.4
@@ -589,16 +642,23 @@ window.app = {
     },
 
     setupInputs: function () {
-        ['soil', 'hum'].forEach(t => document.getElementById(`input-${t}-thresh`).addEventListener('input', (e) => document.getElementById(`lbl-${t}-thresh`).innerText = e.target.value + '%'));
+        ['soil', 'hum'].forEach((key) => {
+            const input = document.getElementById(`input-${key}-thresh`);
+            input?.addEventListener('input', (event) => text(`lbl-${key}-thresh`, `${event.target.value}%`));
+        });
+
+        document.getElementById('log-type-filter')?.addEventListener('change', () => {
+            this.state.logs.page = 0;
+            this.renderFilteredLogs();
+        });
+        document.getElementById('log-search')?.addEventListener('input', () => {
+            this.state.logs.page = 0;
+            this.renderFilteredLogs();
+        });
     },
 
     startClock: function () {
-        setInterval(() => {
-            const el = document.getElementById('last-updated');
-            if (el) {
-                el.innerText = new Date().toLocaleTimeString('id-ID', { hour12: false });
-            }
-        }, 1000);
+        if (this.clockTimer) clearInterval(this.clockTimer);
+        this.clockTimer = setInterval(() => text('last-updated', new Date().toLocaleTimeString('id-ID', { hour12: false })), 1000);
     }
 };
-

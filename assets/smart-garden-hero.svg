@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
+  <title id="title">Smart garden greenhouse dashboard illustration</title>
+  <desc id="desc">A bright greenhouse with garden beds, IoT sensors, water pipes, and a small monitoring panel.</desc>
+  <defs>
+    <linearGradient id="sky" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0" stop-color="#d9f99d"/>
+      <stop offset=".45" stop-color="#7dd3fc"/>
+      <stop offset="1" stop-color="#0f172a"/>
+    </linearGradient>
+    <linearGradient id="glass" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#f8fafc" stop-opacity=".78"/>
+      <stop offset="1" stop-color="#bae6fd" stop-opacity=".22"/>
+    </linearGradient>
+    <linearGradient id="leafA" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#86efac"/>
+      <stop offset="1" stop-color="#15803d"/>
+    </linearGradient>
+    <linearGradient id="leafB" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#facc15"/>
+      <stop offset="1" stop-color="#65a30d"/>
+    </linearGradient>
+    <filter id="softShadow" x="-20%" y="-30%" width="140%" height="170%">
+      <feDropShadow dx="0" dy="24" stdDeviation="24" flood-color="#020617" flood-opacity=".28"/>
+    </filter>
+  </defs>
+
+  <rect width="1600" height="900" fill="url(#sky)"/>
+  <circle cx="1270" cy="170" r="82" fill="#fde68a" opacity=".9"/>
+  <path d="M0 650 C180 605 300 670 470 625 C650 578 780 610 920 570 C1120 515 1320 555 1600 498 L1600 900 L0 900 Z" fill="#14532d" opacity=".72"/>
+  <path d="M0 720 C245 670 370 748 590 692 C780 645 1000 710 1200 655 C1370 608 1500 638 1600 600 L1600 900 L0 900 Z" fill="#052e16"/>
+
+  <g opacity=".42" stroke="#f8fafc" stroke-width="4">
+    <path d="M224 590 L516 215 L840 590"/>
+    <path d="M516 215 L1196 210 L1418 590"/>
+    <path d="M840 590 L1196 210"/>
+    <path d="M224 590 H1418"/>
+    <path d="M365 590 L620 215"/>
+    <path d="M555 590 L748 215"/>
+    <path d="M1015 590 L1258 214"/>
+    <path d="M1215 590 L1328 362"/>
+  </g>
+  <path d="M225 590 L516 214 H1196 L1418 590 Z" fill="url(#glass)" opacity=".34"/>
+
+  <g filter="url(#softShadow)">
+    <path d="M258 656 H1240 L1340 842 H168 L258 656 Z" fill="#854d0e"/>
+    <path d="M312 678 H1180 L1240 802 H248 L312 678 Z" fill="#292524"/>
+    <path d="M362 706 C478 676 556 736 676 702 C802 666 940 724 1076 682 C1130 666 1180 664 1220 672 L1240 802 H248 L312 678 C328 690 342 699 362 706 Z" fill="#44403c"/>
+  </g>
+
+  <g>
+    <path d="M420 720 C392 662 398 606 430 548 C462 608 466 668 420 720 Z" fill="url(#leafA)"/>
+    <path d="M485 724 C470 660 492 610 538 566 C552 638 538 694 485 724 Z" fill="url(#leafB)"/>
+    <path d="M612 708 C560 660 544 598 560 520 C625 572 648 638 612 708 Z" fill="url(#leafA)"/>
+    <path d="M742 718 C724 654 750 594 806 548 C818 626 800 692 742 718 Z" fill="url(#leafB)"/>
+    <path d="M890 714 C846 668 834 604 858 540 C914 586 934 656 890 714 Z" fill="url(#leafA)"/>
+    <path d="M1036 712 C1016 650 1042 596 1094 560 C1106 636 1088 692 1036 712 Z" fill="url(#leafB)"/>
+  </g>
+
+  <g stroke-linecap="round" stroke-linejoin="round">
+    <path d="M330 632 H1160" fill="none" stroke="#38bdf8" stroke-width="10" opacity=".85"/>
+    <path d="M505 632 V574 M762 632 V562 M1018 632 V584" stroke="#38bdf8" stroke-width="8" opacity=".9"/>
+    <circle cx="505" cy="558" r="24" fill="#0f172a" stroke="#7dd3fc" stroke-width="7"/>
+    <circle cx="762" cy="546" r="24" fill="#0f172a" stroke="#7dd3fc" stroke-width="7"/>
+    <circle cx="1018" cy="568" r="24" fill="#0f172a" stroke="#7dd3fc" stroke-width="7"/>
+    <path d="M498 558 H512 M755 546 H769 M1011 568 H1025" stroke="#bbf7d0" stroke-width="5"/>
+  </g>
+
+  <g transform="translate(1115 320)" filter="url(#softShadow)">
+    <rect width="250" height="170" rx="18" fill="#0f172a"/>
+    <rect x="18" y="18" width="214" height="134" rx="12" fill="#f8fafc"/>
+    <path d="M42 118 C72 92 96 100 124 74 C154 46 188 68 212 44" fill="none" stroke="#10b981" stroke-width="8" stroke-linecap="round"/>
+    <rect x="42" y="38" width="70" height="14" rx="7" fill="#f59e0b"/>
+    <rect x="42" y="62" width="42" height="10" rx="5" fill="#94a3b8"/>
+    <circle cx="198" cy="118" r="14" fill="#22c55e"/>
+  </g>
+
+  <g opacity=".65">
+    <path d="M124 770 C204 726 276 716 352 744" fill="none" stroke="#fef3c7" stroke-width="5"/>
+    <path d="M1222 718 C1328 676 1430 682 1528 724" fill="none" stroke="#fef3c7" stroke-width="5"/>
+  </g>
+</svg>
