@@ -1,5 +1,6 @@
 {
   "hosting": {
+    "site": "webdashboard-gardenist",
     "public": "dist",
     "ignore": [
       "firebase.json",
