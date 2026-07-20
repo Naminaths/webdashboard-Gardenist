@@ -893,9 +893,7 @@ html.dark .log-badge.config { background: rgba(147, 51, 234, 0.15); }
   
   /* Penyesuaian Landing Page Mobile */
   .landing-nav-new { 
-    padding: 1rem;
-    flex-direction: column;
-    gap: 1rem;
+    display: none !important; /* Hide header on mobile */
   }
   .hero-section {
     grid-template-columns: 1fr;
