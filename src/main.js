@@ -662,3 +662,34 @@ window.app = {
         this.clockTimer = setInterval(() => text('last-updated', new Date().toLocaleTimeString('id-ID', { hour12: false })), 1000);
     }
 };
+
+// Landing page initializations
+document.addEventListener('DOMContentLoaded', () => {
+    // Stats Counter Animation
+    const stats = document.querySelectorAll('.stat-number');
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const target = parseInt(entry.target.getAttribute('data-target') || '0', 10);
+                const duration = 2000;
+                const increment = target / (duration / 16);
+                let current = 0;
+                
+                const updateCounter = () => {
+                    current += increment;
+                    if (current < target) {
+                        entry.target.innerText = Math.ceil(current).toLocaleString('id-ID');
+                        requestAnimationFrame(updateCounter);
+                    } else {
+                        entry.target.innerText = target.toLocaleString('id-ID') + (target >= 10000 ? '+' : '');
+                    }
+                };
+                
+                if(target > 0) updateCounter();
+                observer.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.5 });
+    
+    stats.forEach(stat => observer.observe(stat));
+});

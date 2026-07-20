@@ -15,7 +15,11 @@
 
     <!-- Landing Page -->
     <div id="landing-page">
-        <nav class="landing-nav glass-panel" style="margin: 1.5rem; border-radius: var(--radius-lg);">
+        <!-- Background Organic Shape -->
+        <div class="organic-bg"></div>
+        <div class="organic-bg-2"></div>
+
+        <nav class="landing-nav-new">
             <div class="brand">
                 <i class="fa-solid fa-leaf"></i> Gardenist
             </div>
@@ -28,15 +32,97 @@
                 </button>
             </div>
         </nav>
-        <main class="landing-main">
-            <h1 class="landing-title">Smart Garden<br>Masa Depan</h1>
-            <p class="landing-subtitle">Pantau kondisi kebun, kendalikan perangkat, dan lihat riwayat alarm dalam satu dashboard yang modern, responsif, dan siap memukau Anda.</p>
-            <div style="display: flex; gap: 1rem;">
-                <button class="btn btn-primary" style="padding: 1rem 2rem; font-size: 1.1rem;" onclick="app.enterDashboard()">
-                    Masuk Dashboard
-                </button>
+
+        <!-- Hero Section -->
+        <main class="hero-section">
+            <div class="hero-content">
+                <div class="badge-eco">🌿 100% Eco-Friendly Dashboard</div>
+                <h1 class="hero-title">Rawat Kebun Anda dari<br>Genggaman Tangan</h1>
+                <p class="hero-subtitle">Gardenist memadukan IoT cerdas dengan antarmuka yang indah. Pantau kelembaban, suhu, hingga kualitas udara secara real-time, dan biarkan otomatisasi menyiram tanaman Anda.</p>
+                <div class="hero-actions">
+                    <button class="btn btn-primary btn-large" onclick="app.enterDashboard()">Mulai Pantau Sekarang</button>
+                    <a href="#features" class="btn btn-outline btn-large">Jelajahi Fitur</a>
+                </div>
+            </div>
+            <div class="hero-mockup-wrapper">
+                <!-- 3D CSS Mockup of Dashboard -->
+                <div class="mockup-3d">
+                    <div class="mockup-topbar">
+                        <div class="mockup-dots"><span></span><span></span><span></span></div>
+                        <div class="mockup-search">Realtime Dashboard</div>
+                    </div>
+                    <div class="mockup-content">
+                        <div class="mockup-sidebar"></div>
+                        <div class="mockup-main">
+                            <div class="mockup-grid">
+                                <div class="mockup-card"></div>
+                                <div class="mockup-card"></div>
+                                <div class="mockup-card"></div>
+                            </div>
+                            <div class="mockup-chart"></div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </main>
+
+        <!-- Statistics Section -->
+        <section class="stats-section">
+            <div class="stat-box">
+                <i class="fa-solid fa-droplet tone-info stat-icon"></i>
+                <h2 class="stat-number" data-target="15000">0</h2>
+                <p>Liter Air Dihemat</p>
+            </div>
+            <div class="stat-box">
+                <i class="fa-solid fa-seedling tone-good stat-icon"></i>
+                <h2 class="stat-number" data-target="98">0</h2>
+                <p>% Tanaman Sehat</p>
+            </div>
+            <div class="stat-box">
+                <i class="fa-solid fa-microchip tone-warning stat-icon"></i>
+                <h2 class="stat-number" data-target="24">0</h2>
+                <p>Jam Nonstop Aktif</p>
+            </div>
+            <div class="stat-box">
+                <i class="fa-solid fa-bolt tone-danger stat-icon"></i>
+                <h2 class="stat-number" data-target="4">0</h2>
+                <p>Aktuator Pintar</p>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section id="features" class="features-section">
+            <div class="features-header">
+                <h2>Sensor Tercanggih</h2>
+                <p>Pahami kondisi kebun Anda lebih dari sekadar melihat.</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon bg-green"><i class="fa-solid fa-droplet"></i></div>
+                    <h3>Kelembaban Tanah</h3>
+                    <p>Mengetahui persis kapan tanaman butuh disiram tanpa menebak.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon bg-blue"><i class="fa-solid fa-cloud-rain"></i></div>
+                    <h3>Suhu & Cuaca Mikro</h3>
+                    <p>Sensor iklim mikro untuk menjaga tanaman pada temperatur ideal.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon bg-yellow"><i class="fa-solid fa-sun"></i></div>
+                    <h3>Intensitas Cahaya</h3>
+                    <p>Mendeteksi jumlah lux agar fotosintesis berlangsung maksimal.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon bg-red"><i class="fa-solid fa-wind"></i></div>
+                    <h3>Kualitas Udara</h3>
+                    <p>Sensor polusi dan gas demi lingkungan yang lebih bersih.</p>
+                </div>
+            </div>
+        </section>
+        
+        <footer class="landing-footer">
+            <p>&copy; 2026 Gardenist IoT. Didesain untuk keberlanjutan alam.</p>
+        </footer>
     </div>
 
     <!-- Dashboard App -->
