@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "skills": {
+    "deep-research": {
+      "source": "199-biotechnologies/claude-deep-research-skill",
+      "sourceType": "github",
+      "skillPath": "SKILL.md",
+      "computedHash": "9eae8e09f41ddde4f85b49687eefe3301c2b5369f71fdfb1ff9ca46ce35d5cef"
+    },
+    "iot": {
+      "source": "markdown-viewer/skills",
+      "sourceType": "github",
+      "skillPath": "iot/SKILL.md",
+      "computedHash": "80599ee662f2026973d1da3bd976c2dc624ad5c49df2d4bf7aa0699e901ca4c1"
+    }
+  }
+}
