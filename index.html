@@ -1,117 +1,57 @@
 <!DOCTYPE html>
 <html lang="id">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description"
-        content="Dashboard monitoring dan kontrol untuk sistem Smart Garden berbasis IoT secara real-time.">
+    <meta name="description" content="Dashboard monitoring dan kontrol untuk sistem Smart Garden berbasis IoT secara real-time.">
     <title>Gardenist - Smart Garden</title>
     <link rel="icon" type="image/png" href="assets/favicon-uny.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap"
-        rel="stylesheet">
 </head>
+<body>
+    <!-- Ambient Background Glows -->
+    <div class="bg-glow"></div>
+    <div class="bg-glow-2"></div>
 
-<body class="bg-slate-50 text-slate-800 antialiased">
-    <div id="landing-page" class="relative min-h-screen overflow-hidden bg-slate-950 text-white">
-        <img class="hero-garden-image" src="assets/smart-garden-hero.svg"
-            alt="Ilustrasi smart garden dengan sensor IoT dan dashboard pemantauan">
-        <div class="hero-garden-overlay"></div>
-
-        <nav class="relative z-10 mx-auto flex max-w-7xl items-center justify-between px-5 py-5 sm:px-8">
-            <div class="brand-mark">
-                <span class="brand-icon"><i class="fa-solid fa-leaf"></i></span>
-                <span>Gardenist</span>
+    <!-- Landing Page -->
+    <div id="landing-page">
+        <nav class="landing-nav glass-panel" style="margin: 1.5rem; border-radius: var(--radius-lg);">
+            <div class="brand">
+                <i class="fa-solid fa-leaf"></i> Gardenist
             </div>
-            <div class="flex items-center gap-2">
-                <button class="icon-button text-slate-300" onclick="document.documentElement.classList.toggle('dark')"
-                    aria-label="Ganti tema">
+            <div style="display: flex; gap: 1rem;">
+                <button class="btn-icon" onclick="document.documentElement.classList.toggle('dark')" aria-label="Ganti tema">
                     <i class="fa-solid fa-circle-half-stroke"></i>
                 </button>
-                <button class="primary-button" onclick="app.enterDashboard()">
+                <button class="btn btn-primary" onclick="app.enterDashboard()">
                     Dashboard <i class="fa-solid fa-arrow-right"></i>
                 </button>
             </div>
         </nav>
-
-        <main
-            class="relative z-10 mx-auto grid min-h-[calc(100vh-88px)] max-w-7xl items-center gap-10 px-5 pb-12 sm:px-8 lg:grid-cols-[1fr_0.95fr]">
-            <section class="max-w-3xl">
-                <p class="eyebrow">Monitoring IoT Smart Garden</p>
-                <h1 class="mt-4 text-4xl font-extrabold leading-tight tracking-normal sm:text-5xl lg:text-6xl">
-                    Gardenist
-                </h1>
-                <p class="mt-5 max-w-2xl text-base leading-8 text-slate-300 sm:text-lg">
-                    Pantau kondisi kebun, kendalikan perangkat, dan lihat riwayat alarm dalam satu dashboard yang
-                    ringan, responsif, dan siap dipakai di layar kecil maupun desktop.
-                </p>
-                <div class="mt-8 flex flex-wrap gap-3">
-                    <button class="primary-button h-12 px-5" onclick="app.enterDashboard()">
-                        Masuk Dashboard <i class="fa-solid fa-chart-line"></i>
-                    </button>
-                    <button class="secondary-button h-12 px-5"
-                        onclick="document.documentElement.classList.toggle('dark')">
-                        Ganti Tema <i class="fa-solid fa-moon"></i>
-                    </button>
-                </div>
-            </section>
-
-            <section class="dashboard-preview" aria-label="Preview dashboard Gardenist">
-                <div class="flex items-center justify-between border-b border-slate-200 pb-4">
-                    <div>
-                        <p class="text-xs font-bold uppercase tracking-wider text-slate-400">Live Preview</p>
-                        <h2 class="mt-1 text-xl font-bold text-slate-900">Kondisi Kebun</h2>
-                    </div>
-                    <span class="live-pill"><span></span> Online</span>
-                </div>
-                <div class="mt-5 grid grid-cols-2 gap-3">
-                    <div class="preview-tile">
-                        <i class="fa-solid fa-droplet text-emerald-600"></i>
-                        <span>Tanah</span>
-                        <strong>68%</strong>
-                    </div>
-                    <div class="preview-tile">
-                        <i class="fa-solid fa-temperature-half text-orange-500"></i>
-                        <span>Suhu</span>
-                        <strong>24°C</strong>
-                    </div>
-                    <div class="preview-tile">
-                        <i class="fa-solid fa-wind text-rose-500"></i>
-                        <span>Udara</span>
-                        <strong>Segar</strong>
-                    </div>
-                    <div class="preview-tile">
-                        <i class="fa-solid fa-water text-indigo-500"></i>
-                        <span>Tangki</span>
-                        <strong>82%</strong>
-                    </div>
-                </div>
-                <div class="preview-chart" aria-hidden="true">
-                    <span style="height: 42%"></span><span style="height: 58%"></span><span style="height: 48%"></span>
-                    <span style="height: 72%"></span><span style="height: 64%"></span><span style="height: 86%"></span>
-                    <span style="height: 76%"></span><span style="height: 91%"></span>
-                </div>
-            </section>
+        <main class="landing-main">
+            <h1 class="landing-title">Smart Garden<br>Masa Depan</h1>
+            <p class="landing-subtitle">Pantau kondisi kebun, kendalikan perangkat, dan lihat riwayat alarm dalam satu dashboard yang modern, responsif, dan siap memukau Anda.</p>
+            <div style="display: flex; gap: 1rem;">
+                <button class="btn btn-primary" style="padding: 1rem 2rem; font-size: 1.1rem;" onclick="app.enterDashboard()">
+                    Masuk Dashboard
+                </button>
+            </div>
         </main>
     </div>
 
-    <div id="dashboard-app" class="hidden min-h-screen bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100">
-        <aside id="sidebar" class="sidebar">
-            <div class="flex items-center justify-between border-b border-slate-200 p-5 dark:border-slate-800">
-                <div class="brand-mark text-slate-900 dark:text-white">
-                    <span class="brand-icon"><i class="fa-solid fa-leaf"></i></span>
-                    <span>Gardenist</span>
+    <!-- Dashboard App -->
+    <div id="dashboard-app" class="hidden">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="sidebar glass-panel" style="border-radius: 0; border-right: 1px solid var(--glass-border); border-top: none; border-bottom: none; border-left: none;">
+            <div class="sidebar-header">
+                <div class="brand">
+                    <i class="fa-solid fa-leaf"></i> Gardenist
                 </div>
-                <button class="icon-button sidebar-toggle" onclick="app.toggleSidebar(true)" aria-label="Sembunyikan sidebar">
+                <button class="btn-icon" onclick="app.toggleSidebar(true)" aria-label="Sembunyikan sidebar">
                     <i class="fa-solid fa-angles-left"></i>
                 </button>
             </div>
-
-            <nav class="flex-1 space-y-2 p-4">
+            <nav class="sidebar-nav">
                 <button id="nav-overview" class="nav-item is-active" onclick="app.navigate('overview')">
                     <i class="fa-solid fa-table-cells-large"></i><span>Overview</span>
                 </button>
@@ -122,213 +62,249 @@
                     <i class="fa-solid fa-clock-rotate-left"></i><span>Log & Alarm</span>
                 </button>
             </nav>
-
-            <div class="space-y-3 border-t border-slate-200 p-4 dark:border-slate-800">
-                <div class="status-card">
-                    <span class="h-2.5 w-2.5 rounded-full bg-emerald-500"></span>
+            <div class="sidebar-footer">
+                <div class="status-indicator">
+                    <span class="status-dot active"></span>
                     <span id="connection-status">Menghubungkan...</span>
                 </div>
-                <button class="soft-button w-full" onclick="document.documentElement.classList.toggle('dark')">
+                <button class="btn btn-secondary" onclick="document.documentElement.classList.toggle('dark')" style="width: 100%;">
                     <i class="fa-solid fa-circle-half-stroke"></i> Ganti Tema
                 </button>
-                <button class="danger-button w-full" onclick="app.logout()">
+                <button class="btn btn-secondary" style="color: var(--danger); border-color: var(--danger-light);" onclick="app.logout()">
                     <i class="fa-solid fa-right-from-bracket"></i> Keluar
                 </button>
             </div>
         </aside>
 
-        <button id="sidebar-reveal" class="sidebar-reveal" onclick="app.toggleSidebar(false)" aria-label="Tampilkan sidebar">
-            <i class="fa-solid fa-bars"></i>
-        </button>
-
-        <div id="dashboard-shell" class="dashboard-shell">
-            <header class="mobile-header">
-                <div class="brand-mark text-slate-900 dark:text-white">
-                    <span class="brand-icon"><i class="fa-solid fa-leaf"></i></span>
-                    <span>Gardenist</span>
+        <div id="dashboard-shell">
+            <!-- Topbar -->
+            <header class="topbar glass-panel" style="border-radius: 0; border-bottom: 1px solid var(--glass-border); border-top: none; border-left: none; border-right: none;">
+                <div class="topbar-left">
+                    <button id="sidebar-reveal" class="btn-icon hidden-desktop" onclick="app.toggleSidebar(false)" aria-label="Tampilkan sidebar">
+                        <i class="fa-solid fa-bars"></i>
+                    </button>
+                    <div class="topbar-title">Realtime Dashboard</div>
                 </div>
-                <button class="icon-button" onclick="app.logout()" aria-label="Keluar">
-                    <i class="fa-solid fa-right-from-bracket"></i>
-                </button>
+                <div class="topbar-right">
+                    <span id="last-updated" style="font-family: var(--font-mono); color: var(--text-muted); font-size: 0.875rem;">Waiting data...</span>
+                    <button class="btn-icon" onclick="app.logout()" aria-label="Keluar">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                    </button>
+                </div>
             </header>
 
-            <main class="mx-auto max-w-7xl px-4 py-5 sm:px-6 lg:px-8 lg:py-8">
-                <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-                    <div>
-                        <p class="eyebrow text-emerald-700 dark:text-emerald-300">Realtime Dashboard</p>
-                        <h1 class="mt-2 text-2xl font-extrabold text-slate-950 dark:text-white sm:text-3xl">Smart Garden</h1>
-                    </div>
-                    <div class="flex items-center gap-3">
-                        <span id="last-updated" class="timestamp">Waiting data...</span>
-                        <button class="icon-button" onclick="document.documentElement.classList.toggle('dark')"
-                            aria-label="Ganti tema">
-                            <i class="fa-solid fa-circle-half-stroke"></i>
-                        </button>
-                    </div>
-                </div>
-
-                <nav class="mobile-tabs">
-                    <button id="mobile-nav-overview" class="mobile-tab is-active" onclick="app.navigate('overview')">
-                        <i class="fa-solid fa-table-cells-large"></i><span>Overview</span>
-                    </button>
-                    <button id="mobile-nav-automation" class="mobile-tab" onclick="app.navigate('automation')">
-                        <i class="fa-solid fa-sliders"></i><span>Otomasi</span>
-                    </button>
-                    <button id="mobile-nav-logs" class="mobile-tab" onclick="app.navigate('logs')">
-                        <i class="fa-solid fa-clock-rotate-left"></i><span>Log</span>
-                    </button>
-                </nav>
-
+            <main class="dashboard-content">
+                <!-- Overview View -->
                 <section id="view-overview" class="view-space">
                     <div class="summary-grid">
-                        <article class="summary-card">
-                            <span class="summary-icon bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300"><i class="fa-solid fa-heart-pulse"></i></span>
-                            <div>
+                        <div class="glass-panel summary-card">
+                            <div class="summary-icon" style="background: var(--brand-primary-light); color: var(--brand-primary);"><i class="fa-solid fa-heart-pulse"></i></div>
+                            <div class="summary-info">
                                 <p>Kesehatan Sistem</p>
                                 <strong id="summary-health">--</strong>
                                 <small id="summary-health-note">Menunggu data sensor</small>
                             </div>
-                        </article>
-                        <article class="summary-card">
-                            <span class="summary-icon bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300"><i class="fa-solid fa-power-off"></i></span>
-                            <div>
+                        </div>
+                        <div class="glass-panel summary-card">
+                            <div class="summary-icon" style="background: var(--info-light); color: var(--info);"><i class="fa-solid fa-power-off"></i></div>
+                            <div class="summary-info">
                                 <p>Perangkat Aktif</p>
                                 <strong id="summary-devices">0/4</strong>
                                 <small id="summary-devices-note">Belum ada perangkat aktif</small>
                             </div>
-                        </article>
-                        <article class="summary-card">
-                            <span class="summary-icon bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300"><i class="fa-solid fa-triangle-exclamation"></i></span>
-                            <div>
+                        </div>
+                        <div class="glass-panel summary-card">
+                            <div class="summary-icon" style="background: var(--warning-light); color: var(--warning);"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                            <div class="summary-info">
                                 <p>Prioritas</p>
                                 <strong id="summary-alerts">0 isu</strong>
                                 <small id="summary-alerts-note">Tidak ada alarm kritis</small>
                             </div>
-                        </article>
-                        <article class="summary-card">
-                            <span class="summary-icon bg-cyan-100 text-cyan-700 dark:bg-cyan-950 dark:text-cyan-300"><i class="fa-solid fa-robot"></i></span>
-                            <div>
+                        </div>
+                        <div class="glass-panel summary-card">
+                            <div class="summary-icon" style="background: var(--brand-primary-light); color: var(--brand-primary);"><i class="fa-solid fa-robot"></i></div>
+                            <div class="summary-info">
                                 <p>Mode Otomasi</p>
                                 <strong id="summary-automation">0/2</strong>
                                 <small id="summary-automation-note">Aturan otomatis nonaktif</small>
                             </div>
-                        </article>
+                        </div>
                     </div>
 
                     <div class="metric-grid">
-                        <article class="metric-card">
-                            <div class="metric-head text-emerald-600"><i class="fa-solid fa-droplet"></i><span>Kelembaban Tanah</span></div>
-                            <strong id="val-soil">--%</strong><small id="soil-msg" class="metric-status tone-muted">--</small>
-                        </article>
-                        <article class="metric-card">
-                            <div class="metric-head text-cyan-600"><i class="fa-solid fa-cloud-rain"></i><span>Kelembapan Udara</span></div>
-                            <strong id="val-hum">--%</strong><small id="hum-msg" class="metric-status tone-muted">--</small>
-                        </article>
-                        <article class="metric-card">
-                            <div class="metric-head text-orange-500"><i class="fa-solid fa-temperature-half"></i><span>Suhu</span></div>
-                            <strong id="val-temp">--°C</strong><small id="temp-msg" class="metric-status tone-muted">--</small>
-                        </article>
-                        <article class="metric-card">
-                            <div class="metric-head text-yellow-500"><i class="fa-solid fa-sun"></i><span>Cahaya</span></div>
-                            <strong><span id="val-light">--</span> <span class="metric-unit">Lx</span></strong><small id="light-msg" class="metric-status tone-muted">--</small>
-                        </article>
-                        <article class="metric-card">
-                            <div class="metric-head text-rose-600"><i class="fa-solid fa-wind"></i><span>Kualitas Udara</span></div>
-                            <strong><span id="val-mq135">--</span> <span class="metric-unit">PPM</span></strong><small id="mq135-msg" class="metric-status tone-muted">--</small>
-                        </article>
-                        <article class="metric-card">
-                            <div class="metric-head text-indigo-600"><i class="fa-solid fa-water"></i><span>Tangki</span></div>
-                            <strong id="val-tank">--%</strong><small id="tank-msg" class="metric-status tone-muted">--</small>
-                        </article>
+                        <div class="glass-panel metric-card">
+                            <div class="metric-head" style="color: var(--brand-primary);"><i class="fa-solid fa-droplet"></i><span>Kelembaban Tanah</span></div>
+                            <div>
+                                <strong id="val-soil">--%</strong>
+                                <br><small id="soil-msg" class="metric-status tone-muted">--</small>
+                            </div>
+                        </div>
+                        <div class="glass-panel metric-card">
+                            <div class="metric-head" style="color: var(--info);"><i class="fa-solid fa-cloud-rain"></i><span>Kelembapan Udara</span></div>
+                            <div>
+                                <strong id="val-hum">--%</strong>
+                                <br><small id="hum-msg" class="metric-status tone-muted">--</small>
+                            </div>
+                        </div>
+                        <div class="glass-panel metric-card">
+                            <div class="metric-head" style="color: var(--warning);"><i class="fa-solid fa-temperature-half"></i><span>Suhu</span></div>
+                            <div>
+                                <strong id="val-temp">--°C</strong>
+                                <br><small id="temp-msg" class="metric-status tone-muted">--</small>
+                            </div>
+                        </div>
+                        <div class="glass-panel metric-card">
+                            <div class="metric-head" style="color: #ca8a04;"><i class="fa-solid fa-sun"></i><span>Cahaya</span></div>
+                            <div>
+                                <strong><span id="val-light">--</span> <span class="metric-unit">Lx</span></strong>
+                                <br><small id="light-msg" class="metric-status tone-muted">--</small>
+                            </div>
+                        </div>
+                        <div class="glass-panel metric-card">
+                            <div class="metric-head" style="color: var(--danger);"><i class="fa-solid fa-wind"></i><span>Kualitas Udara</span></div>
+                            <div>
+                                <strong><span id="val-mq135">--</span> <span class="metric-unit">PPM</span></strong>
+                                <br><small id="mq135-msg" class="metric-status tone-muted">--</small>
+                            </div>
+                        </div>
+                        <div class="glass-panel metric-card">
+                            <div class="metric-head" style="color: #4f46e5;"><i class="fa-solid fa-water"></i><span>Level Tangki</span></div>
+                            <div>
+                                <strong id="val-tank">--%</strong>
+                                <br><small id="tank-msg" class="metric-status tone-muted">--</small>
+                            </div>
+                        </div>
                     </div>
 
-                    <section id="pinned-chart-section" class="panel hidden">
+                    <div id="pinned-chart-section" class="glass-panel chart-panel hidden">
                         <div class="panel-header">
-                            <h2><i class="fa-solid fa-thumbtack text-emerald-600"></i><span id="pinned-chart-title">Chart</span></h2>
-                            <button class="icon-button" onclick="app.pinChart(null)" aria-label="Tutup chart">
-                                <i class="fa-solid fa-xmark"></i>
-                            </button>
+                            <h2><i class="fa-solid fa-thumbtack tone-good"></i> <span id="pinned-chart-title">Chart</span></h2>
+                            <button class="btn-icon" onclick="app.pinChart(null)"><i class="fa-solid fa-xmark"></i></button>
                         </div>
-                        <div class="chart-large"><canvas id="pinnedChart"></canvas></div>
-                    </section>
+                        <div class="chart-container" style="height: 400px;"><canvas id="pinnedChart"></canvas></div>
+                    </div>
 
-                    <div class="grid gap-5 lg:grid-cols-[minmax(0,1fr)_360px]">
-                        <div class="space-y-5">
-                            <article id="card-soil" class="panel">
-                                <div class="panel-header">
-                                    <h2>Kelembaban Tanah</h2>
-                                    <button class="icon-button" onclick="app.pinChart('soil')" aria-label="Pin chart tanah"><i class="fa-solid fa-thumbtack"></i></button>
-                                </div>
-                                <div class="chart-main"><canvas id="soilChart"></canvas></div>
-                            </article>
-
-                            <div class="chart-grid">
-                                <article id="card-hum" class="panel compact-chart"><div class="panel-header"><h2>Udara</h2><button class="icon-button" onclick="app.pinChart('hum')" aria-label="Pin chart udara"><i class="fa-solid fa-thumbtack"></i></button></div><div class="chart-small"><canvas id="humChart"></canvas></div></article>
-                                <article id="card-temp" class="panel compact-chart"><div class="panel-header"><h2>Suhu</h2><button class="icon-button" onclick="app.pinChart('temp')" aria-label="Pin chart suhu"><i class="fa-solid fa-thumbtack"></i></button></div><div class="chart-small"><canvas id="tempChart"></canvas></div></article>
-                                <article id="card-light" class="panel compact-chart"><div class="panel-header"><h2>Cahaya</h2><button class="icon-button" onclick="app.pinChart('light')" aria-label="Pin chart cahaya"><i class="fa-solid fa-thumbtack"></i></button></div><div class="chart-small"><canvas id="lightChart"></canvas></div></article>
-                                <article id="card-mq135" class="panel compact-chart"><div class="panel-header"><h2>Kualitas Udara</h2><button class="icon-button" onclick="app.pinChart('mq135')" aria-label="Pin chart udara"><i class="fa-solid fa-thumbtack"></i></button></div><div class="chart-small"><canvas id="mq135Chart"></canvas></div></article>
-                                <article id="card-tank" class="panel compact-chart md:col-span-2"><div class="panel-header"><h2>Level Tangki</h2><button class="icon-button" onclick="app.pinChart('tank')" aria-label="Pin chart tangki"><i class="fa-solid fa-thumbtack"></i></button></div><div class="chart-small"><canvas id="tankChart"></canvas></div></article>
+                    <div class="chart-section">
+                        <div class="small-charts-grid">
+                            <div id="card-soil" class="glass-panel small-chart-panel">
+                                <div class="panel-header"><h2>Tanah</h2><button class="btn-icon" onclick="app.pinChart('soil')"><i class="fa-solid fa-thumbtack"></i></button></div>
+                                <div class="chart-container"><canvas id="soilChart"></canvas></div>
+                            </div>
+                            <div id="card-hum" class="glass-panel small-chart-panel">
+                                <div class="panel-header"><h2>Udara</h2><button class="btn-icon" onclick="app.pinChart('hum')"><i class="fa-solid fa-thumbtack"></i></button></div>
+                                <div class="chart-container"><canvas id="humChart"></canvas></div>
+                            </div>
+                            <div id="card-temp" class="glass-panel small-chart-panel">
+                                <div class="panel-header"><h2>Suhu</h2><button class="btn-icon" onclick="app.pinChart('temp')"><i class="fa-solid fa-thumbtack"></i></button></div>
+                                <div class="chart-container"><canvas id="tempChart"></canvas></div>
+                            </div>
+                            <div id="card-light" class="glass-panel small-chart-panel">
+                                <div class="panel-header"><h2>Cahaya</h2><button class="btn-icon" onclick="app.pinChart('light')"><i class="fa-solid fa-thumbtack"></i></button></div>
+                                <div class="chart-container"><canvas id="lightChart"></canvas></div>
+                            </div>
+                            <div id="card-mq135" class="glass-panel small-chart-panel">
+                                <div class="panel-header"><h2>Udara (PPM)</h2><button class="btn-icon" onclick="app.pinChart('mq135')"><i class="fa-solid fa-thumbtack"></i></button></div>
+                                <div class="chart-container"><canvas id="mq135Chart"></canvas></div>
+                            </div>
+                            <div id="card-tank" class="glass-panel small-chart-panel">
+                                <div class="panel-header"><h2>Level Tangki</h2><button class="btn-icon" onclick="app.pinChart('tank')"><i class="fa-solid fa-thumbtack"></i></button></div>
+                                <div class="chart-container"><canvas id="tankChart"></canvas></div>
                             </div>
                         </div>
 
-                        <aside class="panel controls-panel">
+                        <div class="glass-panel controls-panel">
                             <div class="panel-header"><h2>Kontrol Manual</h2></div>
-                            <div class="space-y-3">
-                                <div class="device-row"><span class="device-icon bg-blue-100 text-blue-600"><i class="fa-solid fa-shower"></i></span><div><strong>Pompa Air</strong><small id="status-pump" class="device-status">...</small></div><label class="switch"><input type="checkbox" id="toggle-pump" onchange="app.toggleDevice('pump', this.checked)"><span></span></label></div>
-                                <div class="device-row"><span class="device-icon bg-violet-100 text-violet-600"><i class="fa-solid fa-lightbulb"></i></span><div><strong>Lampu UV</strong><small id="status-uv" class="device-status">...</small></div><label class="switch"><input type="checkbox" id="toggle-uv" onchange="app.toggleDevice('uv', this.checked)"><span></span></label></div>
-                                <div class="device-row"><span class="device-icon bg-cyan-100 text-cyan-600"><i class="fa-solid fa-smog"></i></span><div><strong>Mist Maker</strong><small id="status-mist" class="device-status">...</small></div><label class="switch"><input type="checkbox" id="toggle-mist" onchange="app.toggleDevice('mist', this.checked)"><span></span></label></div>
-                                <div class="device-row"><span class="device-icon bg-red-100 text-red-600"><i class="fa-solid fa-bell"></i></span><div><strong>Buzzer</strong><small id="status-buzzer" class="device-status">...</small></div><label class="switch"><input type="checkbox" id="toggle-buzzer" onchange="app.toggleDevice('buzzer', this.checked)"><span></span></label></div>
+                            <div class="device-row">
+                                <div class="device-icon" style="background: var(--info-light); color: var(--info);"><i class="fa-solid fa-shower"></i></div>
+                                <div class="device-info">
+                                    <strong>Pompa Air</strong>
+                                    <small id="status-pump" class="device-status">...</small>
+                                </div>
+                                <label class="switch"><input type="checkbox" id="toggle-pump" onchange="app.toggleDevice('pump', this.checked)"><span></span></label>
                             </div>
-                            <div class="mt-5 rounded-lg bg-slate-50 p-4 text-sm text-slate-500 dark:bg-slate-900 dark:text-slate-400">
-                                Otomasi akan mengaktifkan pompa, mist, atau buzzer sesuai ambang batas sensor yang tersimpan.
+                            <div class="device-row">
+                                <div class="device-icon" style="background: #ede9fe; color: #8b5cf6;"><i class="fa-solid fa-lightbulb"></i></div>
+                                <div class="device-info">
+                                    <strong>Lampu UV</strong>
+                                    <small id="status-uv" class="device-status">...</small>
+                                </div>
+                                <label class="switch"><input type="checkbox" id="toggle-uv" onchange="app.toggleDevice('uv', this.checked)"><span></span></label>
                             </div>
-                        </aside>
+                            <div class="device-row">
+                                <div class="device-icon" style="background: #cffafe; color: #06b6d4;"><i class="fa-solid fa-smog"></i></div>
+                                <div class="device-info">
+                                    <strong>Mist Maker</strong>
+                                    <small id="status-mist" class="device-status">...</small>
+                                </div>
+                                <label class="switch"><input type="checkbox" id="toggle-mist" onchange="app.toggleDevice('mist', this.checked)"><span></span></label>
+                            </div>
+                            <div class="device-row">
+                                <div class="device-icon" style="background: var(--danger-light); color: var(--danger);"><i class="fa-solid fa-bell"></i></div>
+                                <div class="device-info">
+                                    <strong>Buzzer</strong>
+                                    <small id="status-buzzer" class="device-status">...</small>
+                                </div>
+                                <label class="switch"><input type="checkbox" id="toggle-buzzer" onchange="app.toggleDevice('buzzer', this.checked)"><span></span></label>
+                            </div>
+                            <div style="margin-top: 1.5rem; padding: 1rem; background: var(--bg-secondary); border-radius: var(--radius-sm); font-size: 0.85rem; color: var(--text-secondary);">
+                                Otomasi akan mengaktifkan pompa, mist, atau buzzer sesuai ambang batas sensor.
+                            </div>
+                        </div>
                     </div>
                 </section>
 
+                <!-- Automation View -->
                 <section id="view-automation" class="view-space hidden">
-                    <div class="section-title">
-                        <h2>Pengaturan Otomasi</h2>
-                        <p>Atur batas sensor yang memicu perangkat otomatis.</p>
+                    <div style="margin-bottom: 2rem;">
+                        <h2 style="font-size: 1.5rem; font-family: var(--font-heading);">Pengaturan Otomasi</h2>
+                        <p style="color: var(--text-secondary);">Atur batas sensor yang memicu perangkat secara otomatis.</p>
                     </div>
-                    <div class="grid gap-5 md:grid-cols-2">
-                        <article class="panel">
+                    <div class="metric-grid">
+                        <div class="glass-panel metric-card">
                             <div class="panel-header">
-                                <h2><i class="fa-solid fa-droplet text-blue-500"></i> Auto Siram</h2>
+                                <h2><i class="fa-solid fa-droplet" style="color: var(--info);"></i> Auto Siram</h2>
                                 <label class="switch"><input type="checkbox" id="auto-pump-enable"><span></span></label>
                             </div>
-                            <label class="range-label" for="input-soil-thresh"><span>Batas tanah</span><strong id="lbl-soil-thresh">30%</strong></label>
+                            <div style="display: flex; justify-content: space-between; margin-top: 1rem;">
+                                <span>Batas tanah kering</span>
+                                <strong id="lbl-soil-thresh">30%</strong>
+                            </div>
                             <input id="input-soil-thresh" class="range-input" type="range" min="0" max="100" value="30">
-                            <button class="primary-button mt-6 w-full justify-center" onclick="app.saveAutomation('pump')">Simpan</button>
-                        </article>
-                        <article class="panel">
+                            <button class="btn btn-primary" style="margin-top: 2rem; width: 100%;" onclick="app.saveAutomation('pump')">Simpan Pengaturan Siram</button>
+                        </div>
+                        <div class="glass-panel metric-card">
                             <div class="panel-header">
-                                <h2><i class="fa-solid fa-smog text-cyan-500"></i> Auto Mist</h2>
+                                <h2><i class="fa-solid fa-smog" style="color: #06b6d4;"></i> Auto Mist</h2>
                                 <label class="switch"><input type="checkbox" id="auto-mist-enable"><span></span></label>
                             </div>
-                            <label class="range-label" for="input-hum-thresh"><span>Batas udara</span><strong id="lbl-hum-thresh">50%</strong></label>
+                            <div style="display: flex; justify-content: space-between; margin-top: 1rem;">
+                                <span>Batas udara kering</span>
+                                <strong id="lbl-hum-thresh">50%</strong>
+                            </div>
                             <input id="input-hum-thresh" class="range-input" type="range" min="20" max="90" value="50">
-                            <button class="primary-button mt-6 w-full justify-center" onclick="app.saveAutomation('mist')">Simpan</button>
-                        </article>
+                            <button class="btn btn-primary" style="margin-top: 2rem; width: 100%;" onclick="app.saveAutomation('mist')">Simpan Pengaturan Mist</button>
+                        </div>
                     </div>
                 </section>
 
+                <!-- Logs View -->
                 <section id="view-logs" class="view-space hidden">
-                    <div class="section-title sm:flex sm:items-center sm:justify-between">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
                         <div>
-                            <h2>Riwayat & Alarm</h2>
-                            <p>Aktivitas manual, otomasi, dan alarm sistem.</p>
+                            <h2 style="font-size: 1.5rem; font-family: var(--font-heading);">Riwayat & Alarm</h2>
+                            <p style="color: var(--text-secondary);">Aktivitas sistem, otomasi, dan error.</p>
                         </div>
-                        <div class="mt-4 flex gap-2 sm:mt-0">
-                            <button class="soft-button" onclick="app.resetLogFilters()"><i class="fa-solid fa-filter-circle-xmark"></i> Reset</button>
-                            <button class="soft-button" onclick="app.exportLogsToCSV()"><i class="fa-solid fa-file-csv"></i> Export CSV</button>
-                            <button class="danger-button" onclick="app.clearLogs()"><i class="fa-solid fa-trash"></i> Hapus</button>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <button class="btn btn-secondary" onclick="app.resetLogFilters()"><i class="fa-solid fa-filter-circle-xmark"></i> Reset</button>
+                            <button class="btn btn-secondary" onclick="app.exportLogsToCSV()"><i class="fa-solid fa-file-csv"></i> Export CSV</button>
+                            <button class="btn btn-secondary" style="color: var(--danger); border-color: var(--danger-light);" onclick="app.clearLogs()"><i class="fa-solid fa-trash"></i> Hapus</button>
                         </div>
                     </div>
-                    <div class="panel overflow-hidden p-0">
-                        <div class="table-toolbar">
-                            <div class="filter-field">
-                                <label for="log-type-filter">Tipe</label>
+
+                    <div class="glass-panel">
+                        <div class="filter-bar">
+                            <div style="display: flex; flex-direction: column; gap: 0.25rem;">
+                                <label for="log-type-filter" style="font-size: 0.8rem; color: var(--text-secondary);">Tipe</label>
                                 <select id="log-type-filter">
                                     <option value="all">Semua</option>
                                     <option value="ALARM">Alarm</option>
@@ -338,31 +314,33 @@
                                     <option value="INFO">Info</option>
                                 </select>
                             </div>
-                            <div class="filter-field grow">
-                                <label for="log-search">Cari</label>
-                                <input id="log-search" type="search" placeholder="Cari pesan atau tipe log">
+                            <div style="display: flex; flex-direction: column; gap: 0.25rem; flex: 1;">
+                                <label for="log-search" style="font-size: 0.8rem; color: var(--text-secondary);">Cari</label>
+                                <input id="log-search" type="search" placeholder="Cari pesan atau tipe log" style="width: 100%;">
                             </div>
-                            <div class="table-count" id="logs-count">0 log</div>
+                            <div id="logs-count" style="font-weight: 600; padding-top: 1.25rem;">0 log</div>
                         </div>
-                        <div class="overflow-x-auto">
-                            <table class="w-full min-w-[640px] text-left">
-                                <thead class="bg-slate-50 text-xs uppercase tracking-wider text-slate-500 dark:bg-slate-900 dark:text-slate-400">
+
+                        <div class="table-container">
+                            <table>
+                                <thead>
                                     <tr>
-                                        <th class="p-4"><button class="sort-button" onclick="app.sortLogs('timestamp')">Waktu <span id="sort-timestamp">↓</span></button></th>
-                                        <th class="p-4"><button class="sort-button" onclick="app.sortLogs('type')">Tipe <span id="sort-type"></span></button></th>
-                                        <th class="p-4"><button class="sort-button" onclick="app.sortLogs('message')">Pesan <span id="sort-message"></span></button></th>
+                                        <th><button class="btn-icon" style="padding: 0; font-weight: inherit;" onclick="app.sortLogs('timestamp')">Waktu <span id="sort-timestamp">↓</span></button></th>
+                                        <th><button class="btn-icon" style="padding: 0; font-weight: inherit;" onclick="app.sortLogs('type')">Tipe <span id="sort-type"></span></button></th>
+                                        <th><button class="btn-icon" style="padding: 0; font-weight: inherit;" onclick="app.sortLogs('message')">Pesan <span id="sort-message"></span></button></th>
                                     </tr>
                                 </thead>
                                 <tbody id="logs-table-body">
-                                    <tr><td colspan="3" class="p-5 text-center text-slate-400">Memuat...</td></tr>
+                                    <tr><td colspan="3" style="text-align: center; color: var(--text-muted);">Memuat...</td></tr>
                                 </tbody>
                             </table>
                         </div>
-                        <div class="table-footer">
-                            <span id="logs-page-info">Menunggu data</span>
-                            <div class="flex gap-2">
-                                <button class="soft-button" onclick="app.changeLogPage(-1)" id="logs-prev">Sebelumnya</button>
-                                <button class="soft-button" onclick="app.changeLogPage(1)" id="logs-next">Berikutnya</button>
+                        
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem;">
+                            <span id="logs-page-info" style="font-size: 0.875rem; color: var(--text-secondary);">Menunggu data</span>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <button class="btn btn-secondary" onclick="app.changeLogPage(-1)" id="logs-prev">Sebelumnya</button>
+                                <button class="btn btn-secondary" onclick="app.changeLogPage(1)" id="logs-next">Berikutnya</button>
                             </div>
                         </div>
                     </div>
@@ -373,5 +351,4 @@
 
     <script type="module" src="/src/main.js"></script>
 </body>
-
 </html>
