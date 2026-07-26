@@ -128,7 +128,7 @@
     <!-- Dashboard App -->
     <div id="dashboard-app" class="hidden">
         <!-- Sidebar -->
-        <aside id="sidebar" class="sidebar glass-panel" style="border-radius: 0; border-right: 1px solid var(--glass-border); border-top: none; border-bottom: none; border-left: none;">
+        <aside id="sidebar" class="sidebar glass-panel">
             <div class="sidebar-header">
                 <div class="brand">
                     <i class="fa-solid fa-leaf"></i> Gardenist
@@ -162,9 +162,12 @@
             </div>
         </aside>
 
+        <!-- Sidebar Overlay (Mobile) -->
+        <div id="sidebar-overlay" class="sidebar-overlay" onclick="app.toggleSidebar(true)"></div>
+
         <div id="dashboard-shell">
             <!-- Topbar -->
-            <header class="topbar glass-panel" style="border-radius: 0; border-bottom: 1px solid var(--glass-border); border-top: none; border-left: none; border-right: none;">
+            <header class="topbar glass-panel">
                 <div class="topbar-left">
                     <button id="sidebar-reveal" class="btn-icon hidden-desktop" onclick="app.toggleSidebar(false)" aria-label="Tampilkan sidebar">
                         <i class="fa-solid fa-bars"></i>
