@@ -82,6 +82,7 @@ h1, h2, h3, h4, h5, h6 {
 /* Utilities */
 .hidden { display: none !important; }
 .hidden-desktop { display: none; }
+.sidebar-collapsed .hidden-desktop { display: inline-flex; }
 .tone-good { color: var(--brand-primary); }
 .tone-warning { color: var(--warning); }
 .tone-danger { color: var(--danger); }
