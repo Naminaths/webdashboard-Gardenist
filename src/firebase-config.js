@@ -1,5 +1,6 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { getDatabase } from "firebase/database";
+import { getAuth } from "firebase/auth";
 
 const fallbackFirebaseConfig = {
     apiKey: "AIzaSyBoPQqYYAf2qjNCNur0IqQMiCj-sLyWvOs",
@@ -26,6 +27,7 @@ const firebaseConfig = {
 
 let app;
 let database;
+let auth;
 
 try {
     if (!firebaseConfig.projectId || !firebaseConfig.databaseURL) {
@@ -39,6 +41,7 @@ try {
         app = getApp(); // Use existing app
     }
     database = getDatabase(app);
+    auth = getAuth(app);
     console.log("Firebase Connected Successfully", firebaseConfig.projectId);
 } catch (e) {
     console.error("Firebase Init Error", e);
@@ -47,4 +50,4 @@ try {
     }
 }
 
-export { database };
+export { database, auth };

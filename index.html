@@ -6,7 +6,10 @@
     <meta name="description" content="Dashboard monitoring dan kontrol untuk sistem Smart Garden berbasis IoT secara real-time.">
     <title>Gardenist - Smart Garden</title>
     <link rel="icon" type="image/png" href="assets/favicon-uny.png">
+    <link rel="manifest" href="/manifest.json">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
     <!-- Ambient Background Glows -->
@@ -27,8 +30,8 @@
                 <button class="btn-icon" onclick="document.documentElement.classList.toggle('dark')" aria-label="Ganti tema">
                     <i class="fa-solid fa-circle-half-stroke"></i>
                 </button>
-                <button class="btn btn-primary" onclick="app.enterDashboard()">
-                    Dashboard <i class="fa-solid fa-arrow-right"></i>
+                <button class="btn btn-primary" onclick="app.showLoginModal()">
+                    Login / Masuk <i class="fa-solid fa-arrow-right"></i>
                 </button>
             </div>
         </nav>
@@ -40,7 +43,7 @@
                 <h1 class="hero-title">Rawat Kebun Anda dari<br>Genggaman Tangan</h1>
                 <p class="hero-subtitle">Gardenist memadukan IoT cerdas dengan antarmuka yang indah. Pantau kelembaban, suhu, hingga kualitas udara secara real-time, dan biarkan otomatisasi menyiram tanaman Anda.</p>
                 <div class="hero-actions">
-                    <button class="btn btn-primary btn-large" onclick="app.enterDashboard()">Mulai Pantau Sekarang</button>
+                    <button class="btn btn-primary btn-large" onclick="app.showLoginModal()">Masuk Dashboard</button>
                     <a href="#features" class="btn btn-outline btn-large">Jelajahi Fitur</a>
                 </div>
             </div>
@@ -123,6 +126,30 @@
         <footer class="landing-footer">
             <p>&copy; 2026 Gardenist IoT. Didesain untuk keberlanjutan alam.</p>
         </footer>
+
+        <!-- Login Modal -->
+        <div id="login-modal" class="hidden" style="position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(4px);">
+            <div class="glass-panel" style="width: 100%; max-width: 400px; padding: 2rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                    <h2 style="font-size: 1.5rem; font-weight: bold;"><i class="fa-solid fa-leaf text-green-500"></i> Login Gardenist</h2>
+                    <button class="btn-icon" onclick="app.hideLoginModal()"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                <form id="login-form" onsubmit="event.preventDefault(); app.login();">
+                    <div style="margin-bottom: 1rem;">
+                        <label style="display: block; margin-bottom: 0.5rem; font-size: 0.875rem;">Email</label>
+                        <input type="email" id="login-email" required style="width: 100%; padding: 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color); background: var(--bg-primary); color: var(--text-primary);">
+                    </div>
+                    <div style="margin-bottom: 1.5rem;">
+                        <label style="display: block; margin-bottom: 0.5rem; font-size: 0.875rem;">Password</label>
+                        <input type="password" id="login-password" required style="width: 100%; padding: 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color); background: var(--bg-primary); color: var(--text-primary);">
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">Masuk</button>
+                    <div style="margin-top: 1rem; text-align: center; font-size: 0.8rem; color: var(--text-muted);">
+                        <i>Hanya untuk admin resmi.</i>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 
     <!-- Dashboard App -->
@@ -146,6 +173,12 @@
                 </button>
                 <button id="nav-logs" class="nav-item" onclick="app.navigate('logs')">
                     <i class="fa-solid fa-clock-rotate-left"></i><span>Log & Alarm</span>
+                </button>
+                <button id="nav-devices" class="nav-item" onclick="app.navigate('devices')">
+                    <i class="fa-solid fa-microchip"></i><span>Perangkat Cerdas</span>
+                </button>
+                <button id="nav-eco" class="nav-item" onclick="app.navigate('eco')">
+                    <i class="fa-solid fa-leaf"></i><span>Eco-Score</span>
                 </button>
             </nav>
             <div class="sidebar-footer">
@@ -218,6 +251,11 @@
                                 <small id="summary-automation-note">Aturan otomatis nonaktif</small>
                             </div>
                         </div>
+                    </div>
+                    
+                    <!-- Notifikasi Peringatan Cuaca -->
+                    <div id="weather-alert" class="hidden" style="margin-bottom: 1.5rem; padding: 1rem; border-radius: var(--radius-sm); background: var(--info-light); color: var(--info); border: 1px solid currentColor;">
+                        <i class="fa-solid fa-cloud-rain"></i> <strong>Prediksi Cuaca:</strong> Hujan diperkirakan akan turun. Otomasi penyiraman ditangguhkan untuk menghemat air.
                     </div>
 
                     <div class="metric-grid">
@@ -354,12 +392,34 @@
                                 <h2><i class="fa-solid fa-droplet" style="color: var(--info);"></i> Auto Siram</h2>
                                 <label class="switch"><input type="checkbox" id="auto-pump-enable"><span></span></label>
                             </div>
+                            
+                            <!-- Pilih Tanaman -->
+                            <div style="margin-top: 1rem;">
+                                <label style="font-size: 0.85rem; color: var(--text-secondary);">Profil Tanaman Ideal</label>
+                                <select id="plant-profile-select" style="width: 100%; padding: 0.5rem; border-radius: var(--radius-sm); background: var(--bg-secondary); border: 1px solid var(--border-color); color: var(--text-primary); margin-top: 0.25rem;" onchange="app.applyPlantProfile()">
+                                    <option value="custom">Kustomisasi Manual</option>
+                                    <option value="kaktus">Kaktus / Sukulen (Kering, 20%)</option>
+                                    <option value="anggrek">Anggrek (Sedang, 40%)</option>
+                                    <option value="sayuran">Sayuran Daun (Basah, 60%)</option>
+                                </select>
+                            </div>
+
                             <div style="display: flex; justify-content: space-between; margin-top: 1rem;">
                                 <span>Batas tanah kering</span>
                                 <strong id="lbl-soil-thresh">30%</strong>
                             </div>
                             <input id="input-soil-thresh" class="range-input" type="range" min="0" max="100" value="30">
-                            <button class="btn btn-primary" style="margin-top: 2rem; width: 100%;" onclick="app.saveAutomation('pump')">Simpan Pengaturan Siram</button>
+                            
+                            <!-- Jadwal Jam Penyiraman (RTC) -->
+                            <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px dashed var(--border-color);">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                                    <label style="font-size: 0.85rem; color: var(--text-secondary);"><i class="fa-regular fa-clock"></i> Jadwal Siram Harian</label>
+                                    <label class="switch"><input type="checkbox" id="schedule-pump-enable"><span></span></label>
+                                </div>
+                                <input type="time" id="schedule-pump-time" style="width: 100%; padding: 0.5rem; border-radius: var(--radius-sm); background: var(--bg-secondary); border: 1px solid var(--border-color); color: var(--text-primary);">
+                            </div>
+
+                            <button class="btn btn-primary" style="margin-top: 1rem; width: 100%;" onclick="app.saveAutomation('pump')">Simpan Pengaturan Siram</button>
                         </div>
                         <div class="glass-panel metric-card">
                             <div class="panel-header">
@@ -383,8 +443,9 @@
                             <h2 style="font-size: 1.5rem; font-family: var(--font-heading);">Riwayat & Alarm</h2>
                             <p style="color: var(--text-secondary);">Aktivitas sistem, otomasi, dan error.</p>
                         </div>
-                        <div style="display: flex; gap: 0.5rem;">
+                        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
                             <button class="btn btn-secondary" onclick="app.resetLogFilters()"><i class="fa-solid fa-filter-circle-xmark"></i> Reset</button>
+                            <button class="btn btn-secondary" onclick="app.exportLogsToPDF()"><i class="fa-solid fa-file-pdf text-red-500"></i> Export PDF</button>
                             <button class="btn btn-secondary" onclick="app.exportLogsToCSV()"><i class="fa-solid fa-file-csv"></i> Export CSV</button>
                             <button class="btn btn-secondary" style="color: var(--danger); border-color: var(--danger-light);" onclick="app.clearLogs()"><i class="fa-solid fa-trash"></i> Hapus</button>
                         </div>
@@ -434,10 +495,124 @@
                         </div>
                     </div>
                 </section>
+
+                <!-- Devices View -->
+                <section id="view-devices" class="view-space hidden">
+                    <div style="margin-bottom: 2rem;">
+                        <h2 style="font-size: 1.5rem; font-family: var(--font-heading);">Perangkat Cerdas (Nodes)</h2>
+                        <p style="color: var(--text-secondary);">Kelola mikrokontroler dan sistem sensor pintar Anda.</p>
+                    </div>
+                    
+                    <div class="metric-grid">
+                        <div class="glass-panel metric-card" style="border-left: 4px solid var(--good);">
+                            <div class="panel-header" style="border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; margin-bottom: 1rem;">
+                                <h2><i class="fa-solid fa-microchip text-slate-500"></i> Node Utama (ESP32)</h2>
+                                <span class="badge" style="background: var(--good-light); color: var(--good); padding: 0.25rem 0.5rem; border-radius: 1rem; font-size: 0.75rem;">Online</span>
+                            </div>
+                            <div style="display: grid; gap: 0.75rem; font-size: 0.875rem;">
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span class="text-slate-500">IP Address</span>
+                                    <strong class="font-mono">192.168.1.104</strong>
+                                </div>
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span class="text-slate-500">Sinyal WiFi</span>
+                                    <strong>-65 dBm (Baik)</strong>
+                                </div>
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span class="text-slate-500">Uptime</span>
+                                    <strong id="esp-uptime">3 Hari, 4 Jam</strong>
+                                </div>
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span class="text-slate-500">Terakhir Update</span>
+                                    <strong id="esp-last-sync">Baru saja</strong>
+                                </div>
+                            </div>
+                            <div style="margin-top: 1.5rem; display: flex; gap: 0.5rem;">
+                                <button class="btn btn-secondary" style="flex: 1;" onclick="app.restartNode()"><i class="fa-solid fa-rotate-right"></i> Restart Node</button>
+                            </div>
+                        </div>
+
+                        <!-- Harvest Estimator -->
+                        <div class="glass-panel metric-card">
+                            <div class="panel-header" style="border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; margin-bottom: 1rem;">
+                                <h2><i class="fa-solid fa-basket-shopping text-orange-500"></i> Kalkulator Panen</h2>
+                            </div>
+                            <div style="display: flex; flex-direction: column; gap: 1rem;">
+                                <div>
+                                    <label style="font-size: 0.85rem; color: var(--text-secondary);">Tanggal Tanam (Benih)</label>
+                                    <input type="date" id="harvest-date" style="width: 100%; padding: 0.5rem; margin-top: 0.25rem; border-radius: var(--radius-sm); background: var(--bg-secondary); border: 1px solid var(--border-color); color: var(--text-primary);" onchange="app.calculateHarvest()">
+                                </div>
+                                <div>
+                                    <label style="font-size: 0.85rem; color: var(--text-secondary);">Durasi Panen Ideal (Hari)</label>
+                                    <input type="number" id="harvest-duration" value="30" style="width: 100%; padding: 0.5rem; margin-top: 0.25rem; border-radius: var(--radius-sm); background: var(--bg-secondary); border: 1px solid var(--border-color); color: var(--text-primary);" onchange="app.calculateHarvest()">
+                                </div>
+                                <div style="background: var(--brand-primary-light); color: var(--brand-primary); padding: 1rem; border-radius: var(--radius-sm); text-align: center; margin-top: 0.5rem;">
+                                    <div style="font-size: 0.875rem;">Estimasi Panen Dalam</div>
+                                    <div style="font-size: 2rem; font-weight: 800;" id="harvest-days-left">--</div>
+                                    <div style="font-size: 0.875rem;">Hari</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Eco Score View -->
+                <section id="view-eco" class="view-space hidden">
+                    <div style="margin-bottom: 2rem;">
+                        <h2 style="font-size: 1.5rem; font-family: var(--font-heading);">Eco-Score & Gamifikasi</h2>
+                        <p style="color: var(--text-secondary);">Lacak seberapa efisien kebun Anda beroperasi (Hemat Energi & Air).</p>
+                    </div>
+
+                    <div class="glass-panel" style="text-align: center; padding: 3rem 1rem;">
+                        <div style="display: inline-flex; align-items: center; justify-content: center; width: 150px; height: 150px; border-radius: 50%; background: linear-gradient(135deg, #10b981, #059669); color: white; border: 8px solid var(--bg-secondary); box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.4);">
+                            <div style="display: flex; flex-direction: column;">
+                                <span style="font-size: 3rem; font-weight: 900; line-height: 1;" id="eco-score-value">A</span>
+                                <span style="font-size: 0.875rem; text-transform: uppercase; letter-spacing: 2px;">Excellent</span>
+                            </div>
+                        </div>
+                        <h3 style="margin-top: 2rem; font-size: 1.5rem; color: var(--text-primary);">Taman Anda Sangat Efisien!</h3>
+                        <p style="color: var(--text-secondary); max-width: 500px; margin: 0.5rem auto 2rem;">Anda berhasil menghemat 30% air dibandingkan menyiram secara manual. Terus pertahankan poin Anda.</p>
+                        
+                        <div class="metric-grid" style="text-align: left;">
+                            <div class="summary-card" style="background: var(--bg-secondary); padding: 1rem; border-radius: var(--radius-md);">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                    <span class="text-slate-500">Air Dihemat (Bulan ini)</span>
+                                    <i class="fa-solid fa-droplet text-blue-500"></i>
+                                </div>
+                                <strong style="font-size: 1.25rem;">+ 124 Liter</strong>
+                            </div>
+                            <div class="summary-card" style="background: var(--bg-secondary); padding: 1rem; border-radius: var(--radius-md);">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                    <span class="text-slate-500">Over-watering</span>
+                                    <i class="fa-solid fa-shield-halved text-green-500"></i>
+                                </div>
+                                <strong style="font-size: 1.25rem;">0 Kejadian</strong>
+                            </div>
+                            <div class="summary-card" style="background: var(--bg-secondary); padding: 1rem; border-radius: var(--radius-md);">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                    <span class="text-slate-500">Poin Gardenist</span>
+                                    <i class="fa-solid fa-star text-yellow-500"></i>
+                                </div>
+                                <strong style="font-size: 1.25rem;" id="eco-points">850 Pts</strong>
+                            </div>
+                        </div>
+                    </div>
+                </section>
             </main>
         </div>
     </div>
 
     <script type="module" src="/src/main.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js').then(registration => {
+                    console.log('SW registered: ', registration);
+                }).catch(registrationError => {
+                    console.log('SW registration failed: ', registrationError);
+                });
+            });
+        }
+    </script>
 </body>
 </html>

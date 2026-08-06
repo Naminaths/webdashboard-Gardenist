@@ -1,12 +1,13 @@
 import './style.css';
 
-let database, ref, onValue, set, push, query, limitToLast, get;
+let database, auth, ref, onValue, set, push, query, limitToLast, get;
+let signInWithEmailAndPassword, signOut, onAuthStateChanged;
 let Chart;
 let Swal;
 
 const SENSOR_DEFAULTS = { soil: 0, temp: 0, humidity: 0, tank: 0, light: 0, mq135: 0 };
 const DEVICE_KEYS = ['pump', 'uv', 'mist', 'buzzer'];
-const VIEW_KEYS = ['overview', 'automation', 'logs'];
+const VIEW_KEYS = ['overview', 'automation', 'logs', 'devices', 'eco'];
 
 const chartMeta = {
     soil: { label: 'Kelembaban Tanah (%)', color: '#10b981', bg: 'rgba(16, 185, 129, 0.12)' },
@@ -31,6 +32,9 @@ window.app = {
         sensors: { ...SENSOR_DEFAULTS },
         devices: { pump: 0, uv: 0, mist: 0, buzzer: 0 },
         alarmReason: null,
+        user: null,
+        ecoPoints: 850,
+        weather: { isRaining: false },
         mq135_ref: null,
         pinnedKey: null,
         sensorReady: false,
@@ -48,8 +52,13 @@ window.app = {
         if (database) return;
         const fbConfig = await import('./firebase-config.js');
         const fbDb = await import('firebase/database');
+        const fbAuth = await import('firebase/auth');
+        signInWithEmailAndPassword = fbAuth.signInWithEmailAndPassword;
+        signOut = fbAuth.signOut;
+        onAuthStateChanged = fbAuth.onAuthStateChanged;
 
         database = fbConfig.database;
+        auth = fbConfig.auth;
         ref = fbDb.ref;
         onValue = fbDb.onValue;
         set = fbDb.set;
@@ -75,6 +84,126 @@ window.app = {
         this.connectFirebase();
         this.setupInputs();
         this.startClock();
+    },
+
+    
+    showLoginModal: function() {
+        document.getElementById('login-modal')?.classList.remove('hidden');
+    },
+
+    hideLoginModal: function() {
+        document.getElementById('login-modal')?.classList.add('hidden');
+    },
+
+    login: async function() {
+        if (!auth) await this.loadFirebase();
+        const email = document.getElementById('login-email').value;
+        const pass = document.getElementById('login-password').value;
+        
+        try {
+            await signInWithEmailAndPassword(auth, email, pass);
+            this.hideLoginModal();
+            this.enterDashboard();
+        } catch (error) {
+            const swal = await this.loadSwal();
+            swal.fire('Login Gagal', 'Kredensial salah atau tidak diizinkan.', 'error');
+        }
+    },
+
+    checkWeather: async function() {
+        try {
+            // Menggunakan latitude/longitude dummy (misal Jogja)
+            const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=-7.7971&longitude=110.3688&current_weather=true');
+            const data = await res.json();
+            // Kode WMO > 50 biasanya berarti hujan
+            if (data.current_weather.weathercode >= 51) {
+                this.state.weather.isRaining = true;
+                document.getElementById('weather-alert')?.classList.remove('hidden');
+            } else {
+                this.state.weather.isRaining = false;
+                document.getElementById('weather-alert')?.classList.add('hidden');
+            }
+        } catch(e) {
+            console.log('Gagal mengambil data cuaca', e);
+        }
+    },
+
+    applyPlantProfile: function() {
+        const val = document.getElementById('plant-profile-select').value;
+        let soil = 30;
+        if(val === 'kaktus') soil = 20;
+        else if(val === 'anggrek') soil = 40;
+        else if(val === 'sayuran') soil = 60;
+        
+        if (val !== 'custom') {
+            document.getElementById('input-soil-thresh').value = soil;
+            document.getElementById('lbl-soil-thresh').innerText = soil + '%';
+        }
+    },
+
+    calculateHarvest: function() {
+        const dateInput = document.getElementById('harvest-date').value;
+        const duration = parseInt(document.getElementById('harvest-duration').value || '30', 10);
+        const display = document.getElementById('harvest-days-left');
+        
+        if (!dateInput) {
+            display.innerText = '--';
+            return;
+        }
+        
+        const plantDate = new Date(dateInput);
+        const now = new Date();
+        const diffTime = Math.abs(now - plantDate);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        
+        const daysLeft = duration - diffDays;
+        display.innerText = daysLeft > 0 ? daysLeft : 'Siap Panen';
+    },
+
+    exportLogsToPDF: async function() {
+        if (!window.jspdf || !window.html2canvas) {
+            const swal = await this.loadSwal();
+            swal.fire('Error', 'Library PDF belum termuat.', 'error');
+            return;
+        }
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        
+        doc.setFontSize(20);
+        doc.text('Laporan Gardenist - Smart Garden', 14, 22);
+        
+        doc.setFontSize(12);
+        doc.text('Tanggal: ' + new Date().toLocaleDateString('id-ID'), 14, 32);
+        
+        let y = 45;
+        this.state.logs.filtered.slice(0, 30).forEach(log => {
+            const dateStr = new Date(log.timestamp).toLocaleString('id-ID');
+            doc.text("[" + dateStr + "] " + log.type + ": " + log.message, 14, y);
+            y += 8;
+            if(y > 280) {
+                doc.addPage();
+                y = 20;
+            }
+        });
+        
+        doc.save('Gardenist_Report_' + new Date().toISOString().split('T')[0] + '.pdf');
+    },
+    
+    restartNode: async function() {
+        const swal = await this.loadSwal();
+        swal.fire({
+            title: 'Restart Node Utama?',
+            text: 'Perangkat ESP32 akan dimatikan dan dinyalakan ulang. Ini akan memutus sensor sementara.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Ya, Restart',
+            cancelButtonText: 'Batal'
+        }).then(result => {
+            if (result.isConfirmed) {
+                if(database) set(ref(database, 'config/commands/restart'), Date.now());
+                swal.fire('Terkirim', 'Sinyal restart telah dikirim ke node.', 'success');
+            }
+        });
     },
 
     enterDashboard: function () {
@@ -657,6 +786,14 @@ window.app = {
         });
     },
 
+    initDynamicTheme: function() {
+        const hour = new Date().getHours();
+        if (hour >= 18 || hour < 6) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    },
     startClock: function () {
         if (this.clockTimer) clearInterval(this.clockTimer);
         this.clockTimer = setInterval(() => text('last-updated', new Date().toLocaleTimeString('id-ID', { hour12: false })), 1000);
