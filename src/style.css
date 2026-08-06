@@ -964,13 +964,13 @@ html.dark .log-badge.config { background: rgba(147, 51, 234, 0.15); }
   
   /* Penyesuaian Spacing Grid */
   /* Enhanced Mobile Grids */
-  .summary-grid { grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
-  .summary-card { flex-direction: column; text-align: center; gap: 0.5rem; padding: 1rem; }
+  .summary-grid { grid-template-columns: 1fr; gap: 1rem; }
+  .summary-card { flex-direction: row; text-align: left; gap: 1rem; padding: 1.25rem; }
   
-  .metric-grid { grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
-  .metric-card { padding: 1rem; }
-  .metric-card strong { font-size: 1.5rem; }
-  .metric-card .panel-header h2 { font-size: 1rem; }
+  .metric-grid { grid-template-columns: 1fr; gap: 1rem; }
+  .metric-card { padding: 1.5rem; }
+  
+  
   
   .small-charts-grid { grid-template-columns: 1fr; gap: 1rem; }
   
@@ -994,8 +994,8 @@ html.dark .log-badge.config { background: rgba(147, 51, 234, 0.15); }
   .table-container { width: 100%; overflow-x: scroll; -webkit-overflow-scrolling: touch; }
   
   /* Eco-score mobile fix */
-  .eco-score-circle { width: 120px !important; height: 120px !important; border-width: 6px !important; }
-  .eco-score-circle span { font-size: 2rem !important; }
+  
+  
 }
 
 .eco-main-panel { padding: 3rem 1rem; }
