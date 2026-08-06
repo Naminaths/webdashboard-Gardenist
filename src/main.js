@@ -210,7 +210,10 @@ window.app = {
         document.getElementById('landing-page')?.classList.add('hidden');
         document.getElementById('dashboard-app')?.classList.remove('hidden');
         this.initSidebar();
-        setTimeout(() => this.init(), 100);
+        setTimeout(() => {
+            this.init();
+            this.handleRoute();
+        }, 100);
     },
 
     initSidebar: function () {
@@ -247,19 +250,36 @@ window.app = {
             cancelButtonText: 'Batal'
         }).then((result) => {
             if (result.isConfirmed) {
+                window.location.hash = '';
                 document.getElementById('dashboard-app')?.classList.add('hidden');
                 document.getElementById('landing-page')?.classList.remove('hidden');
             }
         });
     },
 
-    navigate: function (viewId) {
+    
+    initRouting: function() {
+        window.addEventListener('hashchange', () => this.handleRoute());
+    },
+    handleRoute: function() {
+        const dashboard = document.getElementById('dashboard-app');
+        if (!dashboard || dashboard.classList.contains('hidden')) return;
+        const hash = window.location.hash.replace('#', '') || 'overview';
+        if (VIEW_KEYS.includes(hash)) {
+            this.navigate(hash, true);
+        } else {
+            this.navigate('overview', true);
+        }
+    },
+    navigate: function (viewId, fromRoute = false) {
+        if (!fromRoute) window.location.hash = viewId;
         VIEW_KEYS.forEach((id) => {
             document.getElementById(`view-${id}`)?.classList.toggle('hidden', id !== viewId);
             document.getElementById(`nav-${id}`)?.classList.toggle('is-active', id === viewId);
             document.getElementById(`mobile-nav-${id}`)?.classList.toggle('is-active', id === viewId);
         });
     },
+
 
     connectFirebase: function () {
         if (!database) return;
