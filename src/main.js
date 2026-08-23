@@ -231,35 +231,7 @@ window.app = {
         }, 100);
     },
 
-    initSidebar: function () {
-        const collapsed = localStorage.getItem('gardenist-sidebar-collapsed') === 'true';
-        this.setSidebarCollapsed(collapsed);
-    },
 
-    setSidebarCollapsed: function (collapsed) {
-        const appEl = document.getElementById('dashboard-app');
-        const reveal = document.getElementById('sidebar-reveal');
-
-        appEl?.classList.toggle('sidebar-collapsed', collapsed);
-        if (reveal) reveal.setAttribute('aria-expanded', String(!collapsed));
-        localStorage.setItem('gardenist-sidebar-collapsed', String(collapsed));
-    },
-
-    toggleSidebar: function (collapsed) {
-        this.setSidebarCollapsed(collapsed);
-        setTimeout(() => {
-            Object.values(this.charts).forEach((chart) => chart?.resize?.());
-        }, 260);
-    },
-
-    logout: async function () {
-        const swal = await this.loadSwal();
-        swal.fire({
-            title: 'Keluar dari Dashboard?',
-            text: 'Anda akan kembali ke halaman utama.',
-            icon: 'warning',
-        }, 100);
-    },
 
     initSidebar: function () {
         const collapsed = localStorage.getItem('gardenist-sidebar-collapsed') === 'true';
