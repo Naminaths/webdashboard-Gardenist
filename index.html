@@ -602,6 +602,45 @@
         </div>
     </div>
 
+    <!-- Login Modal -->
+    <div id="login-modal" class="modal-backdrop hidden">
+        <div class="modal-content glass-panel" style="max-width: 400px; width: 90%; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); padding: 2rem; z-index: 1000; display: flex; flex-direction: column;">
+            <button class="modal-close" onclick="app.hideLoginModal()" aria-label="Tutup" style="position: absolute; top: 1rem; right: 1rem; background: none; border: none; color: var(--text-secondary); font-size: 1.25rem; cursor: pointer;"><i class="fa-solid fa-xmark"></i></button>
+            
+            <div class="modal-header" style="text-align: center; margin-bottom: 2rem;">
+                <i class="fa-solid fa-leaf" style="color: var(--brand-primary); font-size: 2rem; margin-bottom: 1rem;"></i>
+                <h2 style="font-family: var(--font-heading); font-size: 1.5rem; margin-bottom: 0.5rem;">Selamat Datang</h2>
+                <p style="color: var(--text-secondary); font-size: 0.875rem;">Masuk ke Gardenist Dashboard</p>
+            </div>
+
+            <div class="modal-body">
+                <button class="btn btn-google" onclick="app.loginWithGoogle()" style="width: 100%; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: center; gap: 0.75rem; background: white; color: #3c4043; border: 1px solid #dadce0; padding: 0.75rem; font-weight: 500; font-family: 'Google Sans', Roboto, sans-serif; transition: background-color 0.2s; border-radius: var(--radius-sm); cursor: pointer;" onmouseover="this.style.backgroundColor='#f8f9fa'" onmouseout="this.style.backgroundColor='white'">
+                    <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" style="width: 20px; height: 20px;">
+                    Lanjutkan dengan Google
+                </button>
+
+                <div class="divider" style="display: flex; align-items: center; text-align: center; margin-bottom: 1.5rem; color: var(--text-secondary); font-size: 0.875rem;">
+                    <div style="flex: 1; border-bottom: 1px solid var(--border-color);"></div>
+                    <span style="padding: 0 10px;">atau dengan email</span>
+                    <div style="flex: 1; border-bottom: 1px solid var(--border-color);"></div>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 1rem;">
+                    <label for="login-email" style="display: block; margin-bottom: 0.5rem; color: var(--text-secondary); font-size: 0.875rem;">Email</label>
+                    <input type="email" id="login-email" class="form-input" placeholder="contoh@email.com" style="width: 100%; padding: 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color); background: var(--bg-secondary); color: var(--text-primary); outline: none;" onfocus="this.style.borderColor='var(--brand-primary)'" onblur="this.style.borderColor='var(--border-color)'">
+                </div>
+                <div class="form-group" style="margin-bottom: 1.5rem;">
+                    <label for="login-password" style="display: block; margin-bottom: 0.5rem; color: var(--text-secondary); font-size: 0.875rem;">Password</label>
+                    <input type="password" id="login-password" class="form-input" placeholder="••••••••" style="width: 100%; padding: 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color); background: var(--bg-secondary); color: var(--text-primary); outline: none;" onfocus="this.style.borderColor='var(--brand-primary)'" onblur="this.style.borderColor='var(--border-color)'">
+                </div>
+                
+                <button class="btn btn-primary" onclick="app.login()" style="width: 100%; padding: 0.75rem;">
+                    Masuk
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script type="module" src="/src/main.js"></script>
     <script>
         if ('serviceWorker' in navigator) {
