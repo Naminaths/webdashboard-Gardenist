@@ -228,6 +228,7 @@ window.app = {
         setTimeout(() => {
             this.init();
             this.handleRoute();
+            this.checkWeather();
         }, 100);
     },
 
