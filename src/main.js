@@ -259,11 +259,14 @@ window.app = {
         }
 
         // ── Node Metadata ──────────────────────────────────────────────────
-        text('node-ip',       node.ip       || (ready ? 'Terhubung' : '--'));
-        text('node-rssi',     node.rssi     ? this._rssiLabel(node.rssi) : (ready ? 'Terhubung' : '--'));
-        text('node-uptime',   node.uptime   ? this._formatUptime(node.uptime) : (ready ? 'Aktif' : '--'));
+        // config/node is optionally sent by the ESP32 firmware
+        // Fields shown as '--' when not available in Firebase
+        text('node-ip',       node.ip       || '--');
+        text('node-rssi',     node.rssi     ? this._rssiLabel(node.rssi) : '--');
+        text('node-uptime',   node.uptime   ? this._formatUptime(node.uptime) : '--');
         text('node-firmware', node.firmware || '--');
         text('node-heap',     node.heap     ? `${Math.round(node.heap / 1024)} KB` : '--');
+        // Last sync: derived from the latest sensor update timestamp
         text('node-last-sync', lastUpdate ? this._relTime(lastUpdate) : '--');
 
         // ── Sensor Status Table ────────────────────────────────────────────
