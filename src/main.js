@@ -204,6 +204,152 @@ window.app = {
         doc.save('Gardenist_Report_' + new Date().toISOString().split('T')[0] + '.pdf');
     },
     
+    // Helper: format relative time
+    _relTime: function(ts) {
+        if (!ts) return 'Tidak diketahui';
+        const diffMs = Date.now() - ts;
+        const secs = Math.floor(diffMs / 1000);
+        if (secs < 60) return 'Baru saja';
+        const mins = Math.floor(secs / 60);
+        if (mins < 60) return `${mins} menit lalu`;
+        const hrs = Math.floor(mins / 60);
+        if (hrs < 24) return `${hrs} jam lalu`;
+        return `${Math.floor(hrs / 24)} hari lalu`;
+    },
+
+    // Helper: format uptime from seconds
+    _formatUptime: function(secs) {
+        if (!secs) return '--';
+        const d = Math.floor(secs / 86400);
+        const h = Math.floor((secs % 86400) / 3600);
+        const m = Math.floor((secs % 3600) / 60);
+        let parts = [];
+        if (d > 0) parts.push(`${d} Hari`);
+        if (h > 0) parts.push(`${h} Jam`);
+        if (m > 0 && d === 0) parts.push(`${m} Menit`);
+        return parts.join(', ') || '< 1 Menit';
+    },
+
+    // Helper: WiFi RSSI label
+    _rssiLabel: function(rssi) {
+        if (!rssi) return '--';
+        if (rssi >= -60) return `${rssi} dBm (Sangat Baik)`;
+        if (rssi >= -70) return `${rssi} dBm (Baik)`;
+        if (rssi >= -80) return `${rssi} dBm (Lemah)`;
+        return `${rssi} dBm (Kritis)`;
+    },
+
+    updateDevicesUI: function() {
+        const ready = this.state.sensorReady;
+        const s = this.state.sensors;
+        const d = this.state.devices;
+        const node = this.state.nodeInfo || {};
+        const lastUpdate = this.state.lastSensorUpdate || null;
+
+        // ── Node Status Badge ──────────────────────────────────────────────
+        const statusBadge = document.getElementById('node-status-badge');
+        const borderEl = document.getElementById('node-card');
+        if (statusBadge) {
+            statusBadge.innerText = ready ? 'Online' : 'Offline';
+            statusBadge.style.background = ready ? 'var(--good-light)' : 'var(--danger-light)';
+            statusBadge.style.color = ready ? 'var(--good)' : 'var(--danger)';
+        }
+        if (borderEl) {
+            borderEl.style.borderLeftColor = ready ? 'var(--good)' : 'var(--danger)';
+        }
+
+        // ── Node Metadata ──────────────────────────────────────────────────
+        text('node-ip',       node.ip       || (ready ? 'Terhubung' : '--'));
+        text('node-rssi',     node.rssi     ? this._rssiLabel(node.rssi) : (ready ? 'Terhubung' : '--'));
+        text('node-uptime',   node.uptime   ? this._formatUptime(node.uptime) : (ready ? 'Aktif' : '--'));
+        text('node-firmware', node.firmware || '--');
+        text('node-heap',     node.heap     ? `${Math.round(node.heap / 1024)} KB` : '--');
+        text('node-last-sync', lastUpdate ? this._relTime(lastUpdate) : '--');
+
+        // ── Sensor Status Table ────────────────────────────────────────────
+        const sensorTableEl = document.getElementById('sensor-status-table');
+        if (!sensorTableEl) return;
+
+        const sensors = [
+            {
+                key: 'Kelembaban Tanah', icon: 'fa-droplet', color: '#10b981',
+                value: ready ? `${s.soil}%` : '--',
+                status: !ready ? 'Offline' : s.soil < 40 ? 'Kering' : s.soil > 60 ? 'Lembab' : 'Ideal',
+                tone: !ready ? '#64748b' : s.soil < 40 ? '#0891b2' : s.soil > 60 ? '#ef4444' : '#10b981',
+            },
+            {
+                key: 'Kelembaban Udara', icon: 'fa-cloud-rain', color: '#0891b2',
+                value: ready ? `${s.humidity}%` : '--',
+                status: !ready ? 'Offline' : s.humidity < 40 ? 'Kering' : s.humidity > 60 ? 'Lembab' : 'Ideal',
+                tone: !ready ? '#64748b' : s.humidity < 40 ? '#0891b2' : s.humidity > 60 ? '#ef4444' : '#10b981',
+            },
+            {
+                key: 'Suhu', icon: 'fa-temperature-half', color: '#f97316',
+                value: ready ? `${s.temp}°C` : '--',
+                status: !ready ? 'Offline' : s.temp < 15 ? 'Dingin' : s.temp > 30 ? 'Panas' : 'Ideal',
+                tone: !ready ? '#64748b' : s.temp < 15 ? '#0891b2' : s.temp > 30 ? '#ef4444' : '#10b981',
+            },
+            {
+                key: 'Cahaya (LDR)', icon: 'fa-sun', color: '#ca8a04',
+                value: ready ? `${s.light} Lx` : '--',
+                status: !ready ? 'Offline' : s.light < 500 ? 'Redup' : s.light > 2000 ? 'Terang' : 'Ideal',
+                tone: !ready ? '#64748b' : s.light < 500 ? '#0891b2' : s.light > 2000 ? '#f59e0b' : '#10b981',
+            },
+            {
+                key: 'Kualitas Udara', icon: 'fa-wind', color: '#e11d48',
+                value: ready ? `${s.mq135} PPM` : '--',
+                status: !ready ? 'Offline' : s.mq135 < 450 ? 'Segar' : s.mq135 < 900 ? 'Cukup' : 'Berbahaya',
+                tone: !ready ? '#64748b' : s.mq135 < 450 ? '#10b981' : s.mq135 < 900 ? '#f59e0b' : '#ef4444',
+            },
+            {
+                key: 'Level Tangki Air', icon: 'fa-water', color: '#4f46e5',
+                value: ready ? `${s.tank}%` : '--',
+                status: !ready ? 'Offline' : s.tank < 10 ? 'Kritis!' : s.tank < 30 ? 'Rendah' : 'Aman',
+                tone: !ready ? '#64748b' : s.tank < 10 ? '#ef4444' : s.tank < 30 ? '#f59e0b' : '#10b981',
+            },
+        ];
+
+        const actuators = [
+            { key: 'Pompa Air', icon: 'fa-shower', active: d.pump == 1 },
+            { key: 'Lampu UV', icon: 'fa-lightbulb', active: d.uv == 1 },
+            { key: 'Mist Maker', icon: 'fa-smog', active: d.mist == 1 },
+            { key: 'Buzzer', icon: 'fa-bell', active: d.buzzer == 1 },
+        ];
+
+        sensorTableEl.innerHTML = `
+            <div style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-muted);margin-bottom:0.75rem;">
+                Sensor (${ready ? sensors.length : 0}/${sensors.length} aktif)
+            </div>
+            ${sensors.map(sen => `
+                <div style="display:flex;align-items:center;gap:0.75rem;padding:0.6rem 0;border-bottom:1px solid var(--border-color);">
+                    <div style="width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;
+                        background:${ready ? 'rgba(16,185,129,0.12)' : 'rgba(100,116,139,0.1)'};color:${sen.color};">
+                        <i class="fa-solid ${sen.icon}" style="font-size:0.875rem;"></i>
+                    </div>
+                    <span style="flex:1;font-size:0.875rem;color:var(--text-primary);font-weight:500;">${sen.key}</span>
+                    <span style="font-size:0.875rem;font-weight:700;font-family:var(--font-mono);color:var(--text-primary);min-width:6rem;text-align:right;">${sen.value}</span>
+                    <span style="font-size:0.75rem;font-weight:600;padding:0.2rem 0.5rem;border-radius:1rem;min-width:4.5rem;text-align:center;
+                        background:${sen.tone}18;color:${sen.tone};">${sen.status}</span>
+                </div>
+            `).join('')}
+            <div style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-muted);margin:1.25rem 0 0.75rem;">
+                Aktuator (${actuators.filter(a=>a.active).length}/${actuators.length} aktif)
+            </div>
+            ${actuators.map(act => `
+                <div style="display:flex;align-items:center;gap:0.75rem;padding:0.6rem 0;border-bottom:1px solid var(--border-color);">
+                    <div style="width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;
+                        background:${act.active ? 'rgba(16,185,129,0.12)' : 'rgba(100,116,139,0.08)'};color:${act.active ? '#10b981' : '#94a3b8'};">
+                        <i class="fa-solid ${act.icon}" style="font-size:0.875rem;"></i>
+                    </div>
+                    <span style="flex:1;font-size:0.875rem;color:var(--text-primary);font-weight:500;">${act.key}</span>
+                    <span style="font-size:0.75rem;font-weight:700;padding:0.2rem 0.6rem;border-radius:1rem;
+                        background:${act.active ? 'rgba(16,185,129,0.12)' : 'rgba(100,116,139,0.1)'};
+                        color:${act.active ? '#10b981' : '#94a3b8'};">${act.active ? 'ON' : 'OFF'}</span>
+                </div>
+            `).join('')}
+        `;
+    },
+
     restartNode: async function() {
         const swal = await this.loadSwal();
         swal.fire({
@@ -321,15 +467,26 @@ window.app = {
 
             this.state.sensors = { ...this.state.sensors, ...data };
             this.state.sensorReady = true;
+            this.state.lastSensorUpdate = Date.now();
             this.updateDashboardUI(this.state.sensors);
             this.updateSystemSummary();
             this.updateAllCharts(this.state.sensors);
             this.runAutomationLogic();
+            this.updateDevicesUI();
+        }, handleDbError);
+
+        onValue(ref(database, 'config/node'), (snapshot) => {
+            const data = snapshot.val();
+            this.state.nodeInfo = data || {};
+            this.updateDevicesUI();
         }, handleDbError);
 
         onValue(ref(database, 'devices'), (snapshot) => this.syncDeviceToggles(snapshot.val()), handleDbError);
         onValue(ref(database, 'config/automation'), (snapshot) => this.syncAutomationUI(snapshot.val()), handleDbError);
         onValue(query(ref(database, 'logs'), limitToLast(100)), (snapshot) => this.renderLogs(snapshot.val()), handleDbError);
+
+        // Mulai update relatif waktu setiap menit
+        this._uptimeTimer = setInterval(() => this.updateDevicesUI(), 60000);
     },
 
     metricStatus: function (id, label, tone) {

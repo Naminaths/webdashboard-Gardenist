@@ -482,27 +482,35 @@
                     </div>
                     
                     <div class="metric-grid">
-                        <div class="glass-panel metric-card" style="border-left: 4px solid var(--good);">
+                        <div class="glass-panel metric-card" id="node-card" style="border-left: 4px solid var(--danger);">
                             <div class="panel-header" style="border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; margin-bottom: 1rem;">
                                 <h2><i class="fa-solid fa-microchip text-slate-500"></i> Node Utama (ESP32)</h2>
-                                <span class="badge" style="background: var(--good-light); color: var(--good); padding: 0.25rem 0.5rem; border-radius: 1rem; font-size: 0.75rem;">Online</span>
+                                <span id="node-status-badge" class="badge" style="background: var(--danger-light); color: var(--danger); padding: 0.25rem 0.5rem; border-radius: 1rem; font-size: 0.75rem;">Offline</span>
                             </div>
                             <div style="display: grid; gap: 0.75rem; font-size: 0.875rem;">
                                 <div style="display: flex; justify-content: space-between;">
-                                    <span class="text-slate-500">IP Address</span>
-                                    <strong class="font-mono">192.168.1.104</strong>
+                                    <span style="color: var(--text-muted);">IP Address</span>
+                                    <strong id="node-ip" style="font-family: var(--font-mono);">--</strong>
                                 </div>
                                 <div style="display: flex; justify-content: space-between;">
-                                    <span class="text-slate-500">Sinyal WiFi</span>
-                                    <strong>-65 dBm (Baik)</strong>
+                                    <span style="color: var(--text-muted);">Sinyal WiFi</span>
+                                    <strong id="node-rssi">--</strong>
                                 </div>
                                 <div style="display: flex; justify-content: space-between;">
-                                    <span class="text-slate-500">Uptime</span>
-                                    <strong id="esp-uptime">3 Hari, 4 Jam</strong>
+                                    <span style="color: var(--text-muted);">Uptime</span>
+                                    <strong id="node-uptime">--</strong>
                                 </div>
                                 <div style="display: flex; justify-content: space-between;">
-                                    <span class="text-slate-500">Terakhir Update</span>
-                                    <strong id="esp-last-sync">Baru saja</strong>
+                                    <span style="color: var(--text-muted);">Firmware</span>
+                                    <strong id="node-firmware">--</strong>
+                                </div>
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span style="color: var(--text-muted);">Free Heap</span>
+                                    <strong id="node-heap">--</strong>
+                                </div>
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span style="color: var(--text-muted);">Terakhir Update</span>
+                                    <strong id="node-last-sync">--</strong>
                                 </div>
                             </div>
                             <div style="margin-top: 1.5rem; display: flex; gap: 0.5rem;">
@@ -529,6 +537,21 @@
                                     <div style="font-size: 2rem; font-weight: 800;" id="harvest-days-left">--</div>
                                     <div style="font-size: 0.875rem;">Hari</div>
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Live Sensor & Actuator Status Panel -->
+                    <div class="glass-panel" style="margin-top: 1.5rem; padding: 1.5rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <h3 style="font-family: var(--font-heading); font-size: 1rem; font-weight: 700;">
+                                <i class="fa-solid fa-gauge-high" style="color: var(--brand-primary); margin-right: 0.5rem;"></i>Status Real-time Sensor &amp; Aktuator
+                            </h3>
+                            <span style="font-size: 0.8rem; color: var(--text-muted);">Diperbarui otomatis dari Firebase</span>
+                        </div>
+                        <div id="sensor-status-table">
+                            <div style="text-align: center; color: var(--text-muted); padding: 2rem; font-size: 0.875rem;">
+                                <i class="fa-solid fa-circle-notch fa-spin" style="margin-bottom: 0.5rem;"></i><br>Menunggu koneksi sensor...
                             </div>
                         </div>
                     </div>
