@@ -1178,10 +1178,48 @@ window.app = {
     }
 };
 
-// Landing page initializations
-document.addEventListener('DOMContentLoaded', () => {
-    // Stats Counter Animation
+// ─────────────────────────────────────────────────────────────────────────────
+// Bootstrap: Check Firebase Auth persistence on every page load.
+// Firebase stores the session in IndexedDB/localStorage automatically.
+// We use onAuthStateChanged to restore the session without requiring re-login.
+// ─────────────────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', async () => {
+    // Show a loading splash while Firebase resolves the auth state
+    const splash = document.getElementById('auth-loading-splash');
+
+    try {
+        await app.loadFirebase();
+
+        // onAuthStateChanged fires once immediately with the current auth state
+        onAuthStateChanged(auth, (user) => {
+            // Hide the loading splash
+            if (splash) splash.classList.add('hidden');
+
+            if (user) {
+                // ✅ User already logged in — skip landing page, enter dashboard
+                app.state.user = user;
+                document.getElementById('landing-page')?.classList.add('hidden');
+                document.getElementById('dashboard-app')?.classList.remove('hidden');
+                app.initSidebar();
+                setTimeout(() => {
+                    app.init();
+                    app.handleRoute();
+                    app.checkWeather();
+                }, 100);
+            } else {
+                // ❌ Not logged in — show landing page as normal
+                document.getElementById('landing-page')?.classList.remove('hidden');
+            }
+        });
+    } catch (e) {
+        console.error('Auth bootstrap error:', e);
+        if (splash) splash.classList.add('hidden');
+        document.getElementById('landing-page')?.classList.remove('hidden');
+    }
+
+    // Landing page stats counter animation (unrelated to auth)
     const stats = document.querySelectorAll('.stat-number');
+
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
