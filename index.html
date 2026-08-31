@@ -537,27 +537,27 @@
                 <!-- Eco Score View -->
                 <section id="view-eco" class="view-space hidden">
                     <div style="margin-bottom: 2rem;">
-                        <h2 style="font-size: 1.5rem; font-family: var(--font-heading);">Eco-Score & Gamifikasi</h2>
-                        <p style="color: var(--text-secondary);">Lacak seberapa efisien kebun Anda beroperasi (Hemat Energi & Air).</p>
+                        <h2 style="font-size: 1.5rem; font-family: var(--font-heading);">Eco-Score &amp; Gamifikasi</h2>
+                        <p style="color: var(--text-secondary);">Lacak seberapa efisien kebun Anda beroperasi berdasarkan rules sensor &amp; otomasi aktif.</p>
                     </div>
 
                     <div class="glass-panel eco-main-panel" style="text-align: center;">
-                        <div class="eco-score-circle" style="display: inline-flex; align-items: center; justify-content: center; width: 150px; height: 150px; border-radius: 50%; background: linear-gradient(135deg, #10b981, #059669); color: white; border: 8px solid var(--bg-secondary); box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.4);">
+                        <div class="eco-score-circle" style="display: inline-flex; align-items: center; justify-content: center; width: 150px; height: 150px; border-radius: 50%; background: linear-gradient(135deg, #64748b, #475569); color: white; border: 8px solid var(--bg-secondary); box-shadow: 0 10px 25px -5px rgba(100,116,139,0.4);">
                             <div style="display: flex; flex-direction: column;">
-                                <span style="font-size: 3rem; font-weight: 900; line-height: 1;" id="eco-score-value">A</span>
-                                <span style="font-size: 0.875rem; text-transform: uppercase; letter-spacing: 2px;">Excellent</span>
+                                <span style="font-size: 3rem; font-weight: 900; line-height: 1;" id="eco-score-value">F</span>
+                                <span style="font-size: 0.875rem; text-transform: uppercase; letter-spacing: 2px;">Offline</span>
                             </div>
                         </div>
-                        <h3 style="margin-top: 2rem; font-size: 1.5rem; color: var(--text-primary);">Taman Anda Sangat Efisien!</h3>
-                        <p style="color: var(--text-secondary); max-width: 500px; margin: 0.5rem auto 2rem;">Anda berhasil menghemat 30% air dibandingkan menyiram secara manual. Terus pertahankan poin Anda.</p>
+                        <h3 id="eco-title" style="margin-top: 2rem; font-size: 1.5rem; color: var(--text-primary);">Sensor belum terhubung. Hubungkan perangkat untuk mulai merekam data.</h3>
+                        <p id="eco-desc" style="color: var(--text-secondary); max-width: 500px; margin: 0.5rem auto 2rem;">0 / 710 poin &bull; Alarm: 0 &bull; Log otomasi: 0</p>
                         
                         <div class="metric-grid" style="text-align: left; margin-top: 2rem;">
                             <div style="background: var(--bg-secondary); padding: 1.5rem; border-radius: var(--radius-lg); border: 1px solid var(--border-color); display: flex; flex-direction: column; justify-content: space-between;">
                                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                                    <span style="color: var(--text-secondary); font-size: 0.875rem; font-weight: 600;">Air Dihemat (Bulan ini)</span>
+                                    <span style="color: var(--text-secondary); font-size: 0.875rem; font-weight: 600;">Air Dihemat (Estimasi)</span>
                                     <div style="width: 32px; height: 32px; border-radius: 8px; background: rgba(59, 130, 246, 0.15); color: #3b82f6; display: flex; align-items: center; justify-content: center;"><i class="fa-solid fa-droplet"></i></div>
                                 </div>
-                                <strong id="eco-water-saved" style="font-size: 1.75rem; font-family: var(--font-heading); font-weight: 800; color: var(--text-primary);">+ 124 Liter</strong>
+                                <strong id="eco-water-saved" style="font-size: 1.75rem; font-family: var(--font-heading); font-weight: 800; color: var(--text-primary);">0 Liter</strong>
                             </div>
                             <div style="background: var(--bg-secondary); padding: 1.5rem; border-radius: var(--radius-lg); border: 1px solid var(--border-color); display: flex; flex-direction: column; justify-content: space-between;">
                                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
@@ -571,7 +571,22 @@
                                     <span style="color: var(--text-secondary); font-size: 0.875rem; font-weight: 600;">Poin Gardenist</span>
                                     <div style="width: 32px; height: 32px; border-radius: 8px; background: rgba(245, 158, 11, 0.15); color: #f59e0b; display: flex; align-items: center; justify-content: center;"><i class="fa-solid fa-star"></i></div>
                                 </div>
-                                <strong style="font-size: 1.75rem; font-family: var(--font-heading); font-weight: 800; color: var(--text-primary);" id="eco-points">850 Pts</strong>
+                                <strong style="font-size: 1.75rem; font-family: var(--font-heading); font-weight: 800; color: var(--text-primary);" id="eco-points">0 Pts</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Eco-Score Rules Panel -->
+                    <div class="glass-panel" style="margin-top: 1.5rem; padding: 1.5rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <h3 style="font-family: var(--font-heading); font-size: 1rem; font-weight: 700;">
+                                <i class="fa-solid fa-list-check" style="color: var(--brand-primary); margin-right: 0.5rem;"></i>Rules Penilaian
+                            </h3>
+                            <span style="font-size: 0.8rem; color: var(--text-muted);">Diperbarui secara real-time</span>
+                        </div>
+                        <div id="eco-rules-list" style="display: flex; flex-direction: column;">
+                            <div style="text-align: center; color: var(--text-muted); padding: 2rem; font-size: 0.875rem;">
+                                <i class="fa-solid fa-circle-notch fa-spin" style="margin-bottom: 0.5rem;"></i><br>Menunggu koneksi sensor...
                             </div>
                         </div>
                     </div>

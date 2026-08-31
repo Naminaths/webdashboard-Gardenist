@@ -33,7 +33,7 @@ window.app = {
         devices: { pump: 0, uv: 0, mist: 0, buzzer: 0 },
         alarmReason: null,
         user: null,
-        ecoPoints: 850,
+        ecoPoints: 0,
         weather: { isRaining: false },
         mq135_ref: null,
         pinnedKey: null,
@@ -391,54 +391,142 @@ window.app = {
     },
 
     
+    // ─── ECO-SCORE RULES ────────────────────────────────────────────────────────
+    // Eco-Score dimulai dari 0 dan dibangun dari rules berikut:
+    //  +150  Sensor aktif & mengirim data (sensorReady)
+    //  +100  Auto-siram (pump) aktif
+    //  +100  Auto-mist aktif
+    //  +80   Kelembaban tanah dalam range ideal (40–60%)
+    //  +80   Kelembaban udara dalam range ideal (40–60%)
+    //  +60   Suhu dalam range ideal (15–30°C)
+    //  +60   Level tangki mencukupi (> 20%)
+    //  +50   Kualitas udara baik (MQ135 < 450 PPM)
+    //  +30   Intensitas cahaya cukup (500–2000 Lx)
+    //  -100  per kejadian ALARM dalam log (max -300)
+    //  -50   per kejadian over-watering (soil > 65%) dalam log (max -150)
+    // Total maksimum: 710 pts → grade A (≥ 600), B (≥ 450), C (≥ 300), D (< 300)
+    // ────────────────────────────────────────────────────────────────────────────
+    ECO_RULES: [
+        { id: 'sensor_active',   label: 'Sensor aktif & terhubung',           points: 150, check: (s, c, l, r) => r },
+        { id: 'auto_pump',       label: 'Otomasi siram (pompa) aktif',         points: 100, check: (s, c) => !!c?.pump?.enabled },
+        { id: 'auto_mist',       label: 'Otomasi mist aktif',                  points: 100, check: (s, c) => !!c?.mist?.enabled },
+        { id: 'soil_ideal',      label: 'Kelembaban tanah ideal (40–60%)',      points: 80,  check: (s) => s.soil >= 40 && s.soil <= 60 },
+        { id: 'hum_ideal',       label: 'Kelembaban udara ideal (40–60%)',      points: 80,  check: (s) => s.humidity >= 40 && s.humidity <= 60 },
+        { id: 'temp_ideal',      label: 'Suhu lingkungan ideal (15–30°C)',      points: 60,  check: (s) => s.temp >= 15 && s.temp <= 30 },
+        { id: 'tank_ok',         label: 'Level tangki air mencukupi (> 20%)',   points: 60,  check: (s) => s.tank > 20 },
+        { id: 'air_clean',       label: 'Kualitas udara baik (< 450 PPM)',      points: 50,  check: (s) => s.mq135 > 0 && s.mq135 < 450 },
+        { id: 'light_ok',        label: 'Intensitas cahaya cukup (500–2000 Lx)', points: 30,  check: (s) => s.light >= 500 && s.light <= 2000 },
+    ],
+
     updateEcoScore: function() {
         const s = this.state.sensors;
         const c = this.state.automation;
-        if (!this.state.sensorReady) return;
-        
-        let overwateringEvents = 0;
-        if (s.soil > 65) overwateringEvents = 1; 
-        
-        let points = 800;
-        if (c?.pump?.enabled) points += 100;
-        if (s.soil >= 40 && s.soil <= 60) points += 50;
-        if (s.tank > 20) points += 50;
-        if (s.soil > 65) points -= 150;
-        if (this.state.weather.isRaining) points += 50;
-        
-        // Pastikan min 0, max 1000
-        points = Math.max(0, Math.min(1000, points));
-        
-        let waterSaved = Math.max(0, Math.round((points - 700) * 0.5));
-        if (points < 700) waterSaved = 0;
-        
+        const ready = this.state.sensorReady;
+        const logs = this.state.logs.items || [];
+
+        // Hitung poin dari rules
+        let points = 0;
+        const ruleResults = [];
+        for (const rule of this.ECO_RULES) {
+            const passed = rule.check(s, c, logs, ready);
+            if (passed) points += rule.points;
+            ruleResults.push({ ...rule, passed });
+        }
+
+        // Penalti dari log ALARM (max 3 kejadian = -300)
+        const alarmCount = logs.filter(l => l.type === 'ALARM').length;
+        const alarmPenalty = Math.min(alarmCount * 100, 300);
+        points -= alarmPenalty;
+
+        // Hitung over-watering dari log AUTO dengan kata "pump" saat tanah > 65%
+        const overwateringEvents = logs.filter(l => l.type === 'ALARM' && l.message && l.message.toLowerCase().includes('over')).length
+            + (s.soil > 65 ? 1 : 0);
+        const overwaterPenalty = Math.min(overwateringEvents * 50, 150);
+        points -= overwaterPenalty;
+
+        // Hitung air yang "dihemat" berdasarkan poin AUTO di log
+        const autoEvents = logs.filter(l => l.type === 'AUTO').length;
+        const waterSaved = Math.round(autoEvents * 0.5 * 2.5); // estimasi 2.5L per sesi auto
+
+        // Clamp 0–710
+        const MAX_POINTS = 710;
+        points = Math.max(0, Math.min(MAX_POINTS, points));
+        this.state.ecoPoints = points;
+
+        // Grade thresholds
+        let grade, gradeLabel, gradeDesc, gradeBg;
+        if (points >= 600) {
+            grade = 'A'; gradeLabel = 'Excellent';
+            gradeDesc = 'Taman Anda Sangat Efisien! Semua sistem berjalan optimal.';
+            gradeBg = 'linear-gradient(135deg, #10b981, #059669)';
+        } else if (points >= 450) {
+            grade = 'B'; gradeLabel = 'Good';
+            gradeDesc = 'Sistem berjalan baik. Ada beberapa area yang bisa dioptimalkan.';
+            gradeBg = 'linear-gradient(135deg, #3b82f6, #2563eb)';
+        } else if (points >= 300) {
+            grade = 'C'; gradeLabel = 'Fair';
+            gradeDesc = 'Perlu perhatian lebih. Aktifkan otomasi dan pastikan sensor terhubung.';
+            gradeBg = 'linear-gradient(135deg, #f59e0b, #d97706)';
+        } else if (points > 0) {
+            grade = 'D'; gradeLabel = 'Poor';
+            gradeDesc = 'Sistem belum optimal. Hubungkan sensor dan aktifkan rules otomasi.';
+            gradeBg = 'linear-gradient(135deg, #ef4444, #dc2626)';
+        } else {
+            grade = 'F'; gradeLabel = 'Offline';
+            gradeDesc = 'Sensor belum terhubung. Hubungkan perangkat untuk mulai merekam data.';
+            gradeBg = 'linear-gradient(135deg, #64748b, #475569)';
+        }
+
+        // Update DOM
         const ecoPointsEl = document.getElementById('eco-points');
         const ecoWaterEl = document.getElementById('eco-water-saved');
         const ecoOverEl = document.getElementById('eco-over-watering');
         const ecoGradeEl = document.getElementById('eco-score-value');
-        
+        const ecoTitleEl = document.getElementById('eco-title');
+        const ecoDescEl = document.getElementById('eco-desc');
+        const ecoRulesEl = document.getElementById('eco-rules-list');
+
         if (ecoPointsEl) ecoPointsEl.innerText = `${points} Pts`;
-        if (ecoWaterEl) ecoWaterEl.innerText = `+ ${waterSaved} Liter`;
+        if (ecoWaterEl) ecoWaterEl.innerText = waterSaved > 0 ? `+ ${waterSaved} Liter` : '0 Liter';
         if (ecoOverEl) ecoOverEl.innerText = `${overwateringEvents} Kejadian`;
-        
+        if (ecoTitleEl) ecoTitleEl.innerText = gradeDesc;
+        if (ecoDescEl) ecoDescEl.innerText = `${points} / ${MAX_POINTS} poin • Alarm: ${alarmCount} • Log otomasi: ${autoEvents}`;
+
         if (ecoGradeEl) {
-            if (points >= 900) {
-                ecoGradeEl.innerText = 'A';
-                ecoGradeEl.nextElementSibling.innerText = 'Excellent';
-                ecoGradeEl.parentElement.parentElement.style.background = 'linear-gradient(135deg, #10b981, #059669)';
-            } else if (points >= 800) {
-                ecoGradeEl.innerText = 'B';
-                ecoGradeEl.nextElementSibling.innerText = 'Good';
-                ecoGradeEl.parentElement.parentElement.style.background = 'linear-gradient(135deg, #3b82f6, #2563eb)';
-            } else if (points >= 700) {
-                ecoGradeEl.innerText = 'C';
-                ecoGradeEl.nextElementSibling.innerText = 'Fair';
-                ecoGradeEl.parentElement.parentElement.style.background = 'linear-gradient(135deg, #f59e0b, #d97706)';
-            } else {
-                ecoGradeEl.innerText = 'D';
-                ecoGradeEl.nextElementSibling.innerText = 'Poor';
-                ecoGradeEl.parentElement.parentElement.style.background = 'linear-gradient(135deg, #ef4444, #dc2626)';
-            }
+            ecoGradeEl.innerText = grade;
+            ecoGradeEl.nextElementSibling.innerText = gradeLabel;
+            ecoGradeEl.parentElement.parentElement.style.background = gradeBg;
+        }
+
+        // Render rules checklist
+        if (ecoRulesEl) {
+            ecoRulesEl.innerHTML = ruleResults.map(r => `
+                <div style="display:flex;align-items:center;gap:0.75rem;padding:0.6rem 0;border-bottom:1px solid var(--border-color);">
+                    <span style="width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:0.7rem;font-weight:700;
+                        background:${r.passed ? 'rgba(16,185,129,0.15)' : 'rgba(239,68,68,0.12)'};color:${r.passed ? '#10b981' : '#ef4444'};">
+                        ${r.passed ? '✓' : '✗'}
+                    </span>
+                    <span style="flex:1;font-size:0.875rem;color:var(--text-primary);">${r.label}</span>
+                    <span style="font-size:0.8rem;font-weight:700;color:${r.passed ? '#10b981' : 'var(--text-muted)'};">+${r.points} pts</span>
+                </div>
+            `).join('') + `
+                <div style="display:flex;align-items:center;gap:0.75rem;padding:0.6rem 0;border-bottom:1px solid var(--border-color);">
+                    <span style="width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:0.7rem;font-weight:700;
+                        background:${alarmPenalty > 0 ? 'rgba(239,68,68,0.12)' : 'rgba(16,185,129,0.15)'};color:${alarmPenalty > 0 ? '#ef4444' : '#10b981'};">
+                        ${alarmPenalty > 0 ? '✗' : '✓'}
+                    </span>
+                    <span style="flex:1;font-size:0.875rem;color:var(--text-primary);">Tidak ada alarm kritis (${alarmCount} alarm)</span>
+                    <span style="font-size:0.8rem;font-weight:700;color:${alarmPenalty > 0 ? '#ef4444' : 'var(--text-muted)'};">-${alarmPenalty} pts</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:0.75rem;padding:0.6rem 0;">
+                    <span style="width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:0.7rem;font-weight:700;
+                        background:${overwaterPenalty > 0 ? 'rgba(239,68,68,0.12)' : 'rgba(16,185,129,0.15)'};color:${overwaterPenalty > 0 ? '#ef4444' : '#10b981'};">
+                        ${overwaterPenalty > 0 ? '✗' : '✓'}
+                    </span>
+                    <span style="flex:1;font-size:0.875rem;color:var(--text-primary);">Tidak ada over-watering (${overwateringEvents} kejadian)</span>
+                    <span style="font-size:0.8rem;font-weight:700;color:${overwaterPenalty > 0 ? '#ef4444' : 'var(--text-muted)'};">-${overwaterPenalty} pts</span>
+                </div>
+            `;
         }
     },
 
@@ -604,6 +692,8 @@ window.app = {
         })) : [];
         this.state.logs.page = 0;
         this.renderFilteredLogs();
+        // Recalculate eco-score whenever logs change
+        this.updateEcoScore();
     },
 
     getFilteredLogs: function () {
