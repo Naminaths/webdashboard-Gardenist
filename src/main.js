@@ -370,6 +370,10 @@ window.app = {
         if (!this.state.sensorReady) return [];
 
         const s = this.state.sensors;
+        if (s.soil === 0 && s.humidity === 0 && s.temp === 0 && s.light === 0 && s.mq135 === 0) {
+            return [];
+        }
+
         const issues = [];
 
         if (s.soil < 40) issues.push('Tanah kering');
@@ -442,14 +446,22 @@ window.app = {
         const issues = this.getSensorIssues();
         const activeDevices = DEVICE_KEYS.filter((key) => this.state.devices[key] == 1);
         const activeAutomation = ['pump', 'mist'].filter((key) => this.state.automation?.[key]?.enabled);
-        const healthScore = Math.max(0, Math.round(((10 - issues.length) / 10) * 100));
+        
+        let healthScore = Math.max(0, Math.round(((10 - issues.length) / 10) * 100));
+        
+        const s = this.state.sensors;
+        const isDisconnected = s.soil === 0 && s.humidity === 0 && s.temp === 0 && s.light === 0 && s.mq135 === 0;
+        
+        if (isDisconnected) {
+            healthScore = 0;
+        }
 
         text('summary-health', this.state.sensorReady ? `${healthScore}%` : '--');
-        text('summary-health-note', !this.state.sensorReady ? 'Menunggu data sensor' : issues.length ? `${issues.slice(0, 2).join(', ')}${issues.length > 2 ? ` +${issues.length - 2}` : ''}` : 'Semua parameter dalam batas aman');
+        text('summary-health-note', !this.state.sensorReady ? 'Menunggu data sensor' : isDisconnected ? 'Sensor belum terhubung' : issues.length ? `${issues.slice(0, 2).join(', ')}${issues.length > 2 ? ` +${issues.length - 2}` : ''}` : 'Semua parameter dalam batas aman');
         text('summary-devices', `${activeDevices.length}/${DEVICE_KEYS.length}`);
         text('summary-devices-note', activeDevices.length ? activeDevices.map((key) => key.toUpperCase()).join(', ') : 'Belum ada perangkat aktif');
         text('summary-alerts', `${issues.length} isu`);
-        text('summary-alerts-note', issues.length ? issues.slice(0, 3).join(', ') : 'Tidak ada alarm kritis');
+        text('summary-alerts-note', isDisconnected ? 'Sensor belum terhubung' : issues.length ? issues.slice(0, 3).join(', ') : 'Tidak ada alarm kritis');
         text('summary-automation', `${activeAutomation.length}/2`);
         text('summary-automation-note', activeAutomation.length ? activeAutomation.map((key) => key === 'pump' ? 'Auto Siram' : 'Auto Mist').join(', ') : 'Aturan otomatis nonaktif');
     },
