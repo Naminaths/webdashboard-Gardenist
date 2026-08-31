@@ -500,31 +500,50 @@ window.app = {
     },
 
     updateDashboardUI: function (data) {
+        // Helper: update a sensor bar fill width
+        const setBar = (id, pct) => {
+            const el = document.getElementById(id);
+            if (el) el.style.width = Math.min(100, Math.max(0, pct)).toFixed(1) + '%';
+        };
+
+        // Update live dot indicator
+        const liveDot = document.getElementById('sensor-live-dot');
+        if (liveDot) {
+            liveDot.innerHTML = `<span style="width:8px;height:8px;border-radius:50%;background:#10b981;display:inline-block;box-shadow:0 0 6px #10b981;animation:pulse 2s infinite;"></span><span style="color:#10b981;font-weight:600;">Live</span>`;
+        }
+
         if (data.soil !== undefined) {
             text('val-soil', `${data.soil}%`);
+            setBar('bar-fill-soil', data.soil); // 0-100%
             this.metricStatus('soil-msg', data.soil < 40 ? 'Terlalu kering' : data.soil > 60 ? 'Terlalu lembab' : 'Ideal', data.soil < 40 ? 'tone-info' : data.soil > 60 ? 'tone-danger' : 'tone-good');
         }
         if (data.humidity !== undefined) {
             text('val-hum', `${data.humidity}%`);
+            setBar('bar-fill-hum', data.humidity); // 0-100%
             this.metricStatus('hum-msg', data.humidity < 40 ? 'Terlalu kering' : data.humidity > 60 ? 'Terlalu lembab' : 'Ideal', data.humidity < 40 ? 'tone-info' : data.humidity > 60 ? 'tone-danger' : 'tone-good');
         }
         if (data.temp !== undefined) {
             text('val-temp', `${data.temp}°C`);
+            setBar('bar-fill-temp', (data.temp / 50) * 100); // max scale 50°C
             this.metricStatus('temp-msg', data.temp < 15 ? 'Terlalu dingin' : data.temp > 30 ? 'Terlalu panas' : 'Ideal', data.temp < 15 ? 'tone-info' : data.temp > 30 ? 'tone-danger' : 'tone-good');
         }
         if (data.light !== undefined) {
-            text('val-light', data.light);
+            text('val-light', `${data.light} Lx`);
+            setBar('bar-fill-light', (data.light / 3000) * 100); // max scale 3000 Lx
             this.metricStatus('light-msg', data.light < 500 ? 'Kurang cahaya' : data.light > 2000 ? 'Terlalu terang' : 'Ideal', data.light < 500 ? 'tone-info' : data.light > 2000 ? 'tone-danger' : 'tone-good');
         }
         if (data.mq135 !== undefined) {
-            text('val-mq135', data.mq135);
+            text('val-mq135', `${data.mq135} PPM`);
+            setBar('bar-fill-mq135', (data.mq135 / 1200) * 100); // max scale 1200 PPM
             this.metricStatus('mq135-msg', data.mq135 < 450 ? 'Udara segar' : data.mq135 < 900 ? 'Cukup baik' : 'Polusi tinggi', data.mq135 < 450 ? 'tone-good' : data.mq135 < 900 ? 'tone-warning' : 'tone-danger');
         }
         if (data.tank !== undefined) {
             text('val-tank', `${data.tank}%`);
+            setBar('bar-fill-tank', data.tank); // 0-100%
             this.metricStatus('tank-msg', data.tank < 10 ? 'Perlu isi air' : 'Aman', data.tank < 10 ? 'tone-danger animate-pulse' : 'tone-muted');
         }
     },
+
 
     getSensorIssues: function () {
         if (!this.state.sensorReady) return [];

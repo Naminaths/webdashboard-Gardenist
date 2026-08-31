@@ -35,6 +35,10 @@
   --radius-sm: 8px;
 }
 
+html {
+  /* Dark mode by default */
+  color-scheme: dark;
+}
 html.dark {
   --bg-primary: #09090b;
   --bg-secondary: #18181b;
@@ -59,6 +63,8 @@ html.dark {
   --warning-light: rgba(245, 158, 11, 0.15);
   --info: #60a5fa;
   --info-light: rgba(59, 130, 246, 0.15);
+  --good: #10b981;
+  --good-light: rgba(16, 185, 129, 0.15);
 }
 
 * {
@@ -615,42 +621,143 @@ h1, h2, h3, h4, h5, h6 {
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* Summary Grid */
+/* Summary Grid — always 4 columns, never wraps */
 .summary-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.5rem;
 }
 .summary-card {
   display: flex;
   align-items: center;
-  gap: 1.5rem;
-  padding: 1.5rem;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+  position: relative;
+  overflow: hidden;
+}
+.summary-card::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: currentColor;
+  opacity: 0.6;
 }
 .summary-icon {
-  width: 56px;
-  height: 56px;
-  border-radius: var(--radius-md);
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-sm);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.5rem;
+  font-size: 1.25rem;
+  flex-shrink: 0;
 }
 .summary-info p {
-  font-size: 0.875rem;
-  color: var(--text-secondary);
+  font-size: 0.75rem;
+  color: var(--text-muted);
   font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 .summary-info strong {
   display: block;
-  font-size: 1.5rem;
+  font-size: 1.4rem;
   font-family: var(--font-heading);
   font-weight: 800;
-  margin-top: 0.25rem;
+  margin-top: 0.1rem;
+  color: var(--text-primary);
 }
 .summary-info small {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   color: var(--text-muted);
+  display: block;
+  margin-top: 0.15rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 150px;
+}
+
+/* ── Overview Body Layout (sensor bars + sticky controls) ── */
+.overview-body {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 1.5rem;
+  align-items: start;
+}
+.overview-sensors-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.overview-controls-panel {
+  position: sticky;
+  top: 1rem;
+}
+
+/* ── Compact Sensor Bar Rows ── */
+.sensor-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.875rem 1.25rem;
+  border-bottom: 1px solid var(--border-color);
+  transition: background 0.15s ease;
+}
+.sensor-bar-row:last-child { border-bottom: none; }
+.sensor-bar-row:hover { background: rgba(16,185,129,0.04); }
+.sensor-bar-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.875rem;
+  flex-shrink: 0;
+}
+.sensor-bar-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  width: 140px;
+  flex-shrink: 0;
+}
+.sensor-bar-track-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+.sensor-bar-track {
+  height: 8px;
+  background: var(--border-color);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.sensor-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.3s ease;
+  min-width: 4px;
+}
+.sensor-bar-status {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+.sensor-bar-value {
+  font-size: 0.9rem;
+  font-weight: 800;
+  font-family: var(--font-mono);
+  color: var(--text-primary);
+  width: 72px;
+  text-align: right;
+  flex-shrink: 0;
 }
 
 /* Metric Grid */
@@ -974,10 +1081,14 @@ html.dark .log-badge.config { background: rgba(147, 51, 234, 0.15); }
     align-items: center;
     justify-content: center;
   }
+  .summary-card::before { display: none; }
   .summary-card p { font-size: 0.75rem; line-height: 1.1; margin: 0; }
   .summary-card strong { font-size: 1.25rem; line-height: 1; }
-  .summary-card small { font-size: 0.65rem; line-height: 1.2; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .summary-card small { font-size: 0.65rem; line-height: 1.2; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; max-width: none; }
   .summary-icon { width: 36px; height: 36px; font-size: 1rem; margin-bottom: 0.25rem; }
+  .overview-body { grid-template-columns: 1fr; }
+  .overview-controls-panel { position: static; }
+  .sensor-bar-label { width: 100px; font-size: 0.8rem; }
   
   .metric-grid { grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
   .metric-card { padding: 1rem 0.5rem; }

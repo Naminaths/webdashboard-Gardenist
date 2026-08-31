@@ -236,127 +236,160 @@
                         <i class="fa-solid fa-cloud-rain"></i> <strong>Prediksi Cuaca:</strong> Hujan diperkirakan akan turun. Otomasi penyiraman ditangguhkan untuk menghemat air.
                     </div>
 
-                    <div class="metric-grid">
-                        <div class="glass-panel metric-card">
-                            <div class="metric-head" style="color: var(--brand-primary);"><i class="fa-solid fa-droplet"></i><span>Kelembaban Tanah</span></div>
-                            <div>
-                                <strong id="val-soil">--%</strong>
-                                <br><small id="soil-msg" class="metric-status tone-muted">--</small>
+                    <div class="overview-body">
+                        <!-- LEFT: Sensor Bars Panel + Charts -->
+                        <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                            <!-- Compact Sensor Bars -->
+                            <div class="glass-panel overview-sensors-panel">
+                                <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.25rem; border-bottom: 1px solid var(--border-color);">
+                                    <span style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted);">Status Sensor Real-time</span>
+                                    <span id="sensor-live-dot" style="display: flex; align-items: center; gap: 0.4rem; font-size: 0.75rem; color: var(--text-muted);">
+                                        <span style="width:8px;height:8px;border-radius:50%;background:var(--text-muted);display:inline-block;"></span>Offline
+                                    </span>
+                                </div>
+                                <!-- Kelembaban Tanah -->
+                                <div class="sensor-bar-row">
+                                    <div class="sensor-bar-icon" style="background:rgba(16,185,129,0.12);color:#10b981;"><i class="fa-solid fa-droplet"></i></div>
+                                    <span class="sensor-bar-label">Kelembaban Tanah</span>
+                                    <div class="sensor-bar-track-wrap">
+                                        <div class="sensor-bar-track"><div id="bar-fill-soil" class="sensor-bar-fill" style="width:0%;background:#10b981;"></div></div>
+                                        <span id="soil-msg" class="sensor-bar-status metric-status tone-muted">--</span>
+                                    </div>
+                                    <span id="val-soil" class="sensor-bar-value">--%</span>
+                                </div>
+                                <!-- Kelembapan Udara -->
+                                <div class="sensor-bar-row">
+                                    <div class="sensor-bar-icon" style="background:rgba(59,130,246,0.12);color:#3b82f6;"><i class="fa-solid fa-cloud-rain"></i></div>
+                                    <span class="sensor-bar-label">Kelembapan Udara</span>
+                                    <div class="sensor-bar-track-wrap">
+                                        <div class="sensor-bar-track"><div id="bar-fill-hum" class="sensor-bar-fill" style="width:0%;background:#3b82f6;"></div></div>
+                                        <span id="hum-msg" class="sensor-bar-status metric-status tone-muted">--</span>
+                                    </div>
+                                    <span id="val-hum" class="sensor-bar-value">--%</span>
+                                </div>
+                                <!-- Suhu -->
+                                <div class="sensor-bar-row">
+                                    <div class="sensor-bar-icon" style="background:rgba(249,115,22,0.12);color:#f97316;"><i class="fa-solid fa-temperature-half"></i></div>
+                                    <span class="sensor-bar-label">Suhu</span>
+                                    <div class="sensor-bar-track-wrap">
+                                        <div class="sensor-bar-track"><div id="bar-fill-temp" class="sensor-bar-fill" style="width:0%;background:#f97316;"></div></div>
+                                        <span id="temp-msg" class="sensor-bar-status metric-status tone-muted">--</span>
+                                    </div>
+                                    <span id="val-temp" class="sensor-bar-value">--°C</span>
+                                </div>
+                                <!-- Cahaya -->
+                                <div class="sensor-bar-row">
+                                    <div class="sensor-bar-icon" style="background:rgba(234,179,8,0.12);color:#eab308;"><i class="fa-solid fa-sun"></i></div>
+                                    <span class="sensor-bar-label">Cahaya</span>
+                                    <div class="sensor-bar-track-wrap">
+                                        <div class="sensor-bar-track"><div id="bar-fill-light" class="sensor-bar-fill" style="width:0%;background:#eab308;"></div></div>
+                                        <span id="light-msg" class="sensor-bar-status metric-status tone-muted">--</span>
+                                    </div>
+                                    <span id="val-light" class="sensor-bar-value">-- Lx</span>
+                                </div>
+                                <!-- Kualitas Udara -->
+                                <div class="sensor-bar-row">
+                                    <div class="sensor-bar-icon" style="background:rgba(239,68,68,0.12);color:#ef4444;"><i class="fa-solid fa-wind"></i></div>
+                                    <span class="sensor-bar-label">Kualitas Udara</span>
+                                    <div class="sensor-bar-track-wrap">
+                                        <div class="sensor-bar-track"><div id="bar-fill-mq135" class="sensor-bar-fill" style="width:0%;background:#ef4444;"></div></div>
+                                        <span id="mq135-msg" class="sensor-bar-status metric-status tone-muted">--</span>
+                                    </div>
+                                    <span id="val-mq135" class="sensor-bar-value">-- PPM</span>
+                                </div>
+                                <!-- Level Tangki -->
+                                <div class="sensor-bar-row">
+                                    <div class="sensor-bar-icon" style="background:rgba(99,102,241,0.12);color:#6366f1;"><i class="fa-solid fa-water"></i></div>
+                                    <span class="sensor-bar-label">Level Tangki</span>
+                                    <div class="sensor-bar-track-wrap">
+                                        <div class="sensor-bar-track"><div id="bar-fill-tank" class="sensor-bar-fill" style="width:0%;background:#6366f1;"></div></div>
+                                        <span id="tank-msg" class="sensor-bar-status metric-status tone-muted">--</span>
+                                    </div>
+                                    <span id="val-tank" class="sensor-bar-value">--%</span>
+                                </div>
                             </div>
-                        </div>
-                        <div class="glass-panel metric-card">
-                            <div class="metric-head" style="color: var(--info);"><i class="fa-solid fa-cloud-rain"></i><span>Kelembapan Udara</span></div>
-                            <div>
-                                <strong id="val-hum">--%</strong>
-                                <br><small id="hum-msg" class="metric-status tone-muted">--</small>
-                            </div>
-                        </div>
-                        <div class="glass-panel metric-card">
-                            <div class="metric-head" style="color: var(--warning);"><i class="fa-solid fa-temperature-half"></i><span>Suhu</span></div>
-                            <div>
-                                <strong id="val-temp">--°C</strong>
-                                <br><small id="temp-msg" class="metric-status tone-muted">--</small>
-                            </div>
-                        </div>
-                        <div class="glass-panel metric-card">
-                            <div class="metric-head" style="color: #ca8a04;"><i class="fa-solid fa-sun"></i><span>Cahaya</span></div>
-                            <div>
-                                <strong><span id="val-light">--</span> <span class="metric-unit">Lx</span></strong>
-                                <br><small id="light-msg" class="metric-status tone-muted">--</small>
-                            </div>
-                        </div>
-                        <div class="glass-panel metric-card">
-                            <div class="metric-head" style="color: var(--danger);"><i class="fa-solid fa-wind"></i><span>Kualitas Udara</span></div>
-                            <div>
-                                <strong><span id="val-mq135">--</span> <span class="metric-unit">PPM</span></strong>
-                                <br><small id="mq135-msg" class="metric-status tone-muted">--</small>
-                            </div>
-                        </div>
-                        <div class="glass-panel metric-card">
-                            <div class="metric-head" style="color: #4f46e5;"><i class="fa-solid fa-water"></i><span>Level Tangki</span></div>
-                            <div>
-                                <strong id="val-tank">--%</strong>
-                                <br><small id="tank-msg" class="metric-status tone-muted">--</small>
-                            </div>
-                        </div>
-                    </div>
 
-                    <div id="pinned-chart-section" class="glass-panel chart-panel hidden">
-                        <div class="panel-header">
-                            <h2><i class="fa-solid fa-thumbtack tone-good"></i> <span id="pinned-chart-title">Chart</span></h2>
-                            <button class="btn-icon" onclick="app.pinChart(null)"><i class="fa-solid fa-xmark"></i></button>
-                        </div>
-                        <div class="chart-container" style="height: 400px;"><canvas id="pinnedChart"></canvas></div>
-                    </div>
+                            <!-- Charts Row -->
+                            <div id="pinned-chart-section" class="glass-panel chart-panel hidden">
+                                <div class="panel-header">
+                                    <h2><i class="fa-solid fa-thumbtack tone-good"></i> <span id="pinned-chart-title">Chart</span></h2>
+                                    <button class="btn-icon" onclick="app.pinChart(null)"><i class="fa-solid fa-xmark"></i></button>
+                                </div>
+                                <div class="chart-container" style="height: 300px;"><canvas id="pinnedChart"></canvas></div>
+                            </div>
 
-                    <div class="chart-section">
-                        <div class="small-charts-grid">
-                            <div id="card-soil" class="glass-panel small-chart-panel">
-                                <div class="panel-header"><h2>Tanah</h2><button class="btn-icon" onclick="app.pinChart('soil')"><i class="fa-solid fa-thumbtack"></i></button></div>
-                                <div class="chart-container"><canvas id="soilChart"></canvas></div>
-                            </div>
-                            <div id="card-hum" class="glass-panel small-chart-panel">
-                                <div class="panel-header"><h2>Udara</h2><button class="btn-icon" onclick="app.pinChart('hum')"><i class="fa-solid fa-thumbtack"></i></button></div>
-                                <div class="chart-container"><canvas id="humChart"></canvas></div>
-                            </div>
-                            <div id="card-temp" class="glass-panel small-chart-panel">
-                                <div class="panel-header"><h2>Suhu</h2><button class="btn-icon" onclick="app.pinChart('temp')"><i class="fa-solid fa-thumbtack"></i></button></div>
-                                <div class="chart-container"><canvas id="tempChart"></canvas></div>
-                            </div>
-                            <div id="card-light" class="glass-panel small-chart-panel">
-                                <div class="panel-header"><h2>Cahaya</h2><button class="btn-icon" onclick="app.pinChart('light')"><i class="fa-solid fa-thumbtack"></i></button></div>
-                                <div class="chart-container"><canvas id="lightChart"></canvas></div>
-                            </div>
-                            <div id="card-mq135" class="glass-panel small-chart-panel">
-                                <div class="panel-header"><h2>Udara (PPM)</h2><button class="btn-icon" onclick="app.pinChart('mq135')"><i class="fa-solid fa-thumbtack"></i></button></div>
-                                <div class="chart-container"><canvas id="mq135Chart"></canvas></div>
-                            </div>
-                            <div id="card-tank" class="glass-panel small-chart-panel">
-                                <div class="panel-header"><h2>Level Tangki</h2><button class="btn-icon" onclick="app.pinChart('tank')"><i class="fa-solid fa-thumbtack"></i></button></div>
-                                <div class="chart-container"><canvas id="tankChart"></canvas></div>
+                            <div class="small-charts-grid">
+                                <div id="card-soil" class="glass-panel small-chart-panel">
+                                    <div class="panel-header"><h2>Tanah</h2><button class="btn-icon" onclick="app.pinChart('soil')"><i class="fa-solid fa-thumbtack"></i></button></div>
+                                    <div class="chart-container"><canvas id="soilChart"></canvas></div>
+                                </div>
+                                <div id="card-hum" class="glass-panel small-chart-panel">
+                                    <div class="panel-header"><h2>Udara</h2><button class="btn-icon" onclick="app.pinChart('hum')"><i class="fa-solid fa-thumbtack"></i></button></div>
+                                    <div class="chart-container"><canvas id="humChart"></canvas></div>
+                                </div>
+                                <div id="card-temp" class="glass-panel small-chart-panel">
+                                    <div class="panel-header"><h2>Suhu</h2><button class="btn-icon" onclick="app.pinChart('temp')"><i class="fa-solid fa-thumbtack"></i></button></div>
+                                    <div class="chart-container"><canvas id="tempChart"></canvas></div>
+                                </div>
+                                <div id="card-light" class="glass-panel small-chart-panel">
+                                    <div class="panel-header"><h2>Cahaya</h2><button class="btn-icon" onclick="app.pinChart('light')"><i class="fa-solid fa-thumbtack"></i></button></div>
+                                    <div class="chart-container"><canvas id="lightChart"></canvas></div>
+                                </div>
+                                <div id="card-mq135" class="glass-panel small-chart-panel">
+                                    <div class="panel-header"><h2>Udara (PPM)</h2><button class="btn-icon" onclick="app.pinChart('mq135')"><i class="fa-solid fa-thumbtack"></i></button></div>
+                                    <div class="chart-container"><canvas id="mq135Chart"></canvas></div>
+                                </div>
+                                <div id="card-tank" class="glass-panel small-chart-panel">
+                                    <div class="panel-header"><h2>Level Tangki</h2><button class="btn-icon" onclick="app.pinChart('tank')"><i class="fa-solid fa-thumbtack"></i></button></div>
+                                    <div class="chart-container"><canvas id="tankChart"></canvas></div>
+                                </div>
                             </div>
                         </div>
 
-                        <div class="glass-panel controls-panel">
-                            <div class="panel-header"><h2>Kontrol Manual</h2></div>
-                            <div class="device-row">
-                                <div class="device-icon" style="background: var(--info-light); color: var(--info);"><i class="fa-solid fa-shower"></i></div>
-                                <div class="device-info">
-                                    <strong>Pompa Air</strong>
-                                    <small id="status-pump" class="device-status">...</small>
+                        <!-- RIGHT: Sticky Kontrol Manual Panel -->
+                        <div class="overview-controls-panel">
+                            <div class="glass-panel controls-panel">
+                                <div class="panel-header"><h2>Kontrol Manual</h2></div>
+                                <div class="device-row">
+                                    <div class="device-icon" style="background: var(--info-light); color: var(--info);"><i class="fa-solid fa-shower"></i></div>
+                                    <div class="device-info">
+                                        <strong>Pompa Air</strong>
+                                        <small id="status-pump" class="device-status">...</small>
+                                    </div>
+                                    <label class="switch"><input type="checkbox" id="toggle-pump" onchange="app.toggleDevice('pump', this.checked)"><span></span></label>
                                 </div>
-                                <label class="switch"><input type="checkbox" id="toggle-pump" onchange="app.toggleDevice('pump', this.checked)"><span></span></label>
-                            </div>
-                            <div class="device-row">
-                                <div class="device-icon" style="background: #ede9fe; color: #8b5cf6;"><i class="fa-solid fa-lightbulb"></i></div>
-                                <div class="device-info">
-                                    <strong>Lampu UV</strong>
-                                    <small id="status-uv" class="device-status">...</small>
+                                <div class="device-row">
+                                    <div class="device-icon" style="background: #ede9fe; color: #8b5cf6;"><i class="fa-solid fa-lightbulb"></i></div>
+                                    <div class="device-info">
+                                        <strong>Lampu UV</strong>
+                                        <small id="status-uv" class="device-status">...</small>
+                                    </div>
+                                    <label class="switch"><input type="checkbox" id="toggle-uv" onchange="app.toggleDevice('uv', this.checked)"><span></span></label>
                                 </div>
-                                <label class="switch"><input type="checkbox" id="toggle-uv" onchange="app.toggleDevice('uv', this.checked)"><span></span></label>
-                            </div>
-                            <div class="device-row">
-                                <div class="device-icon" style="background: #cffafe; color: #06b6d4;"><i class="fa-solid fa-smog"></i></div>
-                                <div class="device-info">
-                                    <strong>Mist Maker</strong>
-                                    <small id="status-mist" class="device-status">...</small>
+                                <div class="device-row">
+                                    <div class="device-icon" style="background: #cffafe; color: #06b6d4;"><i class="fa-solid fa-smog"></i></div>
+                                    <div class="device-info">
+                                        <strong>Mist Maker</strong>
+                                        <small id="status-mist" class="device-status">...</small>
+                                    </div>
+                                    <label class="switch"><input type="checkbox" id="toggle-mist" onchange="app.toggleDevice('mist', this.checked)"><span></span></label>
                                 </div>
-                                <label class="switch"><input type="checkbox" id="toggle-mist" onchange="app.toggleDevice('mist', this.checked)"><span></span></label>
-                            </div>
-                            <div class="device-row">
-                                <div class="device-icon" style="background: var(--danger-light); color: var(--danger);"><i class="fa-solid fa-bell"></i></div>
-                                <div class="device-info">
-                                    <strong>Buzzer</strong>
-                                    <small id="status-buzzer" class="device-status">...</small>
+                                <div class="device-row">
+                                    <div class="device-icon" style="background: var(--danger-light); color: var(--danger);"><i class="fa-solid fa-bell"></i></div>
+                                    <div class="device-info">
+                                        <strong>Buzzer</strong>
+                                        <small id="status-buzzer" class="device-status">...</small>
+                                    </div>
+                                    <label class="switch"><input type="checkbox" id="toggle-buzzer" onchange="app.toggleDevice('buzzer', this.checked)"><span></span></label>
                                 </div>
-                                <label class="switch"><input type="checkbox" id="toggle-buzzer" onchange="app.toggleDevice('buzzer', this.checked)"><span></span></label>
-                            </div>
-                            <div style="margin-top: 1.5rem; padding: 1rem; background: var(--bg-secondary); border-radius: var(--radius-sm); font-size: 0.85rem; color: var(--text-secondary);">
-                                Otomasi akan mengaktifkan pompa, mist, atau buzzer sesuai ambang batas sensor.
+                                <div style="margin-top: 1rem; padding: 0.75rem 1rem; background: var(--bg-secondary); border-radius: var(--radius-sm); font-size: 0.8rem; color: var(--text-muted); line-height: 1.4;">
+                                    <i class="fa-solid fa-circle-info" style="color: var(--brand-primary); margin-right: 0.4rem;"></i>Otomasi akan mengaktifkan pompa, mist, atau buzzer sesuai ambang batas sensor.
+                                </div>
                             </div>
                         </div>
                     </div>
                 </section>
+
 
                 <!-- Automation View -->
                 <section id="view-automation" class="view-space hidden">
