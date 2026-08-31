@@ -586,7 +586,7 @@ window.app = {
     // Total maksimum: 710 pts → grade A (≥ 600), B (≥ 450), C (≥ 300), D (< 300)
     // ────────────────────────────────────────────────────────────────────────────
     ECO_RULES: [
-        { id: 'sensor_active',   label: 'Sensor aktif & terhubung',           points: 150, check: (s, c, l, r) => r },
+        { id: 'sensor_active',   label: 'Sensor aktif & terhubung',           points: 150, check: (s, c, l, r) => r && !(s.soil === 0 && s.humidity === 0 && s.temp === 0 && s.light === 0 && s.mq135 === 0) },
         { id: 'auto_pump',       label: 'Otomasi siram (pompa) aktif',         points: 100, check: (s, c) => !!c?.pump?.enabled },
         { id: 'auto_mist',       label: 'Otomasi mist aktif',                  points: 100, check: (s, c) => !!c?.mist?.enabled },
         { id: 'soil_ideal',      label: 'Kelembaban tanah ideal (40–60%)',      points: 80,  check: (s) => s.soil >= 40 && s.soil <= 60 },
