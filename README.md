@@ -1,120 +1,112 @@
-# Gardenist - Smart Garden Dashboard
+# Gardenist - Smart Garden IoT Monorepo
 
-Dashboard web untuk monitoring dan kontrol sistem Smart Garden berbasis IoT. Aplikasi ini memakai Vite, Vanilla JavaScript, Tailwind CSS, Chart.js, SweetAlert2, dan Firebase Realtime Database.
+Repositori resmi ekosistem **Gardenist (Smart Garden IoT)** yang mengintegrasikan aplikasi web client dashboard, skema cloud database, modul firmware mikrokontroler ESP32, dan dokumentasi arsitektur dalam format **Monorepo** (*npm workspaces*).
 
-## Fitur Utama
+---
 
-- **Landing page dan dashboard terpisah**: pengguna masuk dari halaman utama ke aplikasi dashboard.
-- **Monitoring realtime**: membaca data sensor dari Firebase Realtime Database untuk kelembaban tanah, kelembaban udara, suhu, cahaya, MQ135, dan level tangki.
-- **Ringkasan kondisi sistem**: menampilkan skor kesehatan, jumlah perangkat aktif, isu sensor, dan status aturan otomatis.
-- **Kontrol perangkat manual**: toggle realtime untuk `pump`, `uv`, `mist`, dan `buzzer`.
-- **Otomasi perangkat**: aturan otomatis untuk pompa berdasarkan kelembaban tanah dan mist maker berdasarkan kelembaban udara, lengkap dengan threshold yang bisa disimpan.
-- **Alarm otomatis**: buzzer aktif saat polusi tinggi/lonjakan MQ135 atau level air tangki kritis.
-- **Grafik monitoring**: Chart.js menampilkan grafik tiap sensor, termasuk fitur pin chart untuk fokus pada satu grafik.
-- **Log aktivitas**: membaca 100 log terakhir, mendukung filter tipe, pencarian, sorting, pagination, hapus log, dan export CSV hingga 500 log terakhir.
-- **Sidebar responsif**: navigasi overview, automation, dan logs dengan sidebar yang bisa disembunyikan serta navigasi mobile.
-- **Dark mode**: tampilan mendukung mode gelap melalui class Tailwind.
-
-## Teknologi
-
-- **Build tool**: Vite
-- **Frontend**: HTML5, Vanilla JavaScript ES Modules
-- **Styling**: Tailwind CSS via PostCSS (`src/style.css`)
-- **Database**: Firebase Realtime Database
-- **Chart**: Chart.js
-- **Dialog**: SweetAlert2
-- **Hosting**: Firebase Hosting, output dari folder `dist`
-
-## Struktur Project
+## 📂 Struktur Monorepo
 
 ```text
-smartgarden-webdashboard/
-├── assets/
-│   ├── favicon-uny.png
-│   └── smart-garden-hero.svg
-├── src/
-│   ├── firebase-config.js   # Inisialisasi Firebase dari env/fallback config
-│   ├── main.js              # State, listener database, UI, chart, automation, log
-│   └── style.css            # Tailwind layer dan komponen UI
-├── index.html               # Landing page dan markup dashboard
-├── firebase.json            # Firebase Hosting ke folder dist
-├── vite.config.js           # Konfigurasi Vite
-├── tailwind.config.js
-├── postcss.config.js
-├── package.json
+webdashboard-Gardenist/
+├── apps/
+│   └── web/                         # [App] Frontend Web Dashboard (Vite + Tailwind + Vanilla JS)
+│       ├── assets/                  # Favicon dan grafis hero SVG
+│       ├── public/                  # PWA Manifest dan Service Worker
+│       ├── src/
+│       │   ├── firebase-config.js   # Inisialisasi Firebase Auth & RTDB
+│       │   ├── main.js              # State, logic, listener Firebase, Chart.js
+│       │   └── style.css            # Tailwind & custom CSS layers
+│       ├── index.html               # Halaman landing & dashboard app
+│       ├── vite.config.js           # Konfigurasi bundler Vite
+│       ├── tailwind.config.js       # Konfigurasi Tailwind CSS
+│       ├── postcss.config.js        # Konfigurasi PostCSS
+│       └── package.json             # (@gardenist/web)
+│
+├── packages/
+│   ├── shared/                      # [Package] Konstanta bersama, keys sensor & batas ambang
+│   │   ├── src/index.js
+│   │   └── package.json             # (@gardenist/shared)
+│   │
+│   ├── database/                    # [Package] Firebase Security Rules & definisi skema RTDB
+│   │   ├── database.rules.json
+│   │   └── README.md
+│   │
+│   └── firmware/                    # [Package] Kode ESP32 Arduino / PlatformIO Controller
+│       ├── src/Gardenist_ESP32.ino  # Firmware pembaca sensor & pengontrol aktuator
+│       └── README.md                # Tabel pinout dan panduan flashing
+│
+├── docs/                            # Dokumentasi teknis & diagram
+│   └── architecture.md              # Diagram arsitektur IoT PlantUML
+│
+├── .github/workflows/               # CI/CD Workflows (Firebase Hosting & Vercel)
+├── firebase.json                    # Konfigurasi Firebase Hosting & Rules
+├── vercel.json                      # Konfigurasi deployment Vercel
+├── package.json                     # Root Monorepo configuration (npm workspaces)
 └── README.md
 ```
 
-## Konfigurasi Firebase
+---
 
-Konfigurasi Firebase dibaca dari environment variable Vite. Jika tidak tersedia, aplikasi memakai fallback config di `src/firebase-config.js`.
+## 🌿 Fitur Utama Web Dashboard (`apps/web`)
 
-Buat file `.env` di root project jika ingin memakai konfigurasi sendiri:
+- **Landing Page & Dashboard**: Tampilan transisi mulus dengan autentikasi Firebase.
+- **Monitoring Real-Time**: Sensor suhu, kelembaban udara (DHT22), kelembaban tanah, cahaya (LDR), kualitas udara (MQ-135), dan level air tangki (Ultrasonic).
+- **Kontrol Aktuator Manual & Otomasi**: Kontrol relay pompa air, mist maker, lampu UV, dan alarm buzzer secara realtime.
+- **Visualisasi & Log**: Grafik interaktif dengan Chart.js, riwayat log aktivitas dengan pencarian, filter, dan export CSV.
+- **Eco Score & Dark Mode**: Sistem penilaian kesehatan kebun otomatis dan tema gelap elegan.
 
-```env
-VITE_FIREBASE_API_KEY=...
-VITE_FIREBASE_AUTH_DOMAIN=...
-VITE_FIREBASE_DATABASE_URL=...
-VITE_FIREBASE_PROJECT_ID=...
-VITE_FIREBASE_STORAGE_BUCKET=...
-VITE_FIREBASE_MESSAGING_SENDER_ID=...
-VITE_FIREBASE_APP_ID=...
-VITE_FIREBASE_MEASUREMENT_ID=...
-```
+---
 
-Path database yang digunakan aplikasi:
+## 🚀 Panduan Memulai (Quickstart)
 
-- `sensors`: data sensor realtime.
-- `devices`: status perangkat `pump`, `uv`, `mist`, dan `buzzer`.
-- `config/automation`: konfigurasi otomasi `pump` dan `mist`.
-- `logs`: log aktivitas manual, otomatis, konfigurasi, dan alarm.
+Semua perintah dapat dijalankan langsung dari **root direktori**:
 
-## Cara Menjalankan
-
-Install dependency:
-
+### 1. Pasang Dependensi
 ```bash
 npm install
 ```
+*Perintah ini otomatis menginstal dependensi seluruh workspace.*
 
-Jalankan mode development:
-
+### 2. Jalankan Server Pengembangan (Dev)
 ```bash
 npm run dev
 ```
+Dashboard akan aktif di `http://localhost:5173`.
 
-Build untuk production:
-
+### 3. Build untuk Produksi
 ```bash
 npm run build
 ```
+Hasil build akan tersimpan di folder `apps/web/dist`.
 
-Preview hasil build:
-
+### 4. Preview Hasil Build
 ```bash
 npm run preview
 ```
 
-## Deployment Firebase Hosting
+---
 
-Project dikonfigurasi agar Firebase Hosting memakai folder `dist`.
+## ☁️ Deployment
 
+### Firebase Hosting
+Hosting dikonfigurasi melalui `firebase.json` mengarah langsung ke build output `apps/web/dist`:
 ```bash
 npm run build
 firebase deploy
 ```
 
-Konfigurasi hosting berada di `firebase.json` dengan site `webdashboard-gardenist`.
+### Vercel
+File `vercel.json` di root direktori telah dikonfigurasi otomatis agar mengenali perintah build monorepo:
+```bash
+vercel --prod
+```
 
-## Catatan Implementasi
+---
 
-- Entry logic berada di `src/main.js` melalui object global `window.app`.
-- `app.enterDashboard()` menampilkan dashboard dan memulai inisialisasi aplikasi.
-- `app.connectFirebase()` memasang listener realtime untuk sensor, perangkat, otomasi, dan log.
-- `app.runAutomationLogic()` menjalankan aturan pompa, mist maker, dan alarm buzzer.
-- `app.renderFilteredLogs()` menangani filter, pencarian, sorting, dan pagination log.
-- `app.exportLogsToCSV()` mengambil log dari Firebase dan mengunduh file CSV.
-- `src/firebase-config.js` memakai singleton Firebase app agar aman saat Vite hot reload.
+## 📖 Dokumentasi Terkait
+- [Arsitektur Sistem IoT](file:///d:/WEB%20DEV/webdashboard-Gardenist/docs/architecture.md)
+- [Dokumentasi Firmware ESP32](file:///d:/WEB%20DEV/webdashboard-Gardenist/packages/firmware/README.md)
+- [Dokumentasi Skema Database](file:///d:/WEB%20DEV/webdashboard-Gardenist/packages/database/README.md)
 
 ---
 

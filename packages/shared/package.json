@@ -1,0 +1,8 @@
+{
+  "name": "@gardenist/shared",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Shared constants, schemas, and configurations for Gardenist IoT ecosystem",
+  "main": "src/index.js",
+  "type": "module"
+}

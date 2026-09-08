@@ -1,0 +1,28 @@
+{
+  "rules": {
+    ".read": "auth != null",
+    ".write": "auth != null",
+    "sensors": {
+      ".read": true,
+      ".write": "auth != null",
+      ".indexOn": ["timestamp"]
+    },
+    "controls": {
+      ".read": true,
+      ".write": "auth != null"
+    },
+    "automation": {
+      ".read": true,
+      ".write": "auth != null"
+    },
+    "logs": {
+      ".read": true,
+      ".write": "auth != null",
+      ".indexOn": ["timestamp"]
+    },
+    "nodes": {
+      ".read": true,
+      ".write": "auth != null"
+    }
+  }
+}

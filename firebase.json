@@ -1,7 +1,10 @@
 {
+  "database": {
+    "rules": "packages/database/database.rules.json"
+  },
   "hosting": {
     "site": "webdashboard-gardenist",
-    "public": "dist",
+    "public": "apps/web/dist",
     "ignore": [
       "firebase.json",
       "**/.*",

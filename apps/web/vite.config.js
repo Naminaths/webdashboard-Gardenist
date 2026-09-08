@@ -1,10 +1,10 @@
-
 import { defineConfig } from 'vite';
 
 export default defineConfig({
     root: './',
-    envDir: './', // Ensure .env is loaded from root
+    envDir: '../../',
     server: {
-        host: true
+        host: true,
+        port: 5173
     }
 });

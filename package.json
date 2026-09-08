@@ -1,37 +1,34 @@
 {
-  "name": "smartgarden-webdashboard",
+  "name": "gardenist-monorepo",
   "version": "1.0.0",
-  "description": "Dashboard monitoring dan kontrol untuk sistem Smart Garden berbasis IoT, terintegrasi dengan Firebase Realtime Database.",
-  "main": "index.js",
+  "private": true,
+  "description": "Smart Garden IoT Monorepo - Web Dashboard, Cloud RTDB Schemas, & ESP32 Firmware",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
+    "dev": "npm run dev --workspace=@gardenist/web",
+    "build": "npm run build --workspace=@gardenist/web",
+    "preview": "npm run preview --workspace=@gardenist/web"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Naminaths/webdashboard-Gardenist.git"
   },
-  "keywords": [],
+  "keywords": [
+    "iot",
+    "smart-garden",
+    "monorepo",
+    "firebase",
+    "esp32",
+    "vite",
+    "tailwind"
+  ],
   "author": "",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/Naminaths/webdashboard-Gardenist/issues"
   },
-  "homepage": "https://github.com/Naminaths/webdashboard-Gardenist#readme",
-  "dependencies": {
-    "chart.js": "^4.5.1",
-    "firebase": "^12.8.0",
-    "html2canvas": "^1.4.1",
-    "jspdf": "^4.2.1",
-    "sweetalert2": "^11.26.18",
-    "vite": "^7.3.1"
-  },
-  "devDependencies": {
-    "@tailwindcss/forms": "^0.5.11",
-    "@tailwindcss/typography": "^0.5.19",
-    "autoprefixer": "^10.4.24",
-    "postcss": "^8.5.6",
-    "tailwindcss": "^3.4.17"
-  }
+  "homepage": "https://github.com/Naminaths/webdashboard-Gardenist#readme"
 }
