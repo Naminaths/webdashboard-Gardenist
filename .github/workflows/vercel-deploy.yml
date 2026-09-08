@@ -4,6 +4,13 @@ on:
   push:
     branches:
       - main
+    paths:
+      - 'apps/web/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'vercel.json'
+      - '.github/workflows/vercel-deploy.yml'
+  workflow_dispatch:
 
 env:
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}

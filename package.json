@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "description": "Smart Garden IoT Monorepo - Web Dashboard, Cloud RTDB Schemas, & ESP32 Firmware",
+  "type": "module",
   "workspaces": [
     "apps/*",
     "packages/*"
@@ -10,7 +11,9 @@
   "scripts": {
     "dev": "npm run dev --workspace=@gardenist/web",
     "build": "npm run build --workspace=@gardenist/web",
-    "preview": "npm run preview --workspace=@gardenist/web"
+    "preview": "npm run preview --workspace=@gardenist/web",
+    "commit": "node scripts/auto-commit.js",
+    "auto-commit": "node scripts/auto-commit.js"
   },
   "repository": {
     "type": "git",
