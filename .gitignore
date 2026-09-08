@@ -13,9 +13,8 @@ dist/
 .env.*.local
 .env*
 
-# Framework & Hosting caches
+# Firebase cache
 .firebase/
-.vercel/
 
 # Logs
 npm-debug.log*

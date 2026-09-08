@@ -12,6 +12,9 @@
     "dev": "npm run dev --workspace=@gardenist/web",
     "build": "npm run build --workspace=@gardenist/web",
     "preview": "npm run preview --workspace=@gardenist/web",
+    "deploy": "npm run build && npx firebase-tools deploy --only hosting",
+    "deploy:all": "npm run build && npx firebase-tools deploy",
+    "deploy:rules": "npx firebase-tools deploy --only database",
     "commit": "node scripts/auto-commit.js",
     "auto-commit": "node scripts/auto-commit.js"
   },

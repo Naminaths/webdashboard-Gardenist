@@ -38,9 +38,8 @@ webdashboard-Gardenist/
 ├── docs/                            # Dokumentasi teknis & diagram
 │   └── architecture.md              # Diagram arsitektur IoT PlantUML
 │
-├── .github/workflows/               # CI/CD Workflows (Firebase Hosting & Vercel)
-├── firebase.json                    # Konfigurasi Firebase Hosting & Rules
-├── vercel.json                      # Konfigurasi deployment Vercel
+├── .github/workflows/               # CI/CD Workflows (Firebase Hosting CI/CD)
+├── firebase.json                    # Konfigurasi Firebase Hosting & Security Rules
 ├── package.json                     # Root Monorepo configuration (npm workspaces)
 └── README.md
 ```
@@ -86,20 +85,40 @@ npm run preview
 
 ---
 
-## ☁️ Deployment
+## ☁️ Deployment (Firebase Hosting)
 
-### Firebase Hosting
-Hosting dikonfigurasi melalui `firebase.json` mengarah langsung ke build output `apps/web/dist`:
-```bash
-npm run build
-firebase deploy
-```
+Aplikasi Web Dashboard Gardenist sepenuhnya dihosting menggunakan **Firebase Hosting** (gratis di Firebase Spark Plan dengan fasilitas global CDN, custom domain gratis, dan SSL otomatis).
 
-### Vercel
-File `vercel.json` di root direktori telah dikonfigurasi otomatis agar mengenali perintah build monorepo:
-```bash
-vercel --prod
-```
+### A. Deployment Otomatis (CI/CD GitHub Actions)
+Setiap kali ada commit atau merge ke branch `main`, GitHub Actions akan otomatis melakukan:
+1. Setup Node.js 20 & restore cache dependensi npm.
+2. Build monorepo (`npm run build`).
+3. Deploy otomatis ke Firebase Hosting saluran langsung (*live channel*).
+
+> **Catatan Secret GitHub**: Pastikan repository GitHub memiliki secret `FIREBASE_SERVICE_ACCOUNT_WEBDASHBOARD_GARDENIST` yang berisi Service Account Key dari Firebase Console (*Project Settings -> Service Accounts*).
+
+### B. Deployment Manual dari Komputer Lokal
+Jika ingin melakukan deploy langsung dari terminal tanpa menunggu CI/CD:
+
+1. **Login Firebase (cukup sekali):**
+   ```bash
+   npx firebase-tools login
+   ```
+2. **Deploy Hosting Web:**
+   ```bash
+   npm run deploy
+   ```
+   *Perintah ini otomatis menjalankan `npm run build` dan mempublikasikan folder `apps/web/dist` ke Firebase Hosting.*
+
+3. **Deploy Aturan Database Saja:**
+   ```bash
+   npm run deploy:rules
+   ```
+
+4. **Deploy Semua (Hosting + Database Rules):**
+   ```bash
+   npm run deploy:all
+   ```
 
 ---
 
