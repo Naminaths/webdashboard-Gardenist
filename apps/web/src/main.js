@@ -499,6 +499,18 @@ window.app = {
         el.className = `metric-status ${tone}`;
     },
 
+    updateGreeting: function () {
+        const hour = new Date().getHours();
+        let greeting = 'Kondisi Kebun Hari Ini';
+        if (hour >= 4 && hour < 11) greeting = 'Selamat Pagi, Petani Cerdas 🌅';
+        else if (hour >= 11 && hour < 15) greeting = 'Selamat Siang, Petani Cerdas ☀️';
+        else if (hour >= 15 && hour < 18) greeting = 'Selamat Sore, Petani Cerdas 🌇';
+        else greeting = 'Selamat Malam, Petani Cerdas 🌙';
+        
+        const el = document.getElementById('hero-greeting-text');
+        if (el) el.innerText = greeting;
+    },
+
     updateDashboardUI: function (data) {
         // Helper: update a sensor bar fill width
         const setBar = (id, pct) => {
@@ -506,11 +518,17 @@ window.app = {
             if (el) el.style.width = Math.min(100, Math.max(0, pct)).toFixed(1) + '%';
         };
 
-        // Update live dot indicator
+        // Update live dot indicator & Hero node status
         const liveDot = document.getElementById('sensor-live-dot');
         if (liveDot) {
             liveDot.innerHTML = `<span style="width:8px;height:8px;border-radius:50%;background:#10b981;display:inline-block;box-shadow:0 0 6px #10b981;animation:pulse 2s infinite;"></span><span style="color:#10b981;font-weight:600;">Live</span>`;
         }
+        const heroNodeStatus = document.getElementById('hero-node-status');
+        if (heroNodeStatus) {
+            heroNodeStatus.innerText = 'ESP32 Online';
+        }
+
+        this.updateGreeting();
 
         if (data.soil !== undefined) {
             text('val-soil', `${data.soil}%`);
@@ -741,8 +759,13 @@ window.app = {
             const enabled = this.state.devices[key] == 1;
             const toggle = document.getElementById(`toggle-${key}`);
             const status = document.getElementById(`status-${key}`);
+            const cardAction = document.getElementById(`card-action-${key}`);
+            const stateInd = document.getElementById(`state-ind-${key}`);
 
             if (toggle) toggle.checked = enabled;
+            if (cardAction) cardAction.classList.toggle('device-active', enabled);
+            if (stateInd) stateInd.innerText = enabled ? 'ON' : 'OFF';
+
             if (!status) return;
 
             let label = enabled ? 'ON' : 'OFF';
@@ -931,6 +954,45 @@ window.app = {
             tbody.appendChild(row);
         });
 
+        // Render Mobile Activity Feed Stream
+        const feedContainer = document.getElementById('logs-activity-feed');
+        if (feedContainer) {
+            feedContainer.innerHTML = '';
+            if (!visibleLogs.length) {
+                feedContainer.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 2rem;">Tidak ada aktivitas log yang cocok.</div>';
+            } else {
+                visibleLogs.forEach((log) => {
+                    const card = document.createElement('div');
+                    card.className = 'log-feed-card';
+
+                    let icon = 'fa-circle-info';
+                    let iconBg = 'tone-info-bg';
+                    const typeLower = String(log.type || 'INFO').toLowerCase();
+                    if (typeLower === 'alarm') { icon = 'fa-triangle-exclamation'; iconBg = 'tone-danger-bg'; }
+                    else if (typeLower === 'auto') { icon = 'fa-robot'; iconBg = 'tone-good-bg'; }
+                    else if (typeLower === 'manual') { icon = 'fa-hand-pointer'; iconBg = 'tone-info-bg'; }
+                    else if (typeLower === 'config') { icon = 'fa-sliders'; iconBg = 'tone-warning-bg'; }
+
+                    const timeStr = log.timestamp ? new Date(log.timestamp).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '-';
+                    const relStr = this._relTime(log.timestamp);
+
+                    card.innerHTML = `
+                        <div class="log-feed-icon ${iconBg}">
+                            <i class="fa-solid ${icon}"></i>
+                        </div>
+                        <div class="log-feed-content">
+                            <div class="log-feed-header">
+                                <span class="log-badge ${typeLower}">${log.type || 'INFO'}</span>
+                                <span class="log-feed-time" title="${timeStr}">${relStr}</span>
+                            </div>
+                            <div class="log-feed-message">${log.message || '-'}</div>
+                        </div>
+                    `;
+                    feedContainer.appendChild(card);
+                });
+            }
+        }
+
         text('logs-count', `${logs.length} log`);
         text('logs-page-info', logs.length ? `Menampilkan ${start + 1}-${Math.min(start + this.state.logs.pageSize, logs.length)} dari ${logs.length}` : 'Tidak ada data');
 
@@ -1063,6 +1125,40 @@ window.app = {
             const canvas = document.getElementById(canvasId);
             if (canvas) this.charts[key] = this.createChartConfig(canvas.getContext('2d'), meta);
         });
+
+        // Initialize default master chart with soil sensor
+        this.switchMasterChart('soil');
+    },
+
+    activeMasterSensor: 'soil',
+    activeTimeRange: 'realtime',
+
+    switchMasterChart: function (key) {
+        if (!key || !chartMeta[key]) return;
+        this.activeMasterSensor = key;
+
+        // Highlight active pill
+        document.querySelectorAll('.chart-pill').forEach((btn) => {
+            btn.classList.toggle('is-active', btn.dataset.sensor === key);
+        });
+
+        // Highlight selected carousel card
+        document.querySelectorAll('.sensor-carousel-card').forEach((card) => {
+            card.classList.toggle('is-selected', card.id === `carousel-card-${key}`);
+        });
+
+        // Render master chart
+        this.pinChart(key);
+    },
+
+    setTimeFilter: function (range, btnEl) {
+        this.activeTimeRange = range;
+        document.querySelectorAll('.time-filter-btn').forEach((b) => b.classList.remove('is-active'));
+        if (btnEl) btnEl.classList.add('is-active');
+
+        if (this.activeMasterSensor) {
+            this.switchMasterChart(this.activeMasterSensor);
+        }
     },
 
     updateAllCharts: function (sensors) {
@@ -1098,50 +1194,57 @@ window.app = {
     },
 
     pinChart: function (key) {
-        const section = document.getElementById('pinned-chart-section');
-        if (!Chart || !section) return;
-
-        if (this.state.pinnedKey) {
-            document.getElementById(`card-${this.state.pinnedKey}`)?.classList.remove('hidden');
-        }
-
-        if (!key || !chartMeta[key]) {
-            section.classList.add('hidden');
-            this.state.pinnedKey = null;
-            this.charts.pinned?.destroy();
-            this.charts.pinned = null;
-            return;
-        }
+        if (!Chart) return;
+        if (!key || !chartMeta[key]) return;
 
         this.state.pinnedKey = key;
-        section.classList.remove('hidden');
-        document.getElementById(`card-${key}`)?.classList.add('hidden');
-        text('pinned-chart-title', chartMeta[key].label);
+        text('pinned-chart-title', `Tren ${chartMeta[key].label}`);
 
         this.charts.pinned?.destroy();
         const source = this.charts[key];
         const canvas = document.getElementById('pinnedChart');
         if (!canvas) return;
 
+        const labels = source?.data.labels?.length ? [...source.data.labels] : Array(15).fill('');
+        const data = source?.data.datasets[0]?.data?.length ? [...source.data.datasets[0].data] : Array(15).fill(0);
+
         this.charts.pinned = new Chart(canvas.getContext('2d'), {
             type: 'line',
             data: {
-                labels: [...(source?.data.labels || [])],
+                labels: labels,
                 datasets: [{
                     label: chartMeta[key].label,
-                    data: [...(source?.data.datasets[0].data || [])],
+                    data: data,
                     borderColor: chartMeta[key].color,
                     backgroundColor: chartMeta[key].bg,
                     borderWidth: 3,
                     fill: true,
-                    tension: 0.4
+                    tension: 0.4,
+                    pointRadius: 2,
+                    pointBackgroundColor: chartMeta[key].color,
+                    pointHoverRadius: 6
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                scales: { y: { beginAtZero: true } },
-                plugins: { legend: { display: true } },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: 'rgba(150, 150, 150, 0.1)' }
+                    },
+                    x: {
+                        grid: { display: false }
+                    }
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                        padding: 10,
+                        cornerRadius: 8
+                    }
+                },
                 interaction: { intersect: false, mode: 'index' },
                 animation: false
             }
