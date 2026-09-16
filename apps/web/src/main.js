@@ -1,7 +1,8 @@
 import './style.css';
+import './premium.css';
 
 let database, auth, ref, onValue, set, push, query, limitToLast, get;
-let signInWithEmailAndPassword, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithPopup;
+let signInWithEmailAndPassword, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, sendPasswordResetEmail;
 let Chart;
 let Swal;
 
@@ -27,6 +28,8 @@ window.app = {
     charts: {},
     initialized: false,
     clockTimer: null,
+    authBusy: false,
+    subscriptions: [],
     state: {
         automation: { pump: { enabled: false, threshold: 30 }, mist: { enabled: false, threshold: 50 } },
         sensors: { ...SENSOR_DEFAULTS },
@@ -58,9 +61,12 @@ window.app = {
         onAuthStateChanged = fbAuth.onAuthStateChanged;
         GoogleAuthProvider = fbAuth.GoogleAuthProvider;
         signInWithPopup = fbAuth.signInWithPopup;
+        sendPasswordResetEmail = fbAuth.sendPasswordResetEmail;
 
         database = fbConfig.database;
         auth = fbConfig.auth;
+        if (!auth || !database) throw new Error('Firebase tidak tersedia.');
+        auth.languageCode = 'id';
         ref = fbDb.ref;
         onValue = fbDb.onValue;
         set = fbDb.set;
@@ -79,50 +85,136 @@ window.app = {
 
     init: async function () {
         if (this.initialized) return;
-        this.initialized = true;
-
         await this.loadFirebase();
         await this.initCharts();
+        if (!this.state.user) return;
+        this.initialized = true;
         this.connectFirebase();
-        this.setupInputs();
+        if (!this.inputsReady) { this.setupInputs(); this.inputsReady = true; }
         this.startClock();
     },
 
     
     showLoginModal: function() {
-        document.getElementById('login-modal')?.classList.remove('hidden');
+        const dialog = document.getElementById('login-modal');
+        if (dialog.open) return;
+        this.loginTrigger = document.activeElement;
+        this.showAuthFeedback('');
+        dialog.showModal();
+        document.body.style.overflow = 'hidden';
+        document.getElementById('google-login-button').focus();
     },
 
     hideLoginModal: function() {
-        document.getElementById('login-modal')?.classList.add('hidden');
+        document.getElementById('login-modal')?.close();
+    },
+
+    showAuthFeedback: function(message, success = false) {
+        const feedback = document.getElementById('auth-feedback');
+        feedback.textContent = message;
+        feedback.classList.toggle('hidden', !message);
+        feedback.classList.toggle('is-success', success);
+    },
+
+    setAuthBusy: function(busy, method) {
+        this.authBusy = busy;
+        document.getElementById('login-form').setAttribute('aria-busy', String(busy));
+        ['google-login-button', 'email-login-button', 'reset-password-button'].forEach(id => {
+            document.getElementById(id).disabled = busy;
+        });
+        document.querySelector('#google-login-button span').textContent = busy && method === 'google' ? 'Menunggu konfirmasi Google…' : 'Lanjutkan dengan Google';
+        document.querySelector('#email-login-button span').textContent = busy && method === 'email' ? 'Memverifikasi akun…' : 'Masuk ke dashboard';
+        document.getElementById('reset-password-button').textContent = busy && method === 'reset' ? 'Mengirim…' : 'Lupa kata sandi?';
+    },
+
+    authErrorMessage: function(error) {
+        const messages = {
+            'auth/invalid-credential': 'Email atau kata sandi belum sesuai. Periksa kembali dan coba lagi.',
+            'auth/wrong-password': 'Email atau kata sandi belum sesuai. Periksa kembali dan coba lagi.',
+            'auth/user-not-found': 'Email atau kata sandi belum sesuai. Periksa kembali dan coba lagi.',
+            'auth/invalid-email': 'Masukkan alamat email yang valid.',
+            'auth/user-disabled': 'Akun ini dinonaktifkan. Hubungi pengelola kebun Anda.',
+            'auth/too-many-requests': 'Terlalu banyak percobaan. Tunggu beberapa saat sebelum mencoba lagi.',
+            'auth/network-request-failed': 'Koneksi terputus. Periksa internet Anda, lalu coba lagi.',
+            'auth/popup-closed-by-user': 'Login Google belum selesai. Silakan coba lagi saat Anda siap.',
+            'auth/cancelled-popup-request': 'Login Google dibatalkan. Silakan coba lagi.',
+            'auth/popup-blocked': 'Browser memblokir jendela Google. Izinkan pop-up untuk situs ini, lalu coba lagi. Anda juga dapat masuk dengan email.',
+            'auth/unauthorized-domain': 'Login belum diaktifkan untuk alamat situs ini. Hubungi pengelola Gardenist.',
+            'auth/operation-not-allowed': 'Metode login ini belum diaktifkan. Gunakan metode lain atau hubungi pengelola.',
+            'auth/account-exists-with-different-credential': 'Email ini menggunakan metode login lain. Masuk dengan email dan kata sandi Anda.'
+        };
+        return messages[error?.code] || 'Belum dapat masuk. Silakan coba lagi dalam beberapa saat.';
     },
 
     login: async function() {
-        if (!auth) await this.loadFirebase();
-        const email = document.getElementById('login-email').value;
-        const pass = document.getElementById('login-password').value;
-        
+        if (this.authBusy || !document.getElementById('login-form').reportValidity()) return;
+        this.setAuthBusy(true, 'email');
+        this.showAuthFeedback('');
         try {
-            await signInWithEmailAndPassword(auth, email, pass);
-            this.hideLoginModal();
-            this.enterDashboard();
+            if (!auth) await this.loadFirebase();
+            await signInWithEmailAndPassword(auth, document.getElementById('login-email').value.trim(), document.getElementById('login-password').value);
         } catch (error) {
-            const swal = await this.loadSwal();
-            swal.fire('Login Gagal', 'Kredensial salah atau tidak diizinkan.', 'error');
+            this.showAuthFeedback(this.authErrorMessage(error));
+        } finally {
+            this.setAuthBusy(false);
         }
     },
 
     loginWithGoogle: async function() {
-        if (!auth) await this.loadFirebase();
+        if (this.authBusy) return;
+        // Keep the popup directly inside the click gesture; no async import before opening it.
+        if (!auth || !GoogleAuthProvider) {
+            this.showAuthFeedback('Layanan login sedang disiapkan. Coba lagi beberapa saat.');
+            this.loadFirebase().catch(() => this.showAuthFeedback('Layanan login belum tersedia. Muat ulang halaman dan coba lagi.'));
+            return;
+        }
+        this.setAuthBusy(true, 'google');
+        this.showAuthFeedback('');
         const provider = new GoogleAuthProvider();
+        provider.setCustomParameters({ prompt: 'select_account' });
         try {
             await signInWithPopup(auth, provider);
-            this.hideLoginModal();
-            this.enterDashboard();
         } catch (error) {
-            const swal = await this.loadSwal();
-            swal.fire('Login Gagal', 'Gagal masuk dengan Google: ' + error.message, 'error');
+            this.showAuthFeedback(this.authErrorMessage(error));
+        } finally {
+            this.setAuthBusy(false);
         }
+    },
+
+    resetPassword: async function() {
+        if (this.authBusy) return;
+        const email = document.getElementById('login-email');
+        if (!email.reportValidity()) { email.focus(); return; }
+        this.setAuthBusy(true, 'reset');
+        this.showAuthFeedback('');
+        try {
+            if (!auth) await this.loadFirebase();
+            await sendPasswordResetEmail(auth, email.value.trim());
+            this.showAuthFeedback('Jika email ini terdaftar, tautan pemulihan akan dikirim. Periksa inbox dan folder spam. Untuk akun Google, gunakan tombol Google.', true);
+        } catch (error) {
+            if (error.code === 'auth/user-not-found') this.showAuthFeedback('Jika email ini terdaftar, tautan pemulihan akan dikirim. Periksa inbox dan folder spam.', true);
+            else this.showAuthFeedback(this.authErrorMessage(error));
+        } finally { this.setAuthBusy(false); }
+    },
+
+    togglePassword: function(button) {
+        const input = document.getElementById('login-password');
+        const visible = input.type === 'password';
+        input.type = visible ? 'text' : 'password';
+        button.setAttribute('aria-pressed', String(visible));
+        button.setAttribute('aria-label', visible ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi');
+        button.innerHTML = '<i class="fa-regular fa-eye' + (visible ? '-slash' : '') + '"></i>';
+    },
+
+    toggleTheme: function() {
+        const dark = document.documentElement.classList.toggle('dark');
+        try { localStorage.setItem('gardenist-theme', dark ? 'dark' : 'light'); } catch {}
+    },
+
+    toggleDemoPump: function(button) {
+        const enabled = button.getAttribute('aria-checked') !== 'true';
+        button.setAttribute('aria-checked', String(enabled));
+        text('demo-pump-status', enabled ? 'Aktif · simulasi penyiraman berjalan' : 'Nonaktif · coba tombol di atas');
     },
 
     checkWeather: async function() {
@@ -370,15 +462,43 @@ window.app = {
         });
     },
 
-    enterDashboard: function () {
+    enterDashboard: async function () {
+        if (!this.state.user) return;
+        this.hideLoginModal();
+        document.getElementById('login-password').value = '';
         document.getElementById('landing-page')?.classList.add('hidden');
         document.getElementById('dashboard-app')?.classList.remove('hidden');
+        text('user-name', this.state.user.displayName || this.state.user.email || 'Akun Gardenist');
+        text('user-avatar', (this.state.user.displayName || this.state.user.email || 'G').charAt(0).toUpperCase());
         this.initSidebar();
-        setTimeout(() => {
-            this.init();
+        try {
+            await this.init();
             this.handleRoute();
-            this.checkWeather();
-        }, 100);
+        } catch (error) {
+            this.initialized = false;
+            text('connection-status', 'Gagal memuat. Muat ulang halaman.');
+            console.error('Dashboard initialization failed:', error);
+        }
+    },
+
+    leaveDashboard: function() {
+        this.subscriptions.forEach(unsubscribe => unsubscribe());
+        this.subscriptions = [];
+        clearInterval(this.clockTimer);
+        clearInterval(this._uptimeTimer);
+        Object.values(this.charts).forEach(chart => chart?.destroy?.());
+        this.charts = {};
+        this.initialized = false;
+        this.state.user = null;
+        this.state.sensorReady = false;
+        this.state.lastSensorUpdate = null;
+        this.state.sensors = { ...SENSOR_DEFAULTS };
+        this.state.devices = { pump: 0, uv: 0, mist: 0, buzzer: 0 };
+        this.state.automation = { pump: { enabled: false, threshold: 30 }, mist: { enabled: false, threshold: 50 } };
+        this.state.logs.items = [];
+        this.state.logs.filtered = [];
+        document.getElementById('dashboard-app')?.classList.add('hidden');
+        document.getElementById('landing-page')?.classList.remove('hidden');
     },
 
 
@@ -421,7 +541,8 @@ window.app = {
                     try {
                         await signOut(auth);
                     } catch(e) {
-                        console.error('Logout error', e);
+                        swal.fire('Belum dapat keluar', 'Periksa koneksi internet dan coba lagi.', 'error');
+                        return;
                     }
                 }
                 window.location.hash = '';
@@ -452,18 +573,30 @@ window.app = {
             document.getElementById(`nav-${id}`)?.classList.toggle('is-active', id === viewId);
             document.getElementById(`mobile-nav-${id}`)?.classList.toggle('is-active', id === viewId);
         });
+        text('dashboard-page-title', { overview: 'Ringkasan Kebun', automation: 'Otomasi', logs: 'Aktivitas & Alarm', devices: 'Perangkat Cerdas', eco: 'Eco-Score' }[viewId]);
+        document.querySelectorAll('.sidebar-nav .nav-item, .bottom-nav-item').forEach(button => {
+            if (button.classList.contains('is-active')) button.setAttribute('aria-current', 'page');
+            else button.removeAttribute('aria-current');
+        });
     },
 
 
     connectFirebase: function () {
         if (!database) return;
+        const subscribe = (...args) => this.subscriptions.push(onValue(...args));
 
         const handleDbError = (error) => {
             console.error('Firebase listener error:', error);
             text('connection-status', 'Koneksi gagal');
         };
 
-        onValue(ref(database, 'sensors'), (snapshot) => {
+        subscribe(ref(database, '.info/connected'), snapshot => {
+            const connected = snapshot.val() === true;
+            text('connection-status', connected ? 'Terhubung ke cloud' : 'Menghubungkan kembali…');
+            document.querySelector('.status-indicator .status-dot')?.classList.toggle('active', connected);
+        }, handleDbError);
+
+        subscribe(ref(database, 'sensors'), (snapshot) => {
             text('connection-status', 'Terhubung');
             const data = snapshot.val();
             if (!data) return;
@@ -478,15 +611,15 @@ window.app = {
             this.updateDevicesUI();
         }, handleDbError);
 
-        onValue(ref(database, 'config/node'), (snapshot) => {
+        subscribe(ref(database, 'config/node'), (snapshot) => {
             const data = snapshot.val();
             this.state.nodeInfo = data || {};
             this.updateDevicesUI();
         }, handleDbError);
 
-        onValue(ref(database, 'devices'), (snapshot) => this.syncDeviceToggles(snapshot.val()), handleDbError);
-        onValue(ref(database, 'config/automation'), (snapshot) => this.syncAutomationUI(snapshot.val()), handleDbError);
-        onValue(query(ref(database, 'logs'), limitToLast(100)), (snapshot) => this.renderLogs(snapshot.val()), handleDbError);
+        subscribe(ref(database, 'devices'), (snapshot) => this.syncDeviceToggles(snapshot.val()), handleDbError);
+        subscribe(ref(database, 'config/automation'), (snapshot) => this.syncAutomationUI(snapshot.val()), handleDbError);
+        subscribe(query(ref(database, 'logs'), limitToLast(100)), (snapshot) => this.renderLogs(snapshot.val()), handleDbError);
 
         // Mulai update relatif waktu setiap menit
         this._uptimeTimer = setInterval(() => this.updateDevicesUI(), 60000);
@@ -841,7 +974,7 @@ window.app = {
     },
 
     runAutomationLogic: function () {
-        if (!database) return;
+        if (!database || !this.state.user || !this.state.sensorReady) return;
 
         const s = this.state.sensors;
         const c = this.state.automation;
@@ -1277,7 +1410,9 @@ window.app = {
     },
     startClock: function () {
         if (this.clockTimer) clearInterval(this.clockTimer);
-        this.clockTimer = setInterval(() => text('last-updated', new Date().toLocaleTimeString('id-ID', { hour12: false })), 1000);
+        const update = () => text('last-updated', this.state.lastSensorUpdate ? 'Data: ' + this._relTime(this.state.lastSensorUpdate) : 'Menunggu data sensor');
+        update();
+        this.clockTimer = setInterval(update, 10000);
     }
 };
 
@@ -1287,65 +1422,36 @@ window.app = {
 // We use onAuthStateChanged to restore the session without requiring re-login.
 // ─────────────────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', async () => {
-    // Show a loading splash while Firebase resolves the auth state
-    const splash = document.getElementById('auth-loading-splash');
-
+    app.initRouting();
+    const dialog = document.getElementById('login-modal');
+    dialog.addEventListener('close', () => {
+        document.body.style.overflow = '';
+        document.getElementById('login-password').value = '';
+        document.getElementById('login-password').type = 'password';
+        const toggle = document.querySelector('.password-toggle');
+        toggle.setAttribute('aria-pressed', 'false');
+        toggle.setAttribute('aria-label', 'Tampilkan kata sandi');
+        toggle.innerHTML = '<i class="fa-regular fa-eye"></i>';
+        if (!app.state.user) app.loginTrigger?.focus();
+    });
+    dialog.addEventListener('click', event => {
+        if (event.target !== dialog) return;
+        const rect = dialog.getBoundingClientRect();
+        if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) dialog.close();
+    });
     try {
         await app.loadFirebase();
-
-        // onAuthStateChanged fires once immediately with the current auth state
         onAuthStateChanged(auth, (user) => {
-            // Hide the loading splash
-            if (splash) splash.classList.add('hidden');
-
             if (user) {
-                // ✅ User already logged in — skip landing page, enter dashboard
                 app.state.user = user;
-                document.getElementById('landing-page')?.classList.add('hidden');
-                document.getElementById('dashboard-app')?.classList.remove('hidden');
-                app.initSidebar();
-                setTimeout(() => {
-                    app.init();
-                    app.handleRoute();
-                    app.checkWeather();
-                }, 100);
+                app.enterDashboard();
             } else {
-                // ❌ Not logged in — show landing page as normal
-                document.getElementById('landing-page')?.classList.remove('hidden');
+                app.leaveDashboard();
             }
         });
     } catch (e) {
         console.error('Auth bootstrap error:', e);
-        if (splash) splash.classList.add('hidden');
         document.getElementById('landing-page')?.classList.remove('hidden');
+        app.showAuthFeedback('Layanan login belum tersedia. Periksa koneksi lalu muat ulang halaman.');
     }
-
-    // Landing page stats counter animation (unrelated to auth)
-    const stats = document.querySelectorAll('.stat-number');
-
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                const target = parseInt(entry.target.getAttribute('data-target') || '0', 10);
-                const duration = 2000;
-                const increment = target / (duration / 16);
-                let current = 0;
-                
-                const updateCounter = () => {
-                    current += increment;
-                    if (current < target) {
-                        entry.target.innerText = Math.ceil(current).toLocaleString('id-ID');
-                        requestAnimationFrame(updateCounter);
-                    } else {
-                        entry.target.innerText = target.toLocaleString('id-ID') + (target >= 10000 ? '+' : '');
-                    }
-                };
-                
-                if(target > 0) updateCounter();
-                observer.unobserve(entry.target);
-            }
-        });
-    }, { threshold: 0.5 });
-    
-    stats.forEach(stat => observer.observe(stat));
 });

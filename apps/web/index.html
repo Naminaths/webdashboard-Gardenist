@@ -4,8 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Dashboard monitoring dan kontrol untuk sistem Smart Garden berbasis IoT secara real-time.">
-    <title>Gardenist - Smart Garden</title>
-    <link rel="icon" type="image/png" href="assets/favicon-uny.png">
+    <title>Gardenist — Ruang Tumbuh yang Lebih Baik</title>
+    <meta name="theme-color" content="#234e3c">
+    <script>try { document.documentElement.classList.toggle('dark', localStorage.getItem('gardenist-theme') === 'dark'); } catch {}</script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <link rel="manifest" href="/manifest.json">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -17,125 +21,67 @@
     <div class="bg-glow-2"></div>
 
     <!-- Auth Loading Splash: shown while Firebase resolves session -->
-    <div id="auth-loading-splash" style="position:fixed;inset:0;z-index:9999;background:var(--bg-primary,#09090b);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1rem;">
+    <div id="auth-loading-splash" class="hidden" style="position:fixed;inset:0;z-index:9999;background:var(--bg-primary,#09090b);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1rem;">
         <div style="font-size:2rem;color:#10b981;"><i class="fa-solid fa-leaf"></i></div>
         <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:1.25rem;color:#f8fafc;letter-spacing:0.05em;">Gardenist</div>
         <div style="width:40px;height:40px;border:3px solid rgba(16,185,129,0.2);border-top-color:#10b981;border-radius:50%;animation:spin 0.8s linear infinite;"></div>
         <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
     </div>
 
-    <!-- Landing Page — hidden by default, shown only if not authenticated -->
-    <div id="landing-page" class="hidden">
-        <!-- Background Organic Shape -->
-        <div class="organic-bg"></div>
-        <div class="organic-bg-2"></div>
-
-        <nav class="landing-nav-new">
-            <div class="brand">
-                <i class="fa-solid fa-leaf"></i> Gardenist
-            </div>
-            <div style="display: flex; gap: 1rem;">
-                <button class="btn-icon" onclick="document.documentElement.classList.toggle('dark')" aria-label="Ganti tema">
-                    <i class="fa-solid fa-circle-half-stroke"></i>
-                </button>
-                <button class="btn btn-primary" onclick="app.showLoginModal()">
-                    Login / Masuk <i class="fa-solid fa-arrow-right"></i>
-                </button>
-            </div>
+    <div id="landing-page">
+        <a class="skip-link" href="#main-content">Lewati ke konten</a>
+        <nav class="site-nav" aria-label="Navigasi utama">
+            <a class="brand" href="#" aria-label="Gardenist beranda"><span class="brand-mark"><i class="fa-solid fa-leaf" aria-hidden="true"></i></span> gardenist<span class="brand-period">.</span></a>
+            <div class="site-nav-links"><a href="#features">Fitur</a><a href="#how-it-works">Cara kerja</a><a href="#product-preview">Preview dashboard <span class="nav-new">DEMO</span></a></div>
+            <div class="site-nav-actions"><button class="btn-icon" onclick="app.toggleTheme()" aria-label="Ganti tema"><i class="fa-solid fa-circle-half-stroke"></i></button><button class="btn btn-primary" onclick="app.showLoginModal()">Masuk <i class="fa-solid fa-arrow-right"></i></button></div>
         </nav>
 
-        <!-- Hero Section -->
-        <main class="hero-section">
-            <div class="hero-content">
-                <div class="badge-eco">🌿 100% Eco-Friendly Dashboard</div>
-                <h1 class="hero-title">Rawat Kebun Anda dari<br>Genggaman Tangan</h1>
-                <p class="hero-subtitle">Gardenist memadukan IoT cerdas dengan antarmuka yang indah. Pantau kelembaban, suhu, hingga kualitas udara secara real-time, dan biarkan otomatisasi menyiram tanaman Anda.</p>
-                <div class="hero-actions">
-                    <button class="btn btn-primary btn-large" onclick="app.showLoginModal()">Masuk Dashboard</button>
-                    <a href="#features" class="btn btn-outline btn-large">Jelajahi Fitur</a>
+        <main id="main-content">
+            <section class="botanical-hero">
+                <div class="botanical-copy">
+                    <span class="eyebrow"><span class="tiny-dot"></span> A LITTLE TECH. A LOT OF GROWTH.</span>
+                    <h1>Kebun lebih sehat.<br>Hidup lebih <em>tenang.</em></h1>
+                    <p>Kenali kebutuhan tanaman, pantau kondisi kebun, dan atur penyiraman. Semua dari satu ruang yang sederhana.</p>
+                    <div class="hero-actions"><button class="btn btn-primary btn-large" onclick="app.showLoginModal()">Mulai merawat kebun <i class="fa-solid fa-arrow-right"></i></button><a class="btn btn-outline btn-large" href="#product-preview"><i class="fa-regular fa-circle-play"></i> Lihat demo</a></div>
+                    <div class="hero-reassurance"><span><i class="fa-solid fa-check"></i> Masuk dengan Google</span><span><i class="fa-solid fa-check"></i> Pantau dari mana saja</span></div>
+                    <div class="hero-caption"><span class="caption-line"></span><p>Teknologi bekerja di belakang layar.<br><strong>Anda menikmati hasilnya.</strong></p></div>
                 </div>
-            </div>
-            <div class="hero-mockup-wrapper">
-                <!-- 3D CSS Mockup of Dashboard -->
-                <div class="mockup-3d">
-                    <div class="mockup-topbar">
-                        <div class="mockup-dots"><span></span><span></span><span></span></div>
-                        <div class="mockup-search">Realtime Dashboard</div>
-                    </div>
-                    <div class="mockup-content">
-                        <div class="mockup-sidebar"></div>
-                        <div class="mockup-main">
-                            <div class="mockup-grid">
-                                <div class="mockup-card"></div>
-                                <div class="mockup-card"></div>
-                                <div class="mockup-card"></div>
-                            </div>
-                            <div class="mockup-chart"></div>
-                        </div>
-                    </div>
+                <div class="garden-visual" role="img" aria-label="Tanaman hijau dengan ilustrasi kartu pemantauan kebun">
+                    <div class="garden-photo"></div>
+                    <div class="visual-topline"><span><i class="fa-solid fa-seedling"></i> YOUR GARDEN, CONNECTED</span><span class="visual-sample">ILUSTRASI</span></div>
+                    <div class="floating-reading"><span class="reading-icon"><i class="fa-solid fa-droplet"></i></span><div><small>Kelembapan tanah</small><strong>58<span>%</span></strong></div><span class="reading-ideal"><i class="fa-solid fa-check"></i> Ideal</span><div class="reading-track"><span></span></div></div>
+                    <div class="visual-bottom"><span class="visual-orbit"><i class="fa-solid fa-leaf"></i></span><div><span>Lebih dekat dengan alam.</span><strong>Lebih cerdas merawatnya.</strong></div><i class="fa-solid fa-arrow-up-right-from-square"></i></div>
+                    <div class="garden-coordinates">GARDENIST / SMART GARDEN SYSTEM</div>
                 </div>
-            </div>
+            </section>
+
+            <div class="capability-strip" aria-label="Kemampuan Gardenist"><p>Didesain untuk kebun.<br><strong>Dibangun untuk keseharian.</strong></p><span><i class="fa-solid fa-chart-simple"></i> 6 parameter sensor</span><span><i class="fa-solid fa-sliders"></i> 4 kontrol aktuator</span><span><i class="fa-solid fa-wifi"></i> Data real-time</span><span><i class="fa-solid fa-mobile-screen-button"></i> Akses lintas perangkat</span></div>
+
+            <section id="features" class="product-features section-wrap">
+                <div class="section-heading"><div><span class="eyebrow">SMALL DETAILS. HEALTHIER GARDENS.</span><h2>Lebih paham kebun Anda.</h2></div><p>Dari akar hingga udara sekitar,<br>setiap kebutuhan punya perhatian.</p></div>
+                <div class="benefit-grid">
+                    <article class="benefit-card"><span class="benefit-icon"><i class="fa-solid fa-droplet"></i></span><span class="card-index">01 / MONITOR</span><h3>Tak perlu lagi menebak.</h3><p>Pantau kelembapan tanah, suhu, cahaya, kualitas udara, dan ketersediaan air dalam satu tampilan.</p><div class="mini-metrics"><span><i class="fa-solid fa-temperature-half"></i> Suhu</span><span><i class="fa-regular fa-sun"></i> Cahaya</span><span><i class="fa-solid fa-wind"></i> Udara</span></div></article>
+                    <article class="benefit-card"><span class="benefit-icon"><i class="fa-solid fa-sliders"></i></span><span class="card-index">02 / AUTOMATE</span><h3>Rutinitas yang lebih ringan.</h3><p>Atur ambang penyiraman dan kelembapan, lalu kelola pompa, mist maker, dan lampu dari dashboard.</p><div class="mini-rule"><span><i class="fa-solid fa-droplet"></i> Tanah kering</span><i class="fa-solid fa-arrow-right"></i><strong>Pompa aktif</strong></div></article>
+                    <article class="benefit-card"><span class="benefit-icon"><i class="fa-solid fa-chart-line"></i></span><span class="card-index">03 / UNDERSTAND</span><h3>Setiap perubahan, terlihat.</h3><p>Lihat tren sensor, periksa riwayat aktivitas, dan pahami kondisi kebun sebelum mengambil tindakan.</p><div class="mini-chart" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div></article>
+                </div>
+            </section>
+
+            <section id="product-preview" class="preview-section section-wrap">
+                <div class="section-heading"><div><span class="eyebrow">A CLEARER VIEW OF YOUR GARDEN</span><h2>Satu kebun. Satu kendali.</h2></div><span class="demo-label"><span class="tiny-dot"></span> Demo interaktif · data ilustrasi</span></div>
+                <div class="product-window">
+                    <aside class="preview-sidebar" aria-hidden="true"><span class="brand"><i class="fa-solid fa-leaf"></i> gardenist.</span><small>WORKSPACE</small><span class="preview-nav active"><i class="fa-solid fa-table-cells-large"></i> Ringkasan</span><span class="preview-nav"><i class="fa-solid fa-sliders"></i> Otomasi</span><span class="preview-nav"><i class="fa-solid fa-clock-rotate-left"></i> Aktivitas</span><span class="preview-nav"><i class="fa-solid fa-microchip"></i> Perangkat</span><div class="preview-sidebar-note"><i class="fa-solid fa-seedling"></i><p>A little care,<br>a greener tomorrow.</p></div></aside>
+                    <div class="preview-main"><div class="preview-top"><span>Workspace / <strong>Kebun rumah</strong></span><span class="preview-avatar">G</span></div><div class="preview-greeting"><div><small>KEBUN RUMAH</small><h3>Tumbuh baik, setiap hari <i class="fa-solid fa-seedling"></i></h3><p>Contoh bagaimana kondisi kebun Anda ditampilkan.</p></div><span class="preview-status"><span class="tiny-dot"></span> Mode demo</span></div>
+                        <div class="preview-metrics"><div><span><i class="fa-solid fa-droplet"></i> Kelembapan tanah</span><strong>58<small>%</small></strong><em>Dalam rentang ideal</em></div><div><span><i class="fa-solid fa-temperature-half"></i> Suhu lingkungan</span><strong>27<small>°C</small></strong><em>Nyaman untuk tanaman</em></div><div><span><i class="fa-regular fa-sun"></i> Intensitas cahaya</span><strong>1.240<small>lx</small></strong><em>Cahaya mencukupi</em></div></div>
+                        <div class="preview-bottom"><div class="preview-chart"><div class="preview-chart-heading"><strong>Tren kelembapan tanah</strong><span>Ilustrasi 24 jam</span></div><div class="chart-drawing"><div class="chart-axis"><span>80%</span><span>60%</span><span>40%</span></div><svg viewBox="0 0 600 150" preserveAspectRatio="none" role="img" aria-label="Grafik ilustrasi kelembapan tanah"><defs><linearGradient id="chart-fill" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#3d8460" stop-opacity=".22"/><stop offset="1" stop-color="#3d8460" stop-opacity="0"/></linearGradient></defs><path d="M0 110 C30 110 35 70 65 78 S110 112 140 85 S190 25 220 50 S270 90 305 63 S350 90 380 60 S415 20 445 42 S490 70 525 38 S570 62 600 30 V150 H0Z" fill="url(#chart-fill)"/><path d="M0 110 C30 110 35 70 65 78 S110 112 140 85 S190 25 220 50 S270 90 305 63 S350 90 380 60 S415 20 445 42 S490 70 525 38 S570 62 600 30" fill="none" stroke="#347552" stroke-width="3"/></svg></div><div class="chart-times"><span>00:00</span><span>06:00</span><span>12:00</span><span>18:00</span><span>23:59</span></div></div><div class="preview-control"><span class="eyebrow">KONTROL CEPAT</span><div><span class="benefit-icon"><i class="fa-solid fa-shower"></i></span><strong>Pompa air</strong><button class="demo-toggle" type="button" role="switch" aria-checked="false" aria-label="Simulasikan pompa air" onclick="app.toggleDemoPump(this)"><span></span></button></div><p id="demo-pump-status" aria-live="polite">Nonaktif · coba tombol di atas</p><small>Simulasi tidak terhubung ke perangkat.</small></div></div>
+                    </div>
+                </div><p class="preview-footnote"><i class="fa-solid fa-lock"></i> Masuk untuk melihat data dan mengontrol perangkat kebun Anda. <button class="text-button" onclick="app.showLoginModal()">Buka dashboard <i class="fa-solid fa-arrow-right"></i></button></p>
+            </section>
+
+            <section id="how-it-works" class="getting-started section-wrap"><div><span class="eyebrow">GROW AT YOUR OWN PACE</span><h2>Mulai dengan sederhana.</h2><p>Tiga langkah menuju kebun yang lebih terhubung.</p></div><ol class="steps-list"><li><span>01</span><div><h3>Masuk ke ruang kebun Anda</h3><p>Gunakan akun Google atau email yang sudah terdaftar.</p></div></li><li><span>02</span><div><h3>Periksa perangkat dan sensor</h3><p>Pastikan node ESP32 terhubung dan mengirimkan data.</p></div></li><li><span>03</span><div><h3>Pantau, atur, dan nikmati</h3><p>Lihat kondisi kebun dan sesuaikan otomasi dengan kebutuhan tanaman.</p></div></li></ol></section>
+
+            <section class="closing-cta section-wrap"><div><span class="eyebrow">GOOD THINGS TAKE A LITTLE CARE</span><h2>Ruang tumbuh yang lebih baik,<br>dimulai dari sini.</h2></div><button class="btn btn-primary btn-large" onclick="app.showLoginModal()">Masuk ke Gardenist <i class="fa-solid fa-arrow-right"></i></button></section>
         </main>
-
-        <!-- Statistics Section -->
-        <section class="stats-section">
-            <div class="stat-box">
-                <i class="fa-solid fa-droplet tone-info stat-icon"></i>
-                <h2 class="stat-number" data-target="15000">0</h2>
-                <p>Liter Air Dihemat</p>
-            </div>
-            <div class="stat-box">
-                <i class="fa-solid fa-seedling tone-good stat-icon"></i>
-                <h2 class="stat-number" data-target="98">0</h2>
-                <p>% Tanaman Sehat</p>
-            </div>
-            <div class="stat-box">
-                <i class="fa-solid fa-microchip tone-warning stat-icon"></i>
-                <h2 class="stat-number" data-target="24">0</h2>
-                <p>Jam Nonstop Aktif</p>
-            </div>
-            <div class="stat-box">
-                <i class="fa-solid fa-bolt tone-danger stat-icon"></i>
-                <h2 class="stat-number" data-target="4">0</h2>
-                <p>Aktuator Pintar</p>
-            </div>
-        </section>
-
-        <!-- Features Section -->
-        <section id="features" class="features-section">
-            <div class="features-header">
-                <h2>Sensor Tercanggih</h2>
-                <p>Pahami kondisi kebun Anda lebih dari sekadar melihat.</p>
-            </div>
-            <div class="features-grid">
-                <div class="feature-card">
-                    <div class="feature-icon bg-green"><i class="fa-solid fa-droplet"></i></div>
-                    <h3>Kelembaban Tanah</h3>
-                    <p>Mengetahui persis kapan tanaman butuh disiram tanpa menebak.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon bg-blue"><i class="fa-solid fa-cloud-rain"></i></div>
-                    <h3>Suhu & Cuaca Mikro</h3>
-                    <p>Sensor iklim mikro untuk menjaga tanaman pada temperatur ideal.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon bg-yellow"><i class="fa-solid fa-sun"></i></div>
-                    <h3>Intensitas Cahaya</h3>
-                    <p>Mendeteksi jumlah lux agar fotosintesis berlangsung maksimal.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon bg-red"><i class="fa-solid fa-wind"></i></div>
-                    <h3>Kualitas Udara</h3>
-                    <p>Sensor polusi dan gas demi lingkungan yang lebih bersih.</p>
-                </div>
-            </div>
-        </section>
-        
-        <footer class="landing-footer">
-            <p>&copy; 2026 Gardenist IoT. Didesain untuk keberlanjutan alam.</p>
-        </footer>
-
-
+        <footer class="site-footer"><a class="brand" href="#"><span class="brand-mark"><i class="fa-solid fa-leaf"></i></span> gardenist.</a><p>Thoughtfully connected. Naturally growing.</p><span>© 2026 Gardenist</span></footer>
     </div>
 
     <!-- Dashboard App -->
@@ -152,7 +98,7 @@
             </div>
             <nav class="sidebar-nav">
                 <button id="nav-overview" class="nav-item is-active" onclick="app.navigate('overview')">
-                    <i class="fa-solid fa-table-cells-large"></i><span>Overview</span>
+                    <i class="fa-solid fa-table-cells-large"></i><span>Ringkasan Kebun</span>
                 </button>
                 <button id="nav-automation" class="nav-item" onclick="app.navigate('automation')">
                     <i class="fa-solid fa-sliders"></i><span>Otomasi</span>
@@ -172,7 +118,7 @@
                     <span class="status-dot active"></span>
                     <span id="connection-status">Menghubungkan...</span>
                 </div>
-                <button class="btn btn-secondary" onclick="document.documentElement.classList.toggle('dark')" style="width: 100%;">
+                <button class="btn btn-secondary" onclick="app.toggleTheme()" style="width: 100%;">
                     <i class="fa-solid fa-circle-half-stroke"></i> Ganti Tema
                 </button>
                 <button class="btn btn-secondary" style="color: var(--danger); border-color: var(--danger-light);" onclick="app.logout()">
@@ -191,10 +137,10 @@
                     <button id="sidebar-reveal" class="btn-icon hidden-desktop" onclick="app.toggleSidebar(false)" aria-label="Tampilkan sidebar">
                         <i class="fa-solid fa-bars"></i>
                     </button>
-                    <div class="topbar-title">Realtime Dashboard</div>
+                    <div class="topbar-title" id="dashboard-page-title">Ringkasan Kebun</div>
                 </div>
-                <div class="topbar-right">
-                    <span id="last-updated" style="font-family: var(--font-mono); color: var(--text-muted); font-size: 0.875rem;">Waiting data...</span>
+                <div class="topbar-right"><span id="user-avatar" class="user-avatar" aria-label="Akun pengguna">G</span><span id="user-name" class="user-name"></span>
+                    <span id="last-updated" style="font-family: var(--font-mono); color: var(--text-muted); font-size: 0.875rem;">Menunggu data sensor</span>
                     <button class="btn-icon" onclick="app.logout()" aria-label="Keluar">
                         <i class="fa-solid fa-right-from-bracket"></i>
                     </button>
@@ -210,12 +156,12 @@
                             <div class="hero-greeting">
                                 <span class="hero-badge"><i class="fa-solid fa-leaf"></i> Smart Eco-System</span>
                                 <h1 class="hero-heading" id="hero-greeting-text">Kondisi Kebun Hari Ini</h1>
-                                <p class="hero-subheading">Monitoring mikroklimat &amp; otomasi kebun aktif</p>
+                                <p class="hero-subheading">Pantau kondisi tanaman dan kelola kebun Anda dari sini.</p>
                             </div>
                             <div class="hero-live-badge">
                                 <span class="pulse-ring"></span>
                                 <span class="pulse-dot"></span>
-                                <span id="hero-node-status">ESP32 Online</span>
+                                <span id="hero-node-status">Menunggu data</span>
                             </div>
                         </div>
 
@@ -270,7 +216,7 @@
                             <h2 class="section-title">
                                 <i class="fa-solid fa-bolt text-emerald"></i> Kontrol Cepat Aktuator
                             </h2>
-                            <span class="section-hint"><i class="fa-solid fa-fingerprint"></i> Sentuh untuk toggle instan</span>
+                            <span class="section-hint"><i class="fa-solid fa-fingerprint"></i> Kelola perangkat kebun Anda</span>
                         </div>
                         <div class="quick-action-grid">
                             <!-- Pompa Air -->
@@ -282,7 +228,7 @@
                                         <small id="status-pump" class="device-status">...</small>
                                     </div>
                                     <label class="switch">
-                                        <input type="checkbox" id="toggle-pump" onchange="app.toggleDevice('pump', this.checked)">
+                                        <input type="checkbox" id="toggle-pump" aria-label="Aktifkan pompa air" onchange="app.toggleDevice('pump', this.checked)">
                                         <span></span>
                                     </label>
                                 </div>
@@ -301,7 +247,7 @@
                                         <small id="status-mist" class="device-status">...</small>
                                     </div>
                                     <label class="switch">
-                                        <input type="checkbox" id="toggle-mist" onchange="app.toggleDevice('mist', this.checked)">
+                                        <input type="checkbox" id="toggle-mist" aria-label="Aktifkan mist maker" onchange="app.toggleDevice('mist', this.checked)">
                                         <span></span>
                                     </label>
                                 </div>
@@ -320,7 +266,7 @@
                                         <small id="status-uv" class="device-status">...</small>
                                     </div>
                                     <label class="switch">
-                                        <input type="checkbox" id="toggle-uv" onchange="app.toggleDevice('uv', this.checked)">
+                                        <input type="checkbox" id="toggle-uv" aria-label="Aktifkan lampu UV" onchange="app.toggleDevice('uv', this.checked)">
                                         <span></span>
                                     </label>
                                 </div>
@@ -339,7 +285,7 @@
                                         <small id="status-buzzer" class="device-status">...</small>
                                     </div>
                                     <label class="switch">
-                                        <input type="checkbox" id="toggle-buzzer" onchange="app.toggleDevice('buzzer', this.checked)">
+                                        <input type="checkbox" id="toggle-buzzer" aria-label="Aktifkan buzzer" onchange="app.toggleDevice('buzzer', this.checked)">
                                         <span></span>
                                     </label>
                                 </div>
@@ -826,44 +772,18 @@
         </nav>
     </div>
 
-    <!-- Login Modal -->
-    <div id="login-modal" class="modal-backdrop hidden">
-        <div class="modal-content glass-panel" style="max-width: 400px; width: 90%; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); padding: 2rem; z-index: 1000; display: flex; flex-direction: column;">
-            <button class="modal-close" onclick="app.hideLoginModal()" aria-label="Tutup" style="position: absolute; top: 1rem; right: 1rem; background: none; border: none; color: var(--text-secondary); font-size: 1.25rem; cursor: pointer;"><i class="fa-solid fa-xmark"></i></button>
-            
-            <div class="modal-header" style="text-align: center; margin-bottom: 2rem;">
-                <i class="fa-solid fa-leaf" style="color: var(--brand-primary); font-size: 2rem; margin-bottom: 1rem;"></i>
-                <h2 style="font-family: var(--font-heading); font-size: 1.5rem; margin-bottom: 0.5rem;">Selamat Datang</h2>
-                <p style="color: var(--text-secondary); font-size: 0.875rem;">Masuk ke Gardenist Dashboard</p>
-            </div>
-
-            <div class="modal-body">
-                <button class="btn btn-google" onclick="app.loginWithGoogle()" style="width: 100%; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: center; gap: 0.75rem; background: white; color: #3c4043; border: 1px solid #dadce0; padding: 0.75rem; font-weight: 500; font-family: 'Google Sans', Roboto, sans-serif; transition: background-color 0.2s; border-radius: var(--radius-sm); cursor: pointer;" onmouseover="this.style.backgroundColor='#f8f9fa'" onmouseout="this.style.backgroundColor='white'">
-                    <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" style="width: 20px; height: 20px;">
-                    Lanjutkan dengan Google
-                </button>
-
-                <div class="divider" style="display: flex; align-items: center; text-align: center; margin-bottom: 1.5rem; color: var(--text-secondary); font-size: 0.875rem;">
-                    <div style="flex: 1; border-bottom: 1px solid var(--border-color);"></div>
-                    <span style="padding: 0 10px;">atau dengan email</span>
-                    <div style="flex: 1; border-bottom: 1px solid var(--border-color);"></div>
-                </div>
-
-                <div class="form-group" style="margin-bottom: 1rem;">
-                    <label for="login-email" style="display: block; margin-bottom: 0.5rem; color: var(--text-secondary); font-size: 0.875rem;">Email</label>
-                    <input type="email" id="login-email" class="form-input" placeholder="contoh@email.com" style="width: 100%; padding: 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color); background: var(--bg-secondary); color: var(--text-primary); outline: none;" onfocus="this.style.borderColor='var(--brand-primary)'" onblur="this.style.borderColor='var(--border-color)'">
-                </div>
-                <div class="form-group" style="margin-bottom: 1.5rem;">
-                    <label for="login-password" style="display: block; margin-bottom: 0.5rem; color: var(--text-secondary); font-size: 0.875rem;">Password</label>
-                    <input type="password" id="login-password" class="form-input" placeholder="••••••••" style="width: 100%; padding: 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color); background: var(--bg-secondary); color: var(--text-primary); outline: none;" onfocus="this.style.borderColor='var(--brand-primary)'" onblur="this.style.borderColor='var(--border-color)'">
-                </div>
-                
-                <button class="btn btn-primary" onclick="app.login()" style="width: 100%; padding: 0.75rem;">
-                    Masuk
-                </button>
+    <!-- Authentication dialog -->
+    <dialog id="login-modal" class="auth-dialog" aria-labelledby="auth-title" aria-describedby="auth-description">
+        <div class="auth-layout">
+            <aside class="auth-story"><a class="brand" href="#" onclick="app.hideLoginModal()"><span class="brand-mark"><i class="fa-solid fa-leaf"></i></span> gardenist.</a><div class="auth-story-copy"><span class="eyebrow">YOUR GARDEN IS CALLING</span><h2>Sedikit perhatian.<br>Banyak kehidupan.</h2><p>Ruang yang tenang untuk merawat<br>apa yang Anda tumbuhkan.</p></div><div class="auth-story-footer"><i class="fa-solid fa-seedling"></i><span>Terhubung dengan kebun.<br>Lebih dekat dengan alam.</span></div></aside>
+            <div class="auth-panel"><button class="auth-close btn-icon" onclick="app.hideLoginModal()" aria-label="Tutup login"><i class="fa-solid fa-xmark"></i></button><span class="auth-kicker"><i class="fa-solid fa-leaf"></i> SELAMAT DATANG DI GARDENIST</span><h2 id="auth-title">Senang Anda kembali.</h2><p id="auth-description">Masuk untuk melihat kabar kebun Anda hari ini.</p>
+                <button id="google-login-button" type="button" class="google-button" onclick="app.loginWithGoogle()"><svg width="20" height="20" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5Z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6C44.4 38.04 46.98 31.86 46.98 24.55Z"/><path fill="#FBBC05" d="M10.53 28.59A14.4 14.4 0 0 1 9.75 24c0-1.59.27-3.13.76-4.59l-7.98-6.19A23.87 23.87 0 0 0 0 24c0 3.87.93 7.53 2.56 10.78l7.97-6.19Z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.91-5.8l-7.73-6c-2.15 1.45-4.92 2.3-8.18 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48Z"/></svg><span>Lanjutkan dengan Google</span></button>
+                <div class="auth-divider"><span>atau masuk dengan email</span></div>
+                <form id="login-form" onsubmit="event.preventDefault(); app.login()"><div class="auth-field"><label for="login-email">Alamat email</label><input type="email" id="login-email" name="email" placeholder="nama@email.com" autocomplete="username" required maxlength="254"></div><div class="auth-field"><div class="auth-field-heading"><label for="login-password">Kata sandi</label><button id="reset-password-button" type="button" class="text-button" onclick="app.resetPassword()">Lupa kata sandi?</button></div><div class="password-field"><input type="password" id="login-password" name="password" placeholder="Masukkan kata sandi" autocomplete="current-password" required><button type="button" class="password-toggle" aria-label="Tampilkan kata sandi" aria-pressed="false" onclick="app.togglePassword(this)"><i class="fa-regular fa-eye"></i></button></div></div><p id="auth-feedback" class="auth-feedback hidden" role="status" aria-live="polite"></p><button id="email-login-button" class="btn btn-primary auth-submit" type="submit"><span>Masuk ke dashboard</span><i class="fa-solid fa-arrow-right"></i></button></form>
+                <p class="auth-new-account">Baru di Gardenist? <strong>Mulai dengan akun Google.</strong></p><div class="auth-trust"><i class="fa-solid fa-lock"></i><span>Autentikasi aman melalui Firebase.<br>Kata sandi Google Anda tidak dibagikan ke Gardenist.</span></div>
             </div>
         </div>
-    </div>
+    </dialog>
 
     <script type="module" src="/src/main.js"></script>
     <script>
