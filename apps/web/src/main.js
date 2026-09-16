@@ -597,6 +597,7 @@ window.app = {
             this.state.firebaseConnected = connected;
             text('connection-status', this.isNodeOnline() ? 'ESP32 Online' : 'ESP32 Offline');
             document.querySelector('.status-indicator .status-dot')?.classList.toggle('active', connected);
+            document.querySelector('.status-indicator')?.classList.toggle('is-offline', !this.isNodeOnline());
         }, handleDbError);
 
         subscribe(ref(database, 'sensors'), (snapshot) => {
@@ -636,6 +637,7 @@ window.app = {
     updateNodeStatus: function () {
         const online = this.isNodeOnline();
         text('connection-status', online ? 'ESP32 Online' : 'ESP32 Offline');
+        document.querySelector('.status-indicator')?.classList.toggle('is-offline', !online);
         const heroNodeStatus = document.getElementById('hero-node-status');
         if (heroNodeStatus) {
             heroNodeStatus.innerText = online ? 'ESP32 Online' : 'ESP32 Offline';
