@@ -41,6 +41,7 @@ window.app = {
         mq135_ref: null,
         pinnedKey: null,
         sensorReady: false,
+        firebaseConnected: false,
         logs: {
             items: [],
             filtered: [],
@@ -332,7 +333,7 @@ window.app = {
     },
 
     updateDevicesUI: function() {
-        const ready = this.state.sensorReady;
+        const ready = this.isNodeOnline();
         const s = this.state.sensors;
         const d = this.state.devices;
         const node = this.state.nodeInfo || {};
@@ -490,6 +491,7 @@ window.app = {
         this.charts = {};
         this.initialized = false;
         this.state.user = null;
+        this.state.firebaseConnected = false;
         this.state.sensorReady = false;
         this.state.lastSensorUpdate = null;
         this.state.sensors = { ...SENSOR_DEFAULTS };
@@ -592,7 +594,8 @@ window.app = {
 
         subscribe(ref(database, '.info/connected'), snapshot => {
             const connected = snapshot.val() === true;
-            text('connection-status', connected ? 'Terhubung ke cloud' : 'Menghubungkan kembali…');
+            this.state.firebaseConnected = connected;
+            text('connection-status', this.isNodeOnline() ? 'ESP32 Online' : 'ESP32 Offline');
             document.querySelector('.status-indicator .status-dot')?.classList.toggle('active', connected);
         }, handleDbError);
 
@@ -622,7 +625,26 @@ window.app = {
         subscribe(query(ref(database, 'logs'), limitToLast(100)), (snapshot) => this.renderLogs(snapshot.val()), handleDbError);
 
         // Mulai update relatif waktu setiap menit
-        this._uptimeTimer = setInterval(() => this.updateDevicesUI(), 60000);
+        this._uptimeTimer = setInterval(() => this.updateNodeStatus(), 5000);
+    },
+
+    isNodeOnline: function () {
+        const last = this.state.lastSensorUpdate;
+        return Boolean(this.state.firebaseConnected && this.state.sensorReady && last && (Date.now() - last <= 15000));
+    },
+
+    updateNodeStatus: function () {
+        const online = this.isNodeOnline();
+        text('connection-status', online ? 'ESP32 Online' : 'ESP32 Offline');
+        const heroNodeStatus = document.getElementById('hero-node-status');
+        if (heroNodeStatus) {
+            heroNodeStatus.innerText = online ? 'ESP32 Online' : 'ESP32 Offline';
+            heroNodeStatus.parentElement?.classList.toggle('is-offline', !online);
+        }
+        const liveDot = document.getElementById('sensor-live-dot');
+        if (liveDot) liveDot.innerHTML = `<span style="width:8px;height:8px;border-radius:50%;background:${online ? '#10b981' : '#94a3b8'};display:inline-block;${online ? 'box-shadow:0 0 6px #10b981;animation:pulse 2s infinite;' : ''}"></span><span style="color:${online ? '#10b981' : '#64748b'};font-weight:600;">${online ? 'Live' : 'Offline'}</span>`;
+        this.updateDevicesUI();
+        this.updateSystemSummary();
     },
 
     metricStatus: function (id, label, tone) {
@@ -651,14 +673,18 @@ window.app = {
             if (el) el.style.width = Math.min(100, Math.max(0, pct)).toFixed(1) + '%';
         };
 
+        this.updateNodeStatus();
+
         // Update live dot indicator & Hero node status
         const liveDot = document.getElementById('sensor-live-dot');
         if (liveDot) {
-            liveDot.innerHTML = `<span style="width:8px;height:8px;border-radius:50%;background:#10b981;display:inline-block;box-shadow:0 0 6px #10b981;animation:pulse 2s infinite;"></span><span style="color:#10b981;font-weight:600;">Live</span>`;
+            const online = this.isNodeOnline();
+            liveDot.innerHTML = `<span style="width:8px;height:8px;border-radius:50%;background:${online ? '#10b981' : '#94a3b8'};display:inline-block;${online ? 'box-shadow:0 0 6px #10b981;animation:pulse 2s infinite;' : ''}"></span><span style="color:${online ? '#10b981' : '#64748b'};font-weight:600;">${online ? 'Live' : 'Offline'}</span>`;
         }
         const heroNodeStatus = document.getElementById('hero-node-status');
         if (heroNodeStatus) {
-            heroNodeStatus.innerText = 'ESP32 Online';
+            heroNodeStatus.innerText = this.isNodeOnline() ? 'ESP32 Online' : 'ESP32 Offline';
+            heroNodeStatus.parentElement?.classList.toggle('is-offline', !this.isNodeOnline());
         }
 
         this.updateGreeting();
