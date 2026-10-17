@@ -37,3 +37,7 @@ Thumbs.db
 # Agent local artifacts
 .agents/
 skills-lock.json
+
+# Graphify
+graphify-out/
+.graphify/
