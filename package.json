@@ -16,7 +16,11 @@
     "deploy:all": "npm run build && npx firebase-tools deploy",
     "deploy:rules": "npx firebase-tools deploy --only database",
     "commit": "node scripts/auto-commit.js",
-    "auto-commit": "node scripts/auto-commit.js"
+    "auto-commit": "node scripts/auto-commit.js",
+    "cbm": ".\\.agents\\bin\\codebase-memory-mcp.exe",
+    "cbm:ui": ".\\.agents\\bin\\codebase-memory-mcp.exe --ui=true",
+    "impeccable": ".\\.agents\\skills\\impeccable\\scripts\\impeccable.cmd",
+    "design:audit": ".\\.agents\\skills\\impeccable\\scripts\\impeccable.cmd detect apps/web"
   },
   "repository": {
     "type": "git",

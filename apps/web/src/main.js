@@ -1,5 +1,7 @@
 import './style.css';
 import './premium.css';
+import './landing.css';
+import { initLanding3D } from './landing-3d.js';
 
 let database, auth, ref, onValue, set, push, query, limitToLast, get;
 let signInWithEmailAndPassword, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, sendPasswordResetEmail;
@@ -1451,6 +1453,7 @@ window.app = {
 // ─────────────────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', async () => {
     app.initRouting();
+    initLanding3D();
     const dialog = document.getElementById('login-modal');
     dialog.addEventListener('close', () => {
         document.body.style.overflow = '';
