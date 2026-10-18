@@ -4,17 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Dashboard monitoring dan kontrol untuk sistem Smart Garden berbasis IoT secara real-time.">
-    <title>Gardenist â€” Ruang Tumbuh yang Lebih Baik</title>
+    <title>Gardenist &mdash; Ruang Tumbuh yang Lebih Baik</title>
     <meta name="theme-color" content="#234e3c">
     <script>try { document.documentElement.classList.toggle('dark', localStorage.getItem('gardenist-theme') === 'dark'); } catch {}</script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <link rel="manifest" href="/manifest.json">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+      body { font-size: 16px; font-family: 'Manrope', -apple-system, sans-serif; }
+      h1 { font-size: 2.5rem; line-height: 1.15; }
+      h2 { font-size: 1.75rem; line-height: 1.25; }
+      h3 { font-size: 1.25rem; line-height: 1.35; }
+    </style>
 </head>
 <body>
     <!-- Ambient Background Glows -->
@@ -24,304 +30,488 @@
     <!-- Auth Loading Splash: shown while Firebase resolves session -->
     <div id="auth-loading-splash" class="hidden" style="position:fixed;inset:0;z-index:9999;background:var(--bg-primary,#09090b);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1rem;">
         <div style="font-size:2rem;color:#10b981;"><i class="fa-solid fa-leaf"></i></div>
-        <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:1.25rem;color:#f8fafc;letter-spacing:0.05em;">Gardenist</div>
+        <div style="font-family:'Manrope',sans-serif;font-weight:800;font-size:1.25rem;color:#f8fafc;letter-spacing:0.05em;">Gardenist</div>
         <div style="width:40px;height:40px;border:3px solid rgba(16,185,129,0.2);border-top-color:#10b981;border-radius:50%;animation:spin 0.8s linear infinite;"></div>
         <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
     </div>
 
     <div id="landing-page">
         <a class="skip-link" href="#main-content">Lewati ke konten</a>
-                <nav class="site-nav" aria-label="Navigasi utama">
-            <a class="brand" href="#" aria-label="Gardenist beranda">
-                <span class="brand-icon-3d"><i class="fa-solid fa-leaf" aria-hidden="true"></i></span>
-                <span>gardenist<span style="color:var(--c-primary);">.</span></span>
-            </a>
-            <div class="site-nav-links">
-                <a href="#features">Fitur Cerdas</a>
-                <a href="#simulator">Simulator 3D <span class="nav-pill">INTERAKTIF</span></a>
-                <a href="#how-it-works">Arsitektur</a>
-            </div>
-            <div class="site-nav-actions">
-                <button class="btn-icon" onclick="app.toggleTheme()" aria-label="Ganti tema">
-                    <i class="fa-solid fa-circle-half-stroke"></i>
-                </button>
-                <button class="btn btn-hero-primary" style="padding: 10px 20px; font-size: 13px;" onclick="app.showLoginModal()">
-                    <span>Buka Dashboard</span> <i class="fa-solid fa-arrow-right"></i>
-                </button>
-            </div>
-        </nav>
+        
+        <!-- Header & Nav -->
+        <header class="site-header">
+            <nav class="site-nav" aria-label="Navigasi utama">
+                <a class="brand" href="#" aria-label="Gardenist beranda">
+                    <span class="brand-badge"><i class="fa-solid fa-seedling" aria-hidden="true"></i></span>
+                    <span class="brand-text">gardenist<span class="brand-dot">.</span></span>
+                </a>
+                <div class="site-nav-links">
+                    <a href="#telemetry">Telemetri 6-Sensor</a>
+                    <a href="#simulator">Simulator Rig <span class="nav-pill">Interaktif</span></a>
+                    <a href="#architecture">Arsitektur ESP32</a>
+                </div>
+                <div class="site-nav-actions">
+                    <div class="nav-live-chip" title="Status node telemetri">
+                        <span class="pulse-dot"></span>
+                        <span>Node ESP32 Live</span>
+                    </div>
+                    <button class="btn-icon" onclick="app.toggleTheme()" aria-label="Ganti tema">
+                        <i class="fa-solid fa-circle-half-stroke"></i>
+                    </button>
+                    <button class="btn btn-hero-primary" onclick="app.showLoginModal()">
+                        <span>Buka Dashboard</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </nav>
+        </header>
 
         <main id="main-content">
-            <!-- 3D Spatial Hero Section -->
-            <section class="spatial-hero">
-                <div class="hero-content">
-                    <div class="status-pill-live">
-                        <span class="pulse-indicator"></span>
-                        <span>IoT Smart Garden Ecosystem â€¢ ESP32 Live Node</span>
+            <!-- Hero Section: Clean, Modern, Persuasive, No gradient text -->
+            <section class="hero-section">
+                <div class="hero-grid">
+                    <div class="hero-editorial">
+                        <div class="system-status-badge">
+                            <span class="live-dot-ping"></span>
+                            <span>Sistem Monitoring Kebun Cerdas Real-Time</span>
+                        </div>
+
+                        <h1 class="hero-title">
+                            Presisi Sains &amp; Otomasi Cerdas untuk Kebun Modern.
+                        </h1>
+
+                        <p class="hero-lead">
+                            Mengintegrasikan mikrokontroler ESP32 dengan sensor tanah kapasitif, mikroklimat DHT22, gas MQ-135, dan aktuator otomatis. Dilengkapi logika fail-safe otonom dan sinkronisasi cloud Firebase tanpa jeda.
+                        </p>
+
+                        <div class="hero-actions">
+                            <button class="btn btn-hero-primary" onclick="app.showLoginModal()">
+                                <span>Masuk ke Dashboard</span>
+                                <i class="fa-solid fa-arrow-right"></i>
+                            </button>
+                            <a class="btn btn-hero-secondary" href="#simulator">
+                                <i class="fa-solid fa-sliders"></i>
+                                <span>Coba Simulator Rig</span>
+                            </a>
+                        </div>
+
+                        <!-- Technical Spec Grid matching codebase -->
+                        <div class="hero-specs-board">
+                            <div class="spec-cell">
+                                <span class="spec-val">6 Sensor</span>
+                                <span class="spec-dim">Tanah, DHT22, LDR, MQ-135, Tangki</span>
+                            </div>
+                            <div class="spec-cell">
+                                <span class="spec-val">4 Aktuator</span>
+                                <span class="spec-dim">Pompa, Mist, Lampu UV, Buzzer</span>
+                            </div>
+                            <div class="spec-cell">
+                                <span class="spec-val">&lt; 15 ms</span>
+                                <span class="spec-dim">Latensi Firebase WebSocket</span>
+                            </div>
+                            <div class="spec-cell">
+                                <span class="spec-val">100% Edge</span>
+                                <span class="spec-dim">Fail-Safe Lokal di ESP32</span>
+                            </div>
+                        </div>
                     </div>
 
-                    <h1 class="hero-headline">
-                        Presisi Sains.<br>
-                        Ketenangan Alam.<br>
-                        <span class="hero-gradient-text">Tumbuh Bersama IoT.</span>
-                    </h1>
-
-                    <p class="hero-description">
-                        Otomatisasi irigasi mikro, analisis kelembaban tanah 6-parameter, dan pemantauan mikroklimat kebun presisi. Terhubung langsung dari sensor fisik ESP32 ke genggaman Anda secara real-time.
-                    </p>
-
-                    <div class="hero-cta-group">
-                        <button class="btn-hero-primary" onclick="app.showLoginModal()">
-                            <span>Mulai Merawat Kebun</span>
-                            <i class="fa-solid fa-arrow-right"></i>
-                        </button>
-                        <a class="btn-hero-secondary" href="#simulator">
-                            <i class="fa-solid fa-cubes"></i>
-                            <span>Coba Simulator 3D</span>
-                        </a>
-                    </div>
-
-                    <div class="hero-specs-strip">
-                        <div class="spec-item">
-                            <span class="spec-value">6 Sensor</span>
-                            <span class="spec-label">DHT22, Soil, LDR, MQ135</span>
-                        </div>
-                        <div class="spec-item">
-                            <span class="spec-value">4 Aktuator</span>
-                            <span class="spec-label">Pompa, Mist, UV, Buzzer</span>
-                        </div>
-                        <div class="spec-item">
-                            <span class="spec-value">&lt; 15ms</span>
-                            <span class="spec-label">Realtime Firebase Sync</span>
-                        </div>
-                        <div class="spec-item">
-                            <span class="spec-value">100%</span>
-                            <span class="spec-label">Edge Local Fail-Safe</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 3D Interactive Spatial Diorama -->
-                <div class="stage-3d-wrapper" id="garden-3d-container">
-                    <div class="stage-3d" id="garden-3d-stage">
-                        <div class="stage-glass-vessel">
-                            <div class="stage-grid-overlay"></div>
-                        </div>
-
-                        <!-- Central Flora Node -->
-                        <div class="stage-center-flora">
-                            <div class="flora-orb">
-                                <i class="fa-solid fa-seedling"></i>
-                            </div>
-                            <div class="flora-label">Greenhouse Zone Alpha</div>
-                            <div class="flora-sublabel">ESP32 Firmware v1.2.0 â€¢ Active Mesh</div>
-                        </div>
-
-                        <!-- 3D Floating Holographic Telemetry Cards -->
-                        <div class="hologram-card hologram-card-soil">
-                            <div class="holo-header">
-                                <i class="fa-solid fa-droplet"></i>
-                                <span>Kelembaban Tanah</span>
-                            </div>
-                            <div class="holo-val">58<small>%</small></div>
-                            <span class="holo-tag"><i class="fa-solid fa-check"></i> Rentang Ideal</span>
-                            <div class="holo-progress">
-                                <div class="holo-progress-fill" style="width: 58%;"></div>
-                            </div>
-                        </div>
-
-                        <div class="hologram-card hologram-card-climate">
-                            <div class="holo-header">
-                                <i class="fa-solid fa-temperature-half"></i>
-                                <span>Mikroklimat Udara</span>
-                            </div>
-                            <div class="holo-val">27.4<small>&deg;C</small></div>
-                            <span class="holo-tag holo-tag-climate">
-                                <i class="fa-solid fa-wind"></i> 64% Hum
-                            </span>
-                            <div class="holo-progress">
-                                <div class="holo-progress-fill" style="width: 64%; background: linear-gradient(90deg, #0891b2, #38bdf8);"></div>
-                            </div>
-                        </div>
-
-                        <div class="hologram-card hologram-card-actuator">
-                            <div style="display: flex; align-items: center; gap: 12px;">
-                                <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(16, 185, 129, 0.2); color: #34d399; display: grid; place-items: center; font-size: 16px;">
-                                    <i class="fa-solid fa-faucet-drip"></i>
+                    <!-- 3D Planter & Hardware Rig Diorama -->
+                    <div class="hero-stage-container" id="garden-3d-container">
+                        <div class="rig-3d-stage" id="garden-3d-stage">
+                            <!-- 3D Planter Chassis -->
+                            <div class="planter-rig-base">
+                                <!-- Top Rim Plate -->
+                                <div class="rig-chassis-top">
+                                    <div class="rig-status-strip">
+                                        <span class="rig-node-label"><i class="fa-solid fa-microchip"></i> ESP32-WROOM-32D</span>
+                                        <span class="rig-mesh-badge">FIRMWARE V1.2 &middot; ACTIVE</span>
+                                    </div>
+                                    <div class="rig-led-row">
+                                        <span class="rig-led green active" title="Power LED"></span>
+                                        <span class="rig-led blue active" title="WiFi Connected"></span>
+                                        <span class="rig-led amber" id="rig-led-relay" title="Relay Pompa Air"></span>
+                                    </div>
                                 </div>
-                                <div>
-                                    <div style="font-size: 13px; font-weight: 700; color: #ffffff;">Irigasi Otomatis (Relay 1)</div>
-                                    <div style="font-size: 11px; color: var(--c-text-muted);">Threshold: Siram jika tanah &lt; 40%</div>
+
+                                <!-- Soil Substrate Layer with Depth Cross-Section -->
+                                <div class="substrate-section" id="rig-substrate">
+                                    <!-- Soil stratum texture -->
+                                    <div class="soil-stratum" id="rig-soil-stratum">
+                                        <!-- Embedded Capacitive Sensor Probe with copper tracks -->
+                                        <div class="capacitive-probe-3d">
+                                            <div class="probe-pcb">
+                                                <div class="probe-copper-traces"></div>
+                                                <span class="probe-label">V1.2 SOIL PROBE</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Plant Specimen with 3D Leaf Planes -->
+                                    <div class="botanical-specimen">
+                                        <div class="plant-stem"></div>
+                                        <div class="leaf leaf-1"></div>
+                                        <div class="leaf leaf-2"></div>
+                                        <div class="leaf leaf-3"></div>
+                                        <div class="leaf leaf-4"></div>
+                                        <div class="plant-bud"></div>
+                                    </div>
+
+                                    <!-- Animated Water Droplets when Irrigation is Active -->
+                                    <div class="water-droplets-system" id="rig-water-droplets">
+                                        <span class="drop d1"></span>
+                                        <span class="drop d2"></span>
+                                        <span class="drop d3"></span>
+                                    </div>
+
+                                    <!-- Mist Plume when Mist Maker is Active -->
+                                    <div class="mist-plume-system" id="rig-mist-plume"></div>
+
+                                    <!-- UV Grow Light Glow -->
+                                    <div class="uv-glow-cone" id="rig-uv-glow"></div>
                                 </div>
                             </div>
-                            <span class="demo-badge success" style="margin: 0;">Siaga Aktif</span>
+
+                            <!-- Anchored 3D Spatial Telemetry Pins -->
+                            <div class="spatial-pin pin-soil">
+                                <div class="pin-icon bg-emerald-tint"><i class="fa-solid fa-droplet"></i></div>
+                                <div class="pin-info">
+                                    <span class="pin-label">Kelembaban Tanah</span>
+                                    <div class="pin-metric"><strong id="rig-val-soil">58%</strong> <span id="rig-soil-tag" class="tag-status tone-good">Ideal</span></div>
+                                </div>
+                            </div>
+
+                            <div class="spatial-pin pin-climate">
+                                <div class="pin-icon bg-blue-tint"><i class="fa-solid fa-temperature-half"></i></div>
+                                <div class="pin-info">
+                                    <span class="pin-label">Suhu &amp; Kelembaban Udara</span>
+                                    <div class="pin-metric"><strong>27.4&deg;C</strong> &middot; <span>64% RH</span></div>
+                                </div>
+                            </div>
+
+                            <div class="spatial-pin pin-pump">
+                                <div class="pin-icon bg-amber-tint"><i class="fa-solid fa-faucet-drip"></i></div>
+                                <div class="pin-info">
+                                    <span class="pin-label">Pompa Air (Relay)</span>
+                                    <div class="pin-metric"><span id="rig-pump-state" class="tag-status tone-muted">Siaga (Mati)</span></div>
+                                </div>
+                            </div>
+
+                            <div class="spatial-pin pin-tank">
+                                <div class="pin-icon bg-indigo-tint"><i class="fa-solid fa-water"></i></div>
+                                <div class="pin-info">
+                                    <span class="pin-label">Level Air Tangki</span>
+                                    <div class="pin-metric"><strong>85%</strong> <span class="tag-status tone-good">Aman</span></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </section>
 
-            <!-- Features with 3D Spatial Tilt Cards -->
-            <section id="features" class="features-section">
-                <div class="section-header-modern">
-                    <span class="section-tag"><i class="fa-solid fa-microchip"></i> Arsitektur Pintar</span>
-                    <h2 class="section-title">Teknologi Dirancang untuk Keseharian Kebun Anda</h2>
-                    <p class="section-desc">Kombinasi sensor industri dan algoritma otomasi lokal memastikan tanaman selalu mendapatkan nutrisi dan air tepat waktu tanpa memboroskan sumber daya.</p>
-                </div>
+            <!-- Section 2: Interactive Rig Workbench Simulator -->
+            <section id="simulator" class="section-container">
+                <div class="workbench-card">
+                    <div class="workbench-header">
+                        <div>
+                            <h2 class="section-heading">Simulator Logika &amp; Uji Otomasi</h2>
+                            <p class="section-subtext">Uji cara rule engine Gardenist merespons perubahan sensor dan menggerakkan 4 aktuator secara otomatis tanpa jeda.</p>
+                        </div>
+                        <div class="rule-engine-pill">
+                            <i class="fa-solid fa-microchip"></i>
+                            <span>Edge Rule Engine: AKTIF</span>
+                        </div>
+                    </div>
 
-                <div class="features-grid-3d">
-                    <article class="card-3d">
-                        <div class="card-icon-box">
-                            <i class="fa-solid fa-satellite-dish"></i>
-                        </div>
-                        <h3 class="card-title">Sensing Multi-Parameter</h3>
-                        <p class="card-text">Pemantauan 6 parameter simultan: kelembaban kapasitif tanah, suhu presisi, kelembaban udara DHT22, intensitas lux cahaya LDR, kualitas udara MQ-135, dan ketinggian air tangki ultrasonik.</p>
-                        <div class="card-pill-list">
-                            <span class="card-pill"><i class="fa-solid fa-check"></i> DHT22 Sensor</span>
-                            <span class="card-pill"><i class="fa-solid fa-check"></i> Soil Moisture</span>
-                            <span class="card-pill"><i class="fa-solid fa-check"></i> MQ-135 Air</span>
-                        </div>
-                    </article>
-
-                    <article class="card-3d">
-                        <div class="card-icon-box">
-                            <i class="fa-solid fa-bolt-lightning"></i>
-                        </div>
-                        <h3 class="card-title">Edge Autonomy &amp; Fail-Safe</h3>
-                        <p class="card-text">Logika otomasi dieksekusi langsung di mikrokontroler ESP32. Jika koneksi Wi-Fi atau internet terputus, siklus penyiraman darurat tetap berjalan tanpa henti secara mandiri.</p>
-                        <div class="card-pill-list">
-                            <span class="card-pill"><i class="fa-solid fa-shield-halved"></i> 100% Offline Safe</span>
-                            <span class="card-pill"><i class="fa-solid fa-sliders"></i> Smart Threshold</span>
-                        </div>
-                    </article>
-
-                    <article class="card-3d">
-                        <div class="card-icon-box">
-                            <i class="fa-solid fa-chart-pie"></i>
-                        </div>
-                        <h3 class="card-title">Eco-Score &amp; Water Intelligence</h3>
-                        <p class="card-text">Algoritma kepatuhan lingkungan yang menghitung skor efisiensi kebun (0â€“1000 Pts), volume estimasi penghematan air, serta deteksi dini anomali overwatering.</p>
-                        <div class="card-pill-list">
-                            <span class="card-pill"><i class="fa-solid fa-leaf"></i> Eco-Metrics</span>
-                            <span class="card-pill"><i class="fa-solid fa-droplet"></i> Hemat Air</span>
-                        </div>
-                    </article>
-                </div>
-            </section>
-
-            <!-- Interactive 3D Simulator Sandbox -->
-            <section id="simulator" class="simulator-section">
-                <div class="simulator-box">
-                    <div>
-                        <span class="section-tag"><i class="fa-solid fa-flask"></i> Sandbox Interaktif</span>
-                        <h2 class="section-title" style="margin-bottom: 14px;">Uji Logika Otomasi Langsung di Sini</h2>
-                        <p class="section-desc" style="margin-bottom: 24px;">Tarik slider kelembaban tanah di samping untuk melihat bagaimana rule engine Gardenist mendeteksi kekeringan dan memicu pompa irigasi secara instan.</p>
-                        
-                        <div style="display: flex; flex-direction: column; gap: 14px;">
-                            <div style="display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; border-radius: 12px; background: rgba(255,255,255,0.03); border: 1px solid var(--c-surface-border-subtle);">
-                                <div style="display: flex; align-items: center; gap: 10px;">
-                                    <i class="fa-solid fa-shower" style="color: var(--c-primary);"></i>
-                                    <span style="font-weight: 600; font-size: 14px;">Pompa Air Fisik (Relay)</span>
-                                </div>
-                                <button class="demo-toggle" type="button" role="switch" aria-checked="false" aria-label="Simulasikan pompa air" onclick="app.toggleDemoPump(this)">
-                                    <span></span>
-                                </button>
+                    <div class="workbench-grid">
+                        <!-- Left: Soil Moisture Control & Logic Simulation -->
+                        <div class="sim-panel">
+                            <div class="sim-panel-title">
+                                <i class="fa-solid fa-droplet text-emerald"></i>
+                                <span>Simulasi Kelembaban Tanah</span>
                             </div>
-                            <p id="demo-pump-status" style="font-size: 13px; color: var(--c-text-muted); margin: 0;" aria-live="polite">
-                                Pompa Nonaktif Â· Coba klik saklar di atas
+                            
+                            <div class="sim-slider-container">
+                                <div class="sim-slider-row">
+                                    <span class="slider-caption">Nilai Sensor Kapasitif</span>
+                                    <span class="slider-reading" id="demo-soil-val">58%</span>
+                                </div>
+                                <input type="range" min="10" max="95" value="58" class="custom-slider" id="demo-soil-slider" aria-label="Geser kelembaban tanah">
+                                
+                                <div class="slider-ticks">
+                                    <span>10% (Kering Kritis)</span>
+                                    <span class="tick-threshold">Ambang Batas 40%</span>
+                                    <span>95% (Jenuh Air)</span>
+                                </div>
+
+                                <div class="sim-progress-track">
+                                    <div class="sim-progress-bar" id="demo-soil-bar" style="width: 58%;"></div>
+                                </div>
+                            </div>
+
+                            <div class="sim-rule-outcome">
+                                <div class="outcome-col">
+                                    <span class="outcome-label">Kondisi Tanah</span>
+                                    <span id="demo-soil-status" class="demo-badge success">Ideal &mdash; Kondisi prima</span>
+                                </div>
+                                <div class="outcome-col">
+                                    <span class="outcome-label">Aksi Otomasi Irigasi</span>
+                                    <span id="demo-auto-pump-badge" class="demo-pump-indicator standby">Siaga (Mati)</span>
+                                </div>
+                            </div>
+
+                            <div class="rule-formula-box">
+                                <div class="formula-icon"><i class="fa-solid fa-code-branch"></i></div>
+                                <div class="formula-text">
+                                    <strong>Aturan Irigasi Mikro:</strong>
+                                    <code>IF Kelembaban &lt; 40% &rarr; Nyalakan Pompa Air; IF Kelembaban &ge; 55% &rarr; Matikan Pompa Air</code>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right: Actuator Test Bank (4 Devices from Codebase) -->
+                        <div class="sim-panel">
+                            <div class="sim-panel-title">
+                                <i class="fa-solid fa-bolt text-amber"></i>
+                                <span>Uji Saklar 4 Aktuator Fisik</span>
+                            </div>
+
+                            <div class="actuator-test-bank">
+                                <!-- 1. Pompa Air -->
+                                <div class="actuator-test-item">
+                                    <div class="actuator-item-icon"><i class="fa-solid fa-shower"></i></div>
+                                    <div class="actuator-item-meta">
+                                        <strong>Pompa Air</strong>
+                                        <small>Irigasi mikro perakaran</small>
+                                    </div>
+                                    <button class="demo-toggle" id="demo-toggle-pump" type="button" role="switch" aria-checked="false" aria-label="Simulasikan pompa air" onclick="app.toggleDemoDevice('pump', this)">
+                                        <span></span>
+                                    </button>
+                                </div>
+
+                                <!-- 2. Mist Maker -->
+                                <div class="actuator-test-item">
+                                    <div class="actuator-item-icon"><i class="fa-solid fa-smog"></i></div>
+                                    <div class="actuator-item-meta">
+                                        <strong>Mist Maker</strong>
+                                        <small>Pengkabutan kelembaban daun</small>
+                                    </div>
+                                    <button class="demo-toggle" id="demo-toggle-mist" type="button" role="switch" aria-checked="false" aria-label="Simulasikan mist maker" onclick="app.toggleDemoDevice('mist', this)">
+                                        <span></span>
+                                    </button>
+                                </div>
+
+                                <!-- 3. Lampu UV -->
+                                <div class="actuator-test-item">
+                                    <div class="actuator-item-icon"><i class="fa-solid fa-sun"></i></div>
+                                    <div class="actuator-item-meta">
+                                        <strong>Lampu UV</strong>
+                                        <small>Spektrum fotosintesis tambahan</small>
+                                    </div>
+                                    <button class="demo-toggle" id="demo-toggle-uv" type="button" role="switch" aria-checked="false" aria-label="Simulasikan lampu UV" onclick="app.toggleDemoDevice('uv', this)">
+                                        <span></span>
+                                    </button>
+                                </div>
+
+                                <!-- 4. Alarm Buzzer -->
+                                <div class="actuator-test-item">
+                                    <div class="actuator-item-icon"><i class="fa-solid fa-bell"></i></div>
+                                    <div class="actuator-item-meta">
+                                        <strong>Alarm Buzzer</strong>
+                                        <small>Peringatan bahaya &amp; kekeringan</small>
+                                    </div>
+                                    <button class="demo-toggle" id="demo-toggle-buzzer" type="button" role="switch" aria-checked="false" aria-label="Simulasikan buzzer" onclick="app.toggleDemoDevice('buzzer', this)">
+                                        <span></span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <p id="demo-pump-status" class="actuator-feedback-msg" aria-live="polite">
+                                Aktuator siap diuji &middot; Tekan salah satu saklar untuk melihat reaksi 3D
                             </p>
                         </div>
                     </div>
+                </div>
+            </section>
 
-                    <div class="sim-control-group">
-                        <div class="sim-slider-wrap">
-                            <div class="sim-slider-header">
-                                <span class="sim-slider-label">Simulasi Kelembaban Tanah:</span>
-                                <span class="sim-slider-value" id="demo-soil-val">58%</span>
-                            </div>
-                            <input type="range" min="10" max="95" value="58" class="sim-range-input" id="demo-soil-slider">
-                            <div style="display: flex; justify-content: space-between; font-size: 12px; color: var(--c-text-dim);">
-                                <span>10% (Kering Kritis)</span>
-                                <span>40% Ambang Batas</span>
-                                <span>95% (Basah Jenuh)</span>
-                            </div>
-                        </div>
+            <!-- Section 3: Telemetri 6-Sensor Presisi -->
+            <section id="telemetry" class="section-container">
+                <div class="section-heading-wrap">
+                    <h2 class="section-heading">Telemetri 6-Sensor Presisi</h2>
+                    <p class="section-subtext">Setiap parameter diukur dengan sampling analog-ke-digital berpresisi tinggi dan difilter langsung di mikrokontroler ESP32.</p>
+                </div>
 
-                        <div style="display: flex; align-items: center; justify-content: space-between; padding: 16px; border-radius: 14px; background: rgba(0,0,0,0.25); border: 1px solid var(--c-surface-border-subtle);">
-                            <div>
-                                <div style="font-size: 12px; color: var(--c-text-muted); margin-bottom: 4px;">Status Kondisi Tanah:</div>
-                                <span id="demo-soil-status" class="demo-badge success">Ideal â€” Kondisi prima</span>
-                            </div>
-                            <div>
-                                <div style="font-size: 12px; color: var(--c-text-muted); margin-bottom: 4px;">Aksi Rule Otomasi:</div>
-                                <span id="demo-auto-pump-badge" class="demo-pump-indicator standby">Otomasi: Siaga (Mati)</span>
-                            </div>
+                <div class="telemetry-grid">
+                    <!-- Sensor 1: Kelembaban Tanah -->
+                    <article class="telemetry-card">
+                        <div class="t-card-header">
+                            <span class="t-icon emerald"><i class="fa-solid fa-droplet"></i></span>
+                            <span class="t-badge">Kapasitif v1.2</span>
                         </div>
+                        <h3 class="t-title">Kelembaban Tanah</h3>
+                        <div class="t-reading">40% &ndash; 80% <span class="t-unit">Ideal</span></div>
+                        <p class="t-desc">Menggunakan probe kapasitif tahan karat yang mengukur permitivitas dielektrik tanah tanpa korosi elektrolisis.</p>
+                        <div class="t-footer">
+                            <span>Key: <code>soil</code></span>
+                            <span class="t-status">Otomasi Irigasi</span>
+                        </div>
+                    </article>
+
+                    <!-- Sensor 2: Suhu Lingkungan -->
+                    <article class="telemetry-card">
+                        <div class="t-card-header">
+                            <span class="t-icon orange"><i class="fa-solid fa-temperature-half"></i></span>
+                            <span class="t-badge">DHT22 Digital</span>
+                        </div>
+                        <h3 class="t-title">Suhu Lingkungan</h3>
+                        <div class="t-reading">20&deg;C &ndash; 32&deg;C <span class="t-unit">Ideal</span></div>
+                        <p class="t-desc">Sensor termistor NTC berkalibrasi digital dengan presisi &plusmn;0.5&deg;C untuk mencegah cekaman suhu panas.</p>
+                        <div class="t-footer">
+                            <span>Key: <code>temp</code></span>
+                            <span class="t-status">Monitoring Panas</span>
+                        </div>
+                    </article>
+
+                    <!-- Sensor 3: Kelembaban Udara -->
+                    <article class="telemetry-card">
+                        <div class="t-card-header">
+                            <span class="t-icon blue"><i class="fa-solid fa-cloud-rain"></i></span>
+                            <span class="t-badge">DHT22 RH</span>
+                        </div>
+                        <h3 class="t-title">Kelembaban Udara</h3>
+                        <div class="t-reading">50% &ndash; 75% <span class="t-unit">RH Ideal</span></div>
+                        <p class="t-desc">Pengukuran kelembaban relatif udara untuk mengontrol pengkabutan Mist Maker agar stomata daun tetap optimal.</p>
+                        <div class="t-footer">
+                            <span>Key: <code>humidity</code></span>
+                            <span class="t-status">Kontrol Mist</span>
+                        </div>
+                    </article>
+
+                    <!-- Sensor 4: Intensitas Cahaya -->
+                    <article class="telemetry-card">
+                        <div class="t-card-header">
+                            <span class="t-icon yellow"><i class="fa-solid fa-sun"></i></span>
+                            <span class="t-badge">LDR GL5528</span>
+                        </div>
+                        <h3 class="t-title">Intensitas Cahaya</h3>
+                        <div class="t-reading">300 &ndash; 2000 <span class="t-unit">Lx Ideal</span></div>
+                        <p class="t-desc">Deteksi fluks radiasi foton untuk memastikan kebutuhan energi fotosintesis tanaman terpenuhi sepanjang hari.</p>
+                        <div class="t-footer">
+                            <span>Key: <code>light</code></span>
+                            <span class="t-status">Pemicu Lampu UV</span>
+                        </div>
+                    </article>
+
+                    <!-- Sensor 5: Kualitas Udara MQ-135 -->
+                    <article class="telemetry-card">
+                        <div class="t-card-header">
+                            <span class="t-icon red"><i class="fa-solid fa-wind"></i></span>
+                            <span class="t-badge">MQ-135 Gas</span>
+                        </div>
+                        <h3 class="t-title">Kualitas Udara</h3>
+                        <div class="t-reading">&lt; 450 <span class="t-unit">PPM Bersih</span></div>
+                        <p class="t-desc">Mendeteksi akumulasi gas berbahaya, amonia sisa pupuk, asap, dan CO2 berlebih di sekitar lingkungan perakaran.</p>
+                        <div class="t-footer">
+                            <span>Key: <code>mq135</code></span>
+                            <span class="t-status">Peringatan Kritis</span>
+                        </div>
+                    </article>
+
+                    <!-- Sensor 6: Level Air Tangki -->
+                    <article class="telemetry-card">
+                        <div class="t-card-header">
+                            <span class="t-icon indigo"><i class="fa-solid fa-water"></i></span>
+                            <span class="t-badge">HC-SR04 Ultrasonik</span>
+                        </div>
+                        <h3 class="t-title">Level Air Tangki</h3>
+                        <div class="t-reading">&gt; 25% <span class="t-unit">Aman</span></div>
+                        <p class="t-desc">Pengukuran ketinggian permukaan air tangki reservoir secara nirsentuh untuk mencegah pompa air menyala saat kering (&lt;10%).</p>
+                        <div class="t-footer">
+                            <span>Key: <code>tank</code></span>
+                            <span class="t-status">Dry-Run Protection</span>
+                        </div>
+                    </article>
+                </div>
+            </section>
+
+            <!-- Section 4: Arsitektur End-to-End -->
+            <section id="architecture" class="section-container">
+                <div class="section-heading-wrap">
+                    <h2 class="section-heading">Arsitektur End-to-End</h2>
+                    <p class="section-subtext">Bagaimana sinyal analog dari tanah diubah menjadi telemetri real-time dan otomasi di genggaman Anda.</p>
+                </div>
+
+                <div class="arch-pipeline">
+                    <div class="arch-step">
+                        <div class="arch-step-num">01</div>
+                        <div class="arch-step-icon"><i class="fa-solid fa-microchip"></i></div>
+                        <h3 class="arch-step-title">Sampling Fisik &amp; Edge Autonomy</h3>
+                        <p class="arch-step-desc">
+                            Mikrokontroler ESP32 membaca data dari 6 sensor setiap beberapa detik, memproses filter moving average, dan mengeksekusi logika irigasi secara mandiri meski Wi-Fi terputus.
+                        </p>
+                    </div>
+
+                    <div class="arch-connector"><i class="fa-solid fa-chevron-right"></i></div>
+
+                    <div class="arch-step">
+                        <div class="arch-step-num">02</div>
+                        <div class="arch-step-icon"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+                        <h3 class="arch-step-title">Sinkronisasi Cloud Firebase</h3>
+                        <p class="arch-step-desc">
+                            Data dikirim via WebSocket terenkripsi ke Firebase Realtime Database. Perubahan status saklar dan telemetri tersinkronisasi instan dengan latensi di bawah 15 milidetik.
+                        </p>
+                    </div>
+
+                    <div class="arch-connector"><i class="fa-solid fa-chevron-right"></i></div>
+
+                    <div class="arch-step">
+                        <div class="arch-step-num">03</div>
+                        <div class="arch-step-icon"><i class="fa-solid fa-chart-line"></i></div>
+                        <h3 class="arch-step-title">Dashboard Analitik &amp; Kontrol</h3>
+                        <p class="arch-step-desc">
+                            Web dashboard menyajikan visualisasi data live, tren grafik Chart.js, perhitungan Eco-Score (0&ndash;1000 poin), serta ekspor riwayat aktivitas resmi dalam format PDF dan CSV.
+                        </p>
                     </div>
                 </div>
             </section>
 
-            <!-- How It Works Section -->
-            <section id="how-it-works" class="features-section" style="padding-top: 20px;">
-                <div class="section-header-modern">
-                    <span class="section-tag"><i class="fa-solid fa-network-wired"></i> Alur Kerja Sistem</span>
-                    <h2 class="section-title">Dari Sensor Tanah Hingga Dashboard Realtime</h2>
-                    <p class="section-desc">Arsitektur end-to-end yang menyederhanakan pemantauan teknologi kebun modern tanpa kerumitan konfigurasi jaringan rumit.</p>
-                </div>
-
-                <div class="features-grid-3d">
-                    <article class="card-3d">
-                        <div class="card-icon-box card-icon-blue">
-                            <span style="font-family: var(--font-display); font-weight: 800; font-size: 20px;">01</span>
-                        </div>
-                        <h3 class="card-title">Pembacaan Fisik Sensor</h3>
-                        <p class="card-text">Mikrokontroler ESP32 membaca data analog &amp; digital dari 6 sensor setiap beberapa detik dan memproses filter rata-rata bergerak (moving average) untuk akurasi tinggi.</p>
-                    </article>
-
-                    <article class="card-3d">
-                        <div class="card-icon-box card-icon-green">
-                            <span style="font-family: var(--font-display); font-weight: 800; font-size: 20px;">02</span>
-                        </div>
-                        <h3 class="card-title">Sinkronisasi Cloud Realtime</h3>
-                        <p class="card-text">Data telemetry dikirim secara terenkripsi ke Firebase Realtime Database via protokol WebSocket ringan, memungkinkan update instan dengan efisiensi bandwidth maksimal.</p>
-                    </article>
-
-                    <article class="card-3d">
-                        <div class="card-icon-box card-icon-amber">
-                            <span style="font-family: var(--font-display); font-weight: 800; font-size: 20px;">03</span>
-                        </div>
-                        <h3 class="card-title">Kontrol &amp; Analitik Visual</h3>
-                        <p class="card-text">Dashboard web menyajikan indikator live, grafik tren historis, notifikasi alarm visual, serta kontrol saklar manual yang dapat diakses dari smartphone maupun PC Anda.</p>
-                    </article>
-                </div>
-            </section>
-
-            <!-- Final Spatial CTA -->
-            <section class="final-cta-section">
-                <div class="cta-box-3d">
-                    <span class="status-pill-live" style="margin: 0 auto;">
-                        <i class="fa-solid fa-leaf"></i> Ruang Tumbuh Masa Depan
-                    </span>
-                    <h2 class="section-title" style="max-width: 650px; font-size: clamp(32px, 4vw, 48px); margin: 0;">
-                        Wujudkan Kebun yang Lebih Cerdas, Sehat, dan Berkelanjutan
-                    </h2>
-                    <p class="section-desc" style="max-width: 520px; margin: 0;">
-                        Masuk sekarang untuk mengakses dashboard monitoring real-time, mengonfigurasi jadwal irigasi, dan memantau parameter kebun Anda.
-                    </p>
-                    <button class="btn-hero-primary" style="margin-top: 10px;" onclick="app.showLoginModal()">
-                        <span>Buka Dashboard Gardenist</span>
-                        <i class="fa-solid fa-arrow-right"></i>
-                    </button>
+            <!-- Section 5: CTA Banner -->
+            <section class="section-container cta-section">
+                <div class="cta-card">
+                    <div class="cta-content">
+                        <h2 class="cta-title">Mulai Merawat Kebun Anda dengan Presisi Hari Ini</h2>
+                        <p class="cta-desc">Pantau telemetri real-time, atur jadwal penyiraman otomatis, dan tingkatkan efisiensi air kebun pintar Anda.</p>
+                    </div>
+                    <div class="cta-actions">
+                        <button class="btn btn-hero-primary cta-btn" onclick="app.showLoginModal()">
+                            <span>Buka Dashboard Gardenist</span>
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </div>
                 </div>
             </section>
         </main>
 
-        <footer class="site-footer" style="max-width: 1360px; margin: 0 auto; padding: 32px; display: flex; align-items: center; justify-content: space-between; border-top: 1px solid var(--c-surface-border-subtle); color: var(--c-text-dim); font-size: 13px;">
-            <a class="brand" href="#" style="font-size: 18px;">
-                <span class="brand-icon-3d" style="width: 28px; height: 28px; font-size: 13px;"><i class="fa-solid fa-leaf"></i></span>
-                <span>gardenist.</span>
-            </a>
-            <p style="margin: 0;">Presisi Sains &bull; Ketenangan Alam &bull; IoT Smart Garden Monorepo</p>
-            <span>&copy; 2026 Gardenist Project</span>
+        <!-- Footer -->
+        <footer class="site-footer">
+            <div class="footer-inner">
+                <div class="footer-brand-col">
+                    <a class="brand" href="#" aria-label="Gardenist beranda">
+                        <span class="brand-badge"><i class="fa-solid fa-seedling"></i></span>
+                        <span class="brand-text">gardenist<span class="brand-dot">.</span></span>
+                    </a>
+                    <p class="footer-motto">Presisi Sains &middot; Ketenangan Alam &middot; IoT Smart Garden</p>
+                </div>
+                <div class="footer-meta-col">
+                    <div class="footer-links">
+                        <a href="#telemetry">Sensor</a>
+                        <a href="#simulator">Simulator</a>
+                        <a href="#architecture">Arsitektur</a>
+                        <a href="javascript:void(0)" onclick="app.showLoginModal()">Login</a>
+                    </div>
+                    <span class="footer-copy">&copy; 2026 Gardenist Project &middot; ESP32 &amp; Firebase IoT</span>
+                </div>
+            </div>
         </footer>
     </div>
 
@@ -579,7 +769,7 @@
                                 </div>
                                 <div class="sensor-card-body">
                                     <div class="sensor-reading">
-                                        <strong id="val-temp" class="reading-number">--Â°C</strong>
+                                        <strong id="val-temp" class="reading-number">--&deg;C</strong>
                                         <span class="reading-unit">Suhu Udara</span>
                                     </div>
                                     <span id="temp-msg" class="metric-status tone-muted">--</span>
@@ -818,7 +1008,7 @@
                             <table>
                                 <thead>
                                     <tr>
-                                        <th><button class="btn-icon" style="padding: 0; font-weight: inherit;" onclick="app.sortLogs('timestamp')">Waktu <span id="sort-timestamp">â†“</span></button></th>
+                                        <th><button class="btn-icon" style="padding: 0; font-weight: inherit;" onclick="app.sortLogs('timestamp')">Waktu <span id="sort-timestamp">&darr;</span></button></th>
                                         <th><button class="btn-icon" style="padding: 0; font-weight: inherit;" onclick="app.sortLogs('type')">Tipe <span id="sort-type"></span></button></th>
                                         <th><button class="btn-icon" style="padding: 0; font-weight: inherit;" onclick="app.sortLogs('message')">Pesan <span id="sort-message"></span></button></th>
                                     </tr>

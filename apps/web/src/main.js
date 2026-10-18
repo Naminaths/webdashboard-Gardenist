@@ -215,9 +215,23 @@ window.app = {
     },
 
     toggleDemoPump: function(button) {
+        if (this.toggleDemoDevice) {
+            this.toggleDemoDevice('pump', button);
+        } else {
+            const enabled = button.getAttribute('aria-checked') !== 'true';
+            button.setAttribute('aria-checked', String(enabled));
+            text('demo-pump-status', enabled ? 'Aktif · simulasi penyiraman berjalan' : 'Pompa nonaktif · coba klik saklar di atas');
+        }
+    },
+
+    toggleDemoDevice: function(deviceKey, button) {
+        if (this._toggleDemoDeviceImpl) {
+            this._toggleDemoDeviceImpl(deviceKey, button);
+            return;
+        }
         const enabled = button.getAttribute('aria-checked') !== 'true';
         button.setAttribute('aria-checked', String(enabled));
-        text('demo-pump-status', enabled ? 'Aktif · simulasi penyiraman berjalan' : 'Nonaktif · coba tombol di atas');
+        text('demo-pump-status', enabled ? `Aktuator ${deviceKey} aktif` : `Aktuator ${deviceKey} nonaktif`);
     },
 
     checkWeather: async function() {
